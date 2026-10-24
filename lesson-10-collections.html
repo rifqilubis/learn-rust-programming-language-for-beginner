@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vectors and strings · rust·learn</title>
+<meta name="description" content="Two growable collections cover most programs: a list of values, and text you build at runtime. Both own their contents and both are used constantly.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="Vectors and strings · rust·learn">
+<meta property="og:description" content="Two growable collections cover most programs: a list of values, and text you build at runtime. Both own their contents and both are used constantly.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html" aria-current="page">All lessons</a>
+      <a class="site-nav__link" href="playground.html">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html" aria-current="page">All lessons</a></li>
+      <li><a href="playground.html">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<article>
+  <header class="lesson-head">
+    <div class="wrap">
+      <p class="lesson-head__meta">
+        <span class="lesson-head__num">Lesson 10</span>
+        <span>Data</span>
+        <span>17 min</span>
+      </p>
+      <h1 class="lesson-head__title">Vectors and strings</h1>
+      <p class="lesson-head__lede">Two growable collections cover most programs: a list of values, and text you build at runtime. Both own their contents and both are used constantly.</p>
+    </div>
+  </header>
+  <div class="wrap lesson-body">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc__title">On this page</p>
+      <ol>
+        <li><a href="#creating-a-vector">Creating a vector</a></li>
+        <li><a href="#looping-and-computing">Looping and computing</a></li>
+        <li><a href="#strings-are-bytes-with-rules">Strings are bytes with rules</a></li>
+        <li><a href="#building-text-from-parts">Building text from parts</a></li>
+        <li><a href="#removing-and-checking">Removing and checking</a></li>
+      </ol>
+    </nav>
+    <div>
+      <div class="prose">
+<h2 id="creating-a-vector"><span class="h2num" aria-hidden="true">01</span><span>Creating a vector</span></h2>
+<p><code>Vec&lt;T&gt;</code> is a growable array on the heap. The <code>vec!</code> macro is the shortest way to build one.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let mut scores = vec![72, 88, 95];
+    scores.push(61);
+    scores.push(100);
+
+    println!(&quot;{:?}&quot;, scores);
+    println!(&quot;count: {}&quot;, scores.len());
+    println!(&quot;first: {:?}&quot;, scores.first());
+    println!(&quot;last: {:?}&quot;, scores.last());
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p><code>first()</code> and <code>last()</code> return <code>Option</code>, because an empty vector has neither. Indexing with <code>scores[0]</code> panics on an empty vector instead, which is why the methods are usually the better choice.</p>
+<h2 id="looping-and-computing"><span class="h2num" aria-hidden="true">02</span><span>Looping and computing</span></h2>
+<p>Iterators turn a loop into an expression. <code>sum</code>, <code>max</code>, and <code>filter</code> are the ones you will reach for first.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let scores = vec![72, 88, 95, 61];
+
+    let total: i32 = scores.iter().sum();
+    let average = total as f64 / scores.len() as f64;
+    println!(&quot;total {total}, average {average:.1}&quot;);
+
+    let passed: Vec&lt;&amp;i32&gt; = scores.iter().filter(|score| **score &gt;= 70).collect();
+    println!(&quot;passed: {:?}&quot;, passed);
+
+    if let Some(best) = scores.iter().max() {
+        println!(&quot;best: {best}&quot;);
+    }
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p><code>.iter()</code> gives references, so the filter closure receives <code>&amp;&amp;i32</code> and needs two stars. <code>collect()</code> gathers the result into whatever type you annotated.</p>
+<h2 id="strings-are-bytes-with-rules"><span class="h2num" aria-hidden="true">03</span><span>Strings are bytes with rules</span></h2>
+<p><code>String</code> is a <code>Vec&lt;u8&gt;</code> that is guaranteed to be valid UTF-8. That guarantee is why you cannot index a string by number: one character can be several bytes.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let mut title = String::from(&quot;rust&quot;);
+    title.push_str(&quot; for beginners&quot;);
+    title.push('!');
+
+    println!(&quot;{title}&quot;);
+    println!(&quot;bytes: {}&quot;, title.len());
+    println!(&quot;characters: {}&quot;, title.chars().count());
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Both numbers agree here because the text is ASCII. Add an accented character and <code>len()</code> grows while <code>chars().count()</code> does not.</p>
+<h2 id="building-text-from-parts"><span class="h2num" aria-hidden="true">04</span><span>Building text from parts</span></h2>
+<p><code>format!</code> returns a new <code>String</code> instead of printing. <code>join</code> glues a collection together, and <code>split</code> takes it apart.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let parts = [&quot;bolt&quot;, &quot;nut&quot;, &quot;washer&quot;];
+    let line = parts.join(&quot;, &quot;);
+    println!(&quot;{line}&quot;);
+
+    let label = format!(&quot;{} parts: {}&quot;, parts.len(), line);
+    println!(&quot;{label}&quot;);
+
+    for word in line.split(&quot;, &quot;) {
+        println!(&quot;- {word}&quot;);
+    }
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<h2 id="removing-and-checking"><span class="h2num" aria-hidden="true">05</span><span>Removing and checking</span></h2>
+<p><code>remove</code> takes an index and shifts the rest, <code>pop</code> takes the last and returns it, and <code>contains</code> checks membership.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let mut queue = vec![&quot;first&quot;, &quot;second&quot;, &quot;third&quot;];
+
+    let served = queue.remove(0);
+    println!(&quot;served {served}, left {:?}&quot;, queue);
+
+    let last = queue.pop();
+    println!(&quot;popped {:?}, left {:?}&quot;, last, queue);
+
+    println!(&quot;has second: {}&quot;, queue.contains(&amp;&quot;second&quot;));
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<aside class="callout callout--note">
+  <span class="callout__tag">Capacity is not length</span>
+  <div><p>A vector tracks how many items it holds and how much room it has. <code>push</code> occasionally reallocates, which is why a <code>&amp;vec[0]</code> held across a push will not compile. That error is the borrow checker saving you from a dangling pointer.</p></div>
+</aside>
+        <aside class="callout">
+          <span class="callout__tag">Exercise</span>
+          <div>
+            <p>Given <code>vec![4, 8, 15, 16, 23, 42]</code>, build a new vector of the even numbers, print its sum, and print the original unchanged.</p>
+            <details class="hint">
+              <summary>Show a hint</summary>
+              <p>Use <code>.iter().filter(|n| **n % 2 == 0).copied().collect::&lt;Vec&lt;i32&gt;&gt;()</code>. The original is untouched because <code>iter</code> borrows.</p>
+            </details>
+          </div>
+        </aside>
+      </div>
+      <footer class="lesson-foot">
+        <button class="btn btn--ghost" type="button" data-complete="collections" aria-pressed="false">
+          <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+          <span data-complete-label>Mark lesson complete</span>
+        </button>
+        <span class="complete-state" data-complete-state hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg> Completed</span>
+      </footer>
+      <nav class="lesson-foot__nav" aria-label="Lesson navigation">
+        <a class="btn btn--ghost" href="lesson-09-enums-and-match.html">Previous: Enums, match, and Option</a>
+        <a class="btn btn--primary" href="lesson-11-errors.html">Next: Recoverable errors with Result</a>
+      </nav>
+    </div>
+  </div>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/vendor/prism-core.min.js"></script>
+<script src="assets/vendor/prism-clike.min.js"></script>
+<script src="assets/vendor/prism-rust.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playground · rust·learn</title>
+<meta name="description" content="A Rust scratch pad that compiles against the public Rust Playground, with edition and build profile controls.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="Playground · rust·learn">
+<meta property="og:description" content="A Rust scratch pad that compiles against the public Rust Playground, with edition and build profile controls.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html">All lessons</a>
+      <a class="site-nav__link" href="playground.html" aria-current="page">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html">All lessons</a></li>
+      <li><a href="playground.html" aria-current="page">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<section class="lesson-head">
+  <div class="wrap">
+    <p class="lesson-head__meta"><span>Playground</span><span>Compiled remotely</span></p>
+    <h1 class="lesson-head__title">Write Rust, press run</h1>
+    <p class="lesson-head__lede">A scratch pad for the lessons. Your source is sent to the public Rust Playground and compiled with the edition you pick. Nothing is saved on this site.</p>
+  </div>
+</section>
+<section class="section section--tight">
+  <div class="wrap pg">
+    <div class="pg__panel">
+      <div class="bench__bar">
+        <span class="bench__file">main.rs</span>
+        <span class="bench__meta" data-pg-status>idle</span>
+      </div>
+      <label class="sr-only" for="pg-source">Rust source code</label>
+      <textarea class="bench__input" id="pg-source" data-pg-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
+    let names = ["Ada", "Grace", "Ferris"];
+
+    for (index, name) in names.iter().enumerate() {
+        println!("{}: {}", index + 1, name);
+    }
+}</textarea>
+      <div class="bench__actions">
+        <button class="btn btn--primary" type="button" data-pg-run><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Run</button>
+        <button class="btn btn--quiet" type="button" data-pg-clear>Clear output</button>
+        <span class="bench__hint">Ctrl + Enter</span>
+      </div>
+    </div>
+    <div>
+      <div class="field">
+        <label for="pg-edition">Edition</label>
+        <select id="pg-edition" data-pg-edition>
+          <option value="2024" selected>2024</option>
+          <option value="2021">2021</option>
+          <option value="2018">2018</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="pg-mode">Build profile</label>
+        <select id="pg-mode" data-pg-mode>
+          <option value="debug" selected>debug, overflow checks on</option>
+          <option value="release">release, optimized</option>
+        </select>
+      </div>
+      <div class="out pg__out">
+        <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+        <pre class="out__body" data-out aria-live="polite"></pre>
+        <details class="out__more">
+          <summary>Compiler messages</summary>
+          <pre data-err></pre>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install Rust and run a program · rust·learn</title>
+<meta name="description" content="One toolchain, one project, one line of output. By the end of this lesson a program you wrote is running on your machine.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="Install Rust and run a program · rust·learn">
+<meta property="og:description" content="One toolchain, one project, one line of output. By the end of this lesson a program you wrote is running on your machine.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html" aria-current="page">All lessons</a>
+      <a class="site-nav__link" href="playground.html">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html" aria-current="page">All lessons</a></li>
+      <li><a href="playground.html">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<article>
+  <header class="lesson-head">
+    <div class="wrap">
+      <p class="lesson-head__meta">
+        <span class="lesson-head__num">Lesson 01</span>
+        <span>Setup</span>
+        <span>12 min</span>
+      </p>
+      <h1 class="lesson-head__title">Install Rust and run a program</h1>
+      <p class="lesson-head__lede">One toolchain, one project, one line of output. By the end of this lesson a program you wrote is running on your machine.</p>
+    </div>
+  </header>
+  <div class="wrap lesson-body">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc__title">On this page</p>
+      <ol>
+        <li><a href="#what-you-are-actually-installing">What you are actually installing</a></li>
+        <li><a href="#install">Install</a></li>
+        <li><a href="#create-a-project">Create a project</a></li>
+        <li><a href="#read-the-program">Read the program</a></li>
+        <li><a href="#run-it">Run it</a></li>
+        <li><a href="#make-it-yours">Make it yours</a></li>
+        <li><a href="#if-something-breaks">If something breaks</a></li>
+      </ol>
+    </nav>
+    <div>
+      <div class="prose">
+<h2 id="what-you-are-actually-installing"><span class="h2num" aria-hidden="true">01</span><span>What you are actually installing</span></h2>
+<p>Rust ships as three pieces that work together. You install them once, through a tool called <code>rustup</code>, and then stop thinking about it.</p>
+<ul>
+  <li><strong>rustc</strong> is the compiler. It turns a <code>.rs</code> file into a program.</li>
+  <li><strong>cargo</strong> is the project tool. It creates projects, downloads libraries, builds, and runs tests.</li>
+  <li><strong>rustup</strong> is the installer. It manages which version of the two above you have.</li>
+</ul>
+<p>You will call <code>cargo</code> almost every day and <code>rustc</code> almost never. That is normal.</p>
+<h2 id="install"><span class="h2num" aria-hidden="true">02</span><span>Install</span></h2>
+<p>On Linux or macOS, run this in a terminal and follow the prompts. The default options are the right ones.</p>
+<div class="cmd">
+  <span class="cmd__text"><code>curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code></span>
+  <button class="btn btn--quiet" type="button" data-copy-text="curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh" hidden>Copy</button>
+</div>
+<p>On Windows, download and run <code>rustup-init.exe</code> from <a href="https://rustup.rs">rustup.rs</a>. It will offer to install the Microsoft C++ build tools if they are missing, and you should accept, because the linker lives there.</p>
+<p>Close the terminal and open a new one so the path change takes effect, then check the install:</p>
+<div class="cmd">
+  <span class="cmd__text"><code>rustc --version &amp;&amp; cargo --version</code></span>
+  <button class="btn btn--quiet" type="button" data-copy-text="rustc --version &amp;&amp; cargo --version" hidden>Copy</button>
+</div>
+<p>You should see two version numbers. If you see a command not found error, the installer's path line did not reach your shell, so open a fresh terminal or run <code>source ~/.cargo/env</code>.</p>
+<h2 id="create-a-project"><span class="h2num" aria-hidden="true">03</span><span>Create a project</span></h2>
+<p>Never start with a bare <code>.rs</code> file. Cargo needs a folder with a manifest to know how to build and run your code.</p>
+<div class="cmd">
+  <span class="cmd__text"><code>cargo new hello_rust &amp;&amp; cd hello_rust</code></span>
+  <button class="btn btn--quiet" type="button" data-copy-text="cargo new hello_rust &amp;&amp; cd hello_rust" hidden>Copy</button>
+</div>
+<p>That gives you this:</p>
+<pre class="tree"><code>hello_rust/
+├── Cargo.toml
+└── src/
+    └── main.rs</code></pre>
+<p><code>Cargo.toml</code> is the manifest: the project name, the version, and later the libraries you depend on. <code>src/main.rs</code> is your program, and it already contains a working one.</p>
+<h2 id="read-the-program"><span class="h2num" aria-hidden="true">04</span><span>Read the program</span></h2>
+<p>Open <code>src/main.rs</code>. It contains exactly this:</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    println!(&quot;Hello, world!&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Three things are happening. <code>fn main()</code> declares the entry point, the function the operating system calls when the program starts. The braces hold the body. <code>println!</code> is a macro, which you can tell by the exclamation mark, and it prints a line of text followed by a newline.</p>
+<p>Those quotation marks matter. Without them you would be naming a variable, not writing text.</p>
+<h2 id="run-it"><span class="h2num" aria-hidden="true">05</span><span>Run it</span></h2>
+<p>From inside the project folder:</p>
+<div class="cmd">
+  <span class="cmd__text"><code>cargo run</code></span>
+  <button class="btn btn--quiet" type="button" data-copy-text="cargo run" hidden>Copy</button>
+</div>
+<p>The first run compiles, so it takes a second or two. Every run after that reuses the build, so it is instant until you change a file. You should see the greeting printed under a <code>Running</code> line.</p>
+<aside class="callout callout--note">
+  <span class="callout__tag">Two more commands</span>
+  <div><p><code>cargo build</code> compiles without running. <code>cargo check</code> checks for errors without producing a program, and it is the fastest of the three, so reach for it while you are editing.</p></div>
+</aside>
+<h2 id="make-it-yours"><span class="h2num" aria-hidden="true">06</span><span>Make it yours</span></h2>
+<p>Change the text and add a second line. The <code>{}</code> pair is a slot, and the value after the comma fills it, in order.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    println!(&quot;Hello, world!&quot;);
+    println!(&quot;I am learning {} in {}&quot;, &quot;Rust&quot;, 2026);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Run it with <code>cargo run</code> and confirm both lines appear.</p>
+<h2 id="if-something-breaks"><span class="h2num" aria-hidden="true">07</span><span>If something breaks</span></h2>
+<p>Compilers complain, and Rust's complaints are unusually specific. Read the first error only, fix it, then run again, because later errors are often knock-on effects.</p>
+<figure class="code" data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    println!(&quot;first line&quot;)
+    println!(&quot;second line&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">does not compile</span>
+  </div>
+  <p class="code__note">The first line is missing its semicolon, so the compiler reaches the second <code>println!</code> while still expecting one. It reports <code>expected `;`, found `println`</code> and puts a caret at the exact spot.</p>
+</figure>
+<p>Notice the shape of the message: an error code, the file and line, a caret pointing at the exact character, and usually a suggested fix. Every error code has a full page of explanation, which you can read with <code>rustc --explain E0308</code> or any other code the compiler prints.</p>
+        <aside class="callout">
+          <span class="callout__tag">Exercise</span>
+          <div>
+            <p>Make the program print three lines: your name, the city you are in, and the year. Use a single <code>println!</code> with three slots.</p>
+            <details class="hint">
+              <summary>Show a hint</summary>
+              <p>One call, three <code>{}</code> slots, three values after the string, separated by commas.</p>
+            </details>
+          </div>
+        </aside>
+      </div>
+      <footer class="lesson-foot">
+        <button class="btn btn--ghost" type="button" data-complete="install-and-first-program" aria-pressed="false">
+          <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+          <span data-complete-label>Mark lesson complete</span>
+        </button>
+        <span class="complete-state" data-complete-state hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg> Completed</span>
+      </footer>
+      <nav class="lesson-foot__nav" aria-label="Lesson navigation">
+        <a class="btn btn--ghost" href="lessons.html">Back to the course map</a>
+        <a class="btn btn--primary" href="lesson-02-variables-and-mutability.html">Next: Variables, mutability, and shadowing</a>
+      </nav>
+    </div>
+  </div>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/vendor/prism-core.min.js"></script>
+<script src="assets/vendor/prism-clike.min.js"></script>
+<script src="assets/vendor/prism-rust.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

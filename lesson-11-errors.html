@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recoverable errors with Result · rust·learn</title>
+<meta name="description" content="A failure you can do something about is a value, not an exception. Result carries either the answer or the reason, and the question mark passes it along.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="Recoverable errors with Result · rust·learn">
+<meta property="og:description" content="A failure you can do something about is a value, not an exception. Result carries either the answer or the reason, and the question mark passes it along.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html" aria-current="page">All lessons</a>
+      <a class="site-nav__link" href="playground.html">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html" aria-current="page">All lessons</a></li>
+      <li><a href="playground.html">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<article>
+  <header class="lesson-head">
+    <div class="wrap">
+      <p class="lesson-head__meta">
+        <span class="lesson-head__num">Lesson 11</span>
+        <span>Real programs</span>
+        <span>18 min</span>
+      </p>
+      <h1 class="lesson-head__title">Recoverable errors with Result</h1>
+      <p class="lesson-head__lede">A failure you can do something about is a value, not an exception. Result carries either the answer or the reason, and the question mark passes it along.</p>
+    </div>
+  </header>
+  <div class="wrap lesson-body">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc__title">On this page</p>
+      <ol>
+        <li><a href="#result-is-an-enum">Result is an enum</a></li>
+        <li><a href="#handling-it-with-match">Handling it with match</a></li>
+        <li><a href="#the-question-mark">The question mark</a></li>
+        <li><a href="#your-own-error-type">Your own error type</a></li>
+        <li><a href="#panic-and-when-not-to">panic, and when not to</a></li>
+      </ol>
+    </nav>
+    <div>
+      <div class="prose">
+<h2 id="result-is-an-enum"><span class="h2num" aria-hidden="true">01</span><span>Result is an enum</span></h2>
+<p><code>Result&lt;T, E&gt;</code> is <code>Ok(value)</code> on success and <code>Err(error)</code> on failure. Parsing text into a number is the cleanest example, because it fails all the time and never crashes.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let good = &quot;42&quot;.parse::&lt;i32&gt;();
+    let bad = &quot;forty two&quot;.parse::&lt;i32&gt;();
+
+    println!(&quot;{:?}&quot;, good);
+    println!(&quot;{:?}&quot;, bad);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Nothing panicked. The failure is a value you can inspect, store, or pass upward.</p>
+<h2 id="handling-it-with-match"><span class="h2num" aria-hidden="true">02</span><span>Handling it with match</span></h2>
+<p>The explicit version is a <code>match</code> on the two variants. It is verbose and completely clear.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">use std::num::ParseIntError;
+
+fn double(number: &amp;str) -&gt; Result&lt;i32, ParseIntError&gt; {
+    let value: i32 = number.trim().parse()?;
+    Ok(value * 2)
+}
+
+fn main() {
+    match double(&quot;21&quot;) {
+        Ok(value) =&gt; println!(&quot;doubled: {value}&quot;),
+        Err(error) =&gt; println!(&quot;could not parse: {error}&quot;),
+    }
+
+    match double(&quot;twenty&quot;) {
+        Ok(value) =&gt; println!(&quot;doubled: {value}&quot;),
+        Err(error) =&gt; println!(&quot;could not parse: {error}&quot;),
+    }
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>The error type is named in the signature, so a caller knows exactly what can go wrong without reading the body.</p>
+<h2 id="the-question-mark"><span class="h2num" aria-hidden="true">03</span><span>The question mark</span></h2>
+<p><code>?</code> after an expression means: if this is <code>Err</code>, return that error from the current function now. If it is <code>Ok</code>, unwrap the value and carry on.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">use std::num::ParseIntError;
+
+fn sum_all(numbers: &amp;[&amp;str]) -&gt; Result&lt;i32, ParseIntError&gt; {
+    let mut total = 0;
+    for number in numbers {
+        total += number.parse::&lt;i32&gt;()?;
+    }
+    Ok(total)
+}
+
+fn main() {
+    println!(&quot;{:?}&quot;, sum_all(&amp;[&quot;1&quot;, &quot;2&quot;, &quot;3&quot;]));
+    println!(&quot;{:?}&quot;, sum_all(&amp;[&quot;1&quot;, &quot;two&quot;, &quot;3&quot;]));
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Without <code>?</code> that loop needs a nested <code>match</code> in every iteration. The operator exists so the happy path stays flat and readable.</p>
+<h2 id="your-own-error-type"><span class="h2num" aria-hidden="true">04</span><span>Your own error type</span></h2>
+<p>When a function can fail for more than one reason, give it an error enum. Each variant names a real failure, and the caller can match on them.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">#[derive(Debug)]
+enum StockError {
+    UnknownPart(String),
+    NotEnough { available: u32, requested: u32 },
+}
+
+fn take(stock: u32, requested: u32) -&gt; Result&lt;u32, StockError&gt; {
+    if requested &gt; stock {
+        return Err(StockError::NotEnough {
+            available: stock,
+            requested,
+        });
+    }
+    Ok(stock - requested)
+}
+
+fn main() {
+    println!(&quot;{:?}&quot;, take(40, 12));
+    println!(&quot;{:?}&quot;, take(4, 12));
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Deriving <code>Debug</code> makes the failure printable. In a real project you would also implement <code>Display</code> so the message reads well for a user.</p>
+<h2 id="panic-and-when-not-to"><span class="h2num" aria-hidden="true">05</span><span>panic, and when not to</span></h2>
+<p>A panic aborts the current thread. It is for a bug that should never happen, not for input you expect to be wrong.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let numbers = [1, 2, 3];
+    let index = 5;
+
+    if let Some(value) = numbers.get(index) {
+        println!(&quot;value {value}&quot;);
+    } else {
+        println!(&quot;no element at index {index}&quot;);
+    }
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p><code>.get()</code> returns an <code>Option</code> and never panics, while <code>numbers[index]</code> panics on an out-of-range index. For anything driven by user input, choose the version that returns a value.</p>
+<aside class="callout callout--note">
+  <span class="callout__tag">Rule of thumb</span>
+  <div><p>Use <code>Result</code> when the caller can recover. Use <code>Option</code> when the only information is presence or absence. Use <code>panic!</code> when continuing would leave the program in a state you cannot reason about.</p></div>
+</aside>
+        <aside class="callout">
+          <span class="callout__tag">Exercise</span>
+          <div>
+            <p>Write <code>fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt;</code> that returns an error when the slice is empty. Print the result of both an empty and a non-empty call.</p>
+            <details class="hint">
+              <summary>Show a hint</summary>
+              <p>Return <code>Err(String::from("empty list"))</code> early. Otherwise sum as <code>f64</code> and divide by <code>len()</code>.</p>
+            </details>
+          </div>
+        </aside>
+      </div>
+      <footer class="lesson-foot">
+        <button class="btn btn--ghost" type="button" data-complete="errors" aria-pressed="false">
+          <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+          <span data-complete-label>Mark lesson complete</span>
+        </button>
+        <span class="complete-state" data-complete-state hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg> Completed</span>
+      </footer>
+      <nav class="lesson-foot__nav" aria-label="Lesson navigation">
+        <a class="btn btn--ghost" href="lesson-10-collections.html">Previous: Vectors and strings</a>
+        <a class="btn btn--primary" href="lesson-12-modules-and-tests.html">Next: Modules, tests, and what next</a>
+      </nav>
+    </div>
+  </div>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/vendor/prism-core.min.js"></script>
+<script src="assets/vendor/prism-clike.min.js"></script>
+<script src="assets/vendor/prism-rust.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

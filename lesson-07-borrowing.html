@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Borrowing instead of moving · rust·learn</title>
+<meta name="description" content="A reference lets a function read or change a value without taking ownership of it. The rules are two lines long, and they prevent data races at compile time.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="Borrowing instead of moving · rust·learn">
+<meta property="og:description" content="A reference lets a function read or change a value without taking ownership of it. The rules are two lines long, and they prevent data races at compile time.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html" aria-current="page">All lessons</a>
+      <a class="site-nav__link" href="playground.html">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html" aria-current="page">All lessons</a></li>
+      <li><a href="playground.html">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<article>
+  <header class="lesson-head">
+    <div class="wrap">
+      <p class="lesson-head__meta">
+        <span class="lesson-head__num">Lesson 07</span>
+        <span>Ownership</span>
+        <span>17 min</span>
+      </p>
+      <h1 class="lesson-head__title">Borrowing instead of moving</h1>
+      <p class="lesson-head__lede">A reference lets a function read or change a value without taking ownership of it. The rules are two lines long, and they prevent data races at compile time.</p>
+    </div>
+  </header>
+  <div class="wrap lesson-body">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc__title">On this page</p>
+      <ol>
+        <li><a href="#a-reference-borrows">A reference borrows</a></li>
+        <li><a href="#a-mutable-reference-can-change-it">A mutable reference can change it</a></li>
+        <li><a href="#the-two-rules">The two rules</a></li>
+        <li><a href="#why-the-rule-is-worth-it">Why the rule is worth it</a></li>
+        <li><a href="#slices">Slices</a></li>
+      </ol>
+    </nav>
+    <div>
+      <div class="prose">
+<h2 id="a-reference-borrows"><span class="h2num" aria-hidden="true">01</span><span>A reference borrows</span></h2>
+<p><code>&amp;value</code> creates a reference. The owner keeps the value, and the reference is only allowed to exist for a while.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let report = String::from(&quot;all parts accounted for&quot;);
+    let length = measure(&amp;report);
+
+    println!(&quot;length: {length}&quot;);
+    println!(&quot;still usable: {report}&quot;);
+}
+
+fn measure(text: &amp;str) -&gt; usize {
+    text.len()
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p><code>measure</code> takes <code>&amp;str</code>, and <code>&amp;report</code> is a <code>&amp;String</code>. That works because <code>&amp;String</code> coerces to <code>&amp;str</code>, which is why library functions prefer <code>&amp;str</code>: it accepts both a literal and a <code>String</code>.</p>
+<h2 id="a-mutable-reference-can-change-it"><span class="h2num" aria-hidden="true">02</span><span>A mutable reference can change it</span></h2>
+<p><code>&amp;mut</code> gives read and write access. The caller must pass a mutable reference too, so the change is visible at the call site.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let mut log = String::from(&quot;start&quot;);
+    append(&amp;mut log, &quot;middle&quot;);
+    println!(&quot;{log}&quot;);
+}
+
+fn append(target: &amp;mut String, piece: &amp;str) {
+    target.push('-');
+    target.push_str(piece);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Inside the function you do not need to dereference to call a method. Rust inserts that for you.</p>
+<h2 id="the-two-rules"><span class="h2num" aria-hidden="true">03</span><span>The two rules</span></h2>
+<p>At any moment, a value can have either:</p>
+<ul>
+  <li>any number of immutable references, or</li>
+  <li>exactly one mutable reference,</li>
+</ul>
+<p>but never both at once. This is checked when you compile, and it is what makes Rust safe without a runtime check.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let mut text = String::from(&quot;hello&quot;);
+
+    let first = &amp;text;
+    let second = &amp;text;
+    println!(&quot;{first} {second}&quot;);
+
+    let editor = &amp;mut text;
+    editor.push_str(&quot; there&quot;);
+    println!(&quot;{editor}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>That compiles because the immutable borrows are finished before the mutable one starts. This does not:</p>
+<figure class="code" data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let mut text = String::from(&quot;hello&quot;);
+    let reader = &amp;text;
+    let editor = &amp;mut text;
+
+    println!(&quot;{reader} {editor}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">does not compile</span>
+  </div>
+  <p class="code__note">The error is <code>E0502: cannot borrow as mutable because it is also borrowed as immutable</code>. Reading and writing the same memory at the same time is the bug this rule removes.</p>
+</figure>
+<h2 id="why-the-rule-is-worth-it"><span class="h2num" aria-hidden="true">04</span><span>Why the rule is worth it</span></h2>
+<p>An immutable borrow promises the value will not change while it is held. A mutable borrow promises nobody else is looking. Together they mean a reference can never be invalidated underneath you, which is the dangling pointer problem, solved before the program runs.</p>
+<p>In practice you will hit these errors when you try to hold a reference across a loop that also mutates the collection. The fix is almost always to finish using the reference before mutating, or to collect what you need into a new variable first.</p>
+<h2 id="slices"><span class="h2num" aria-hidden="true">05</span><span>Slices</span></h2>
+<p>A slice is a reference to part of a collection. <code>&amp;text[0..5]</code> is the first five bytes, and <code>&amp;items[1..]</code> is everything from the second element on.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let text = String::from(&quot;workshop&quot;);
+    let first = &amp;text[0..4];
+    let rest = &amp;text[4..];
+
+    println!(&quot;{first} + {rest}&quot;);
+
+    let numbers = [3, 8, 13, 21];
+    let tail = &amp;numbers[2..];
+    println!(&quot;{:?}&quot;, tail);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<aside class="callout callout--note">
+  <span class="callout__tag">Careful with text indexes</span>
+  <div><p>String slices are byte offsets, and a multi-byte character will panic if you cut it in half. For text you did not write yourself, use <code>.chars()</code> instead of slicing.</p></div>
+</aside>
+        <aside class="callout">
+          <span class="callout__tag">Exercise</span>
+          <div>
+            <p>Write <code>fn longest(a: &amp;str, b: &amp;str) -&gt; &amp;str</code> that returns whichever is longer. Call it with two literals and print the result.</p>
+            <details class="hint">
+              <summary>Show a hint</summary>
+              <p>Compare <code>a.len()</code> and <code>b.len()</code>. Both parameters and the return value need the same lifetime, which the compiler infers when there is a single output reference.</p>
+            </details>
+          </div>
+        </aside>
+      </div>
+      <footer class="lesson-foot">
+        <button class="btn btn--ghost" type="button" data-complete="borrowing" aria-pressed="false">
+          <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+          <span data-complete-label>Mark lesson complete</span>
+        </button>
+        <span class="complete-state" data-complete-state hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg> Completed</span>
+      </footer>
+      <nav class="lesson-foot__nav" aria-label="Lesson navigation">
+        <a class="btn btn--ghost" href="lesson-06-ownership.html">Previous: Ownership: who holds the value</a>
+        <a class="btn btn--primary" href="lesson-08-structs.html">Next: Structs and methods</a>
+      </nav>
+    </div>
+  </div>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/vendor/prism-core.min.js"></script>
+<script src="assets/vendor/prism-clike.min.js"></script>
+<script src="assets/vendor/prism-rust.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Functions and return values · rust·learn</title>
+<meta name="description" content="A function is a name for a piece of work. Rust adds one rule that surprises everyone: the last expression is the return value, with no semicolon.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="Functions and return values · rust·learn">
+<meta property="og:description" content="A function is a name for a piece of work. Rust adds one rule that surprises everyone: the last expression is the return value, with no semicolon.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html" aria-current="page">All lessons</a>
+      <a class="site-nav__link" href="playground.html">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html" aria-current="page">All lessons</a></li>
+      <li><a href="playground.html">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<article>
+  <header class="lesson-head">
+    <div class="wrap">
+      <p class="lesson-head__meta">
+        <span class="lesson-head__num">Lesson 04</span>
+        <span>Basics</span>
+        <span>14 min</span>
+      </p>
+      <h1 class="lesson-head__title">Functions and return values</h1>
+      <p class="lesson-head__lede">A function is a name for a piece of work. Rust adds one rule that surprises everyone: the last expression is the return value, with no semicolon.</p>
+    </div>
+  </header>
+  <div class="wrap lesson-body">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc__title">On this page</p>
+      <ol>
+        <li><a href="#declaring-one">Declaring one</a></li>
+        <li><a href="#expression-versus-statement">Expression versus statement</a></li>
+        <li><a href="#early-return-is-still-available">Early return is still available</a></li>
+        <li><a href="#functions-that-change-their-argument">Functions that change their argument</a></li>
+        <li><a href="#functions-that-return-nothing">Functions that return nothing</a></li>
+      </ol>
+    </nav>
+    <div>
+      <div class="prose">
+<h2 id="declaring-one"><span class="h2num" aria-hidden="true">01</span><span>Declaring one</span></h2>
+<p>Every parameter needs a type and the return type follows an arrow. Nothing is inferred across a function boundary, which is why the signature alone tells you how to call it.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let total = add(3, 4);
+    println!(&quot;add(3, 4) = {total}&quot;);
+}
+
+fn add(a: i32, b: i32) -&gt; i32 {
+    a + b
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Look at the body of <code>add</code>. There is no <code>return</code> and no semicolon. The expression <code>a + b</code> is the last thing in the block, so it is the value of the block, and the block is the function body.</p>
+<h2 id="expression-versus-statement"><span class="h2num" aria-hidden="true">02</span><span>Expression versus statement</span></h2>
+<p>An expression produces a value. A statement does not. A semicolon turns an expression into a statement, which is exactly why adding one to the last line breaks the function.</p>
+<figure class="code" data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn add(a: i32, b: i32) -&gt; i32 {
+    a + b;
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">does not compile</span>
+  </div>
+  <p class="code__note">With the semicolon the body evaluates to <code>()</code>, the empty tuple, and the compiler reports <code>expected `i32`, found `()`</code>.</p>
+</figure>
+<p>This is the most common early error in Rust, and the message names the fix. Remove the semicolon.</p>
+<h2 id="early-return-is-still-available"><span class="h2num" aria-hidden="true">03</span><span>Early return is still available</span></h2>
+<p>For guard clauses, <code>return</code> reads better than a deeply nested expression.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    println!(&quot;{}&quot;, describe(0));
+    println!(&quot;{}&quot;, describe(-3));
+    println!(&quot;{}&quot;, describe(8));
+}
+
+fn describe(value: i32) -&gt; &amp;'static str {
+    if value &lt; 0 {
+        return &quot;negative&quot;;
+    }
+    if value == 0 {
+        return &quot;zero&quot;;
+    }
+    &quot;positive&quot;
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p><code>&amp;'static str</code> means a borrowed string that lives for the whole program. String literals are always that, so returning one needs no allocation.</p>
+<h2 id="functions-that-change-their-argument"><span class="h2num" aria-hidden="true">04</span><span>Functions that change their argument</span></h2>
+<p>By default a function cannot change what you pass it. To allow it, the parameter must be a mutable reference and the caller must pass one.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let mut log = String::from(&quot;start&quot;);
+    append(&amp;mut log, &quot;middle&quot;);
+    append(&amp;mut log, &quot;end&quot;);
+    println!(&quot;{log}&quot;);
+}
+
+fn append(target: &amp;mut String, piece: &amp;str) {
+    target.push('-');
+    target.push_str(piece);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>The <code>&amp;mut</code> in the signature is a visible warning at the call site that this call can change your value. Lesson 7 covers the rules behind it.</p>
+<h2 id="functions-that-return-nothing"><span class="h2num" aria-hidden="true">05</span><span>Functions that return nothing</span></h2>
+<p>Omit the arrow. The return type is <code>()</code>, the unit type, and the function is called for its effect.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    greet(&quot;Ferris&quot;);
+}
+
+fn greet(name: &amp;str) {
+    println!(&quot;hello, {name}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+        <aside class="callout">
+          <span class="callout__tag">Exercise</span>
+          <div>
+            <p>Write a function <code>celsius_to_fahrenheit(c: f64) -&gt; f64</code> and print three conversions. Then write a second function that returns a tuple of the minimum and maximum of two numbers.</p>
+            <details class="hint">
+              <summary>Show a hint</summary>
+              <p>The formula is <code>c * 9.0 / 5.0 + 32.0</code>. For the second, return <code>(low, high)</code> and destructure it at the call site.</p>
+            </details>
+          </div>
+        </aside>
+      </div>
+      <footer class="lesson-foot">
+        <button class="btn btn--ghost" type="button" data-complete="functions" aria-pressed="false">
+          <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+          <span data-complete-label>Mark lesson complete</span>
+        </button>
+        <span class="complete-state" data-complete-state hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg> Completed</span>
+      </footer>
+      <nav class="lesson-foot__nav" aria-label="Lesson navigation">
+        <a class="btn btn--ghost" href="lesson-03-types.html">Previous: Numbers, text, and tuples</a>
+        <a class="btn btn--primary" href="lesson-05-conditionals-and-loops.html">Next: Decisions and repetition</a>
+      </nav>
+    </div>
+  </div>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/vendor/prism-core.min.js"></script>
+<script src="assets/vendor/prism-clike.min.js"></script>
+<script src="assets/vendor/prism-rust.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

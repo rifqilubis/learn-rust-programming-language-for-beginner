@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All lessons · rust·learn</title>
+<meta name="description" content="The full twelve lesson Rust course, grouped from setup through ownership to real programs.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="All lessons · rust·learn">
+<meta property="og:description" content="The full twelve lesson Rust course, grouped from setup through ownership to real programs.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body data-lesson-total="12">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html" aria-current="page">All lessons</a>
+      <a class="site-nav__link" href="playground.html">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html" aria-current="page">All lessons</a></li>
+      <li><a href="playground.html">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<section class="lesson-head">
+  <div class="wrap">
+    <p class="lesson-head__meta"><span>Course map</span><span>12 lessons</span><span>3 hours of reading</span></p>
+    <h1 class="lesson-head__title">Every lesson, in the order they build</h1>
+    <p class="lesson-head__lede">The first six lessons give you the language. The next three give you the ownership model, which is the part that makes Rust Rust. The last three turn it into programs you can keep.</p>
+  </div>
+</section>
+<section class="section section--tight">
+  <div class="wrap">
+<h2 class="group-label">Setup</h2>
+<div class="ledger">
+<a class="ledger__row" href="lesson-01-install-and-first-program.html" data-lesson-row="install-and-first-program">
+  <span class="ledger__num">01</span>
+  <span class="ledger__body">
+    <span class="ledger__title">Install Rust and run a program</span>
+    <span class="ledger__sub">One toolchain, one project, one line of output. By the end of this lesson a program you wrote is running on your machine.</span>
+  </span>
+  <span class="ledger__meta">
+    <span class="ledger__time">12 min</span>
+    <span class="ledger__state" data-state-for="install-and-first-program">Not started</span>
+  </span>
+</a>
+</div>
+<h2 class="group-label">Basics</h2>
+<div class="ledger">
+<a class="ledger__row" href="lesson-02-variables-and-mutability.html" data-lesson-row="variables-and-mutability">
+  <span class="ledger__num">02</span>
+  <span class="ledger__body">
+    <span class="ledger__title">Variables, mutability, and shadowing</span>
+    <span class="ledger__sub">Rust makes you say when a value can change. That one word removes a whole category of bugs, and it takes ten minutes to get used to.</span>
+  </span>
+  <span class="ledger__meta">
+    <span class="ledger__time">15 min</span>
+    <span class="ledger__state" data-state-for="variables-and-mutability">Not started</span>
+  </span>
+</a>
+<a class="ledger__row" href="lesson-03-types.html" data-lesson-row="types">
+  <span class="ledger__num">03</span>
+  <span class="ledger__body">
+    <span class="ledger__title">Numbers, text, and tuples</span>
+    <span class="ledger__sub">Rust has a small set of built-in types and no implicit conversions between them. Learn the five you will use daily and the rest follow.</span>
+  </span>
+  <span class="ledger__meta">
+    <span class="ledger__time">16 min</span>
+    <span class="ledger__state" data-state-for="types">Not started</span>
+  </span>
+</a>
+<a class="ledger__row" href="lesson-04-functions.html" data-lesson-row="functions">
+  <span class="ledger__num">04</span>
+  <span class="ledger__body">
+    <span class="ledger__title">Functions and return values</span>
+    <span class="ledger__sub">A function is a name for a piece of work. Rust adds one rule that surprises everyone: the last expression is the return value, with no semicolon.</span>
+  </span>
+  <span class="ledger__meta">
+    <span class="ledger__time">14 min</span>
+    <span class="ledger__state" data-state-for="functions">Not started</span>
+  </span>
+</a>
+<a class="ledger__row" href="lesson-05-conditionals-and-loops.html" data-lesson-row="conditionals-and-loops">
+  <span class="ledger__num">05</span>
+  <span class="ledger__body">
+    <span class="ledger__title">Decisions and repetition</span>
+    <span class="ledger__sub">if is an expression, loops return values, and there is no do-while to trip over. The control flow is small enough to learn in one sitting.</span>
+  </span>
+  <span class="ledger__meta">
+    <span class="ledger__time">15 min</span>
+    <span class="ledger__state" data-state-for="conditionals-and-loops">Not started</span>
+  </span>
+</a>
+</div>
+<h2 class="group-label">Ownership</h2>
+<div class="ledger">
+<a class="ledger__row" href="lesson-06-ownership.html" data-lesson-row="ownership">
+  <span class="ledger__num">06</span>
+  <span class="ledger__body">
+    <span class="ledger__title">Ownership: who holds the value</span>
+    <span class="ledger__sub">Every value has exactly one owner. When the owner goes out of scope the value is freed. This is the idea the rest of Rust is built on.</span>
+  </span>
+  <span class="ledger__meta">
+    <span class="ledger__time">18 min</span>
+    <span class="ledger__state" data-state-for="ownership">Not started</span>
+  </span>
+</a>
+<a class="ledger__row" href="lesson-07-borrowing.html" data-lesson-row="borrowing">
+  <span class="ledger__num">07</span>
+  <span class="ledger__body">
+    <span class="ledger__title">Borrowing instead of moving</span>
+    <span class="ledger__sub">A reference lets a function read or change a value without taking ownership of it. The rules are two lines long, and they prevent data races at compile time.</span>
+  </span>
+  <span class="ledger__meta">
+    <span class="ledger__time">17 min</span>
+    <span class="ledger__state" data-state-for="borrowing">Not started</span>
+  </span>
+</a>
+</div>
+<h2 class="group-label">Data</h2>
+<div class="ledger">
+<a class="ledger__row" href="lesson-08-structs.html" data-lesson-row="structs">
+  <span class="ledger__num">08</span>
+  <span class="ledger__body">
+    <span class="ledger__title">Structs and methods</span>
+    <span class="ledger__sub">A struct names a group of related values. An impl block attaches behavior to it. Together they are how you model a real thing in Rust.</span>
+  </span>
+  <span class="ledger__meta">
+    <span class="ledger__time">16 min</span>
+    <span class="ledger__state" data-state-for="structs">Not started</span>
+  </span>
+</a>
+<a class="ledger__row" href="lesson-09-enums-and-match.html" data-lesson-row="enums-and-match">
+  <span class="ledger__num">09</span>
+  <span class="ledger__body">
+    <span class="ledger__title">Enums, match, and Option</span>
+    <span class="ledger__sub">An enum says a value is one of several things. match makes you handle every one of them. Together they replace null and most boolean flags.</span>
+  </span>
+  <span class="ledger__meta">
+    <span class="ledger__time">18 min</span>
+    <span class="ledger__state" data-state-for="enums-and-match">Not started</span>
+  </span>
+</a>
+<a class="ledger__row" href="lesson-10-collections.html" data-lesson-row="collections">
+  <span class="ledger__num">10</span>
+  <span class="ledger__body">
+    <span class="ledger__title">Vectors and strings</span>
+    <span class="ledger__sub">Two growable collections cover most programs: a list of values, and text you build at runtime. Both own their contents and both are used constantly.</span>
+  </span>
+  <span class="ledger__meta">
+    <span class="ledger__time">17 min</span>
+    <span class="ledger__state" data-state-for="collections">Not started</span>
+  </span>
+</a>
+</div>
+<h2 class="group-label">Real programs</h2>
+<div class="ledger">
+<a class="ledger__row" href="lesson-11-errors.html" data-lesson-row="errors">
+  <span class="ledger__num">11</span>
+  <span class="ledger__body">
+    <span class="ledger__title">Recoverable errors with Result</span>
+    <span class="ledger__sub">A failure you can do something about is a value, not an exception. Result carries either the answer or the reason, and the question mark passes it along.</span>
+  </span>
+  <span class="ledger__meta">
+    <span class="ledger__time">18 min</span>
+    <span class="ledger__state" data-state-for="errors">Not started</span>
+  </span>
+</a>
+<a class="ledger__row" href="lesson-12-modules-and-tests.html" data-lesson-row="modules-and-tests">
+  <span class="ledger__num">12</span>
+  <span class="ledger__body">
+    <span class="ledger__title">Modules, tests, and what next</span>
+    <span class="ledger__sub">Split code into modules, prove it works with tests, and then go build something. The last lesson is mostly about the habit.</span>
+  </span>
+  <span class="ledger__meta">
+    <span class="ledger__time">16 min</span>
+    <span class="ledger__state" data-state-for="modules-and-tests">Not started</span>
+  </span>
+</a>
+</div>
+    <div class="progress">
+      <span class="progress__track"><span class="progress__fill" data-progress-fill></span></span>
+      <span class="progress__label" data-progress-label>0 of 12 complete</span>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

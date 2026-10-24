@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modules, tests, and what next · rust·learn</title>
+<meta name="description" content="Split code into modules, prove it works with tests, and then go build something. The last lesson is mostly about the habit.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="Modules, tests, and what next · rust·learn">
+<meta property="og:description" content="Split code into modules, prove it works with tests, and then go build something. The last lesson is mostly about the habit.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html" aria-current="page">All lessons</a>
+      <a class="site-nav__link" href="playground.html">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html" aria-current="page">All lessons</a></li>
+      <li><a href="playground.html">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<article>
+  <header class="lesson-head">
+    <div class="wrap">
+      <p class="lesson-head__meta">
+        <span class="lesson-head__num">Lesson 12</span>
+        <span>Real programs</span>
+        <span>16 min</span>
+      </p>
+      <h1 class="lesson-head__title">Modules, tests, and what next</h1>
+      <p class="lesson-head__lede">Split code into modules, prove it works with tests, and then go build something. The last lesson is mostly about the habit.</p>
+    </div>
+  </header>
+  <div class="wrap lesson-body">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc__title">On this page</p>
+      <ol>
+        <li><a href="#modules-are-namespaces">Modules are namespaces</a></li>
+        <li><a href="#splitting-into-files">Splitting into files</a></li>
+        <li><a href="#tests-live-next-to-the-code">Tests live next to the code</a></li>
+        <li><a href="#assert-assert-eq-assert-ne">assert, assert_eq, assert_ne</a></li>
+        <li><a href="#what-to-build-next">What to build next</a></li>
+        <li><a href="#where-the-language-reference-lives">Where the language reference lives</a></li>
+      </ol>
+    </nav>
+    <div>
+      <div class="prose">
+<h2 id="modules-are-namespaces"><span class="h2num" aria-hidden="true">01</span><span>Modules are namespaces</span></h2>
+<p><code>mod</code> groups related items and controls what is visible outside. Everything is private by default, and <code>pub</code> opens one item at a time.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">mod text {
+    pub fn slugify(input: &amp;str) -&gt; String {
+        let mut out = String::new();
+        let mut pending_dash = false;
+
+        for ch in input.chars() {
+            if ch.is_alphanumeric() {
+                for lower in ch.to_lowercase() {
+                    out.push(lower);
+                }
+                pending_dash = false;
+            } else if !pending_dash &amp;&amp; !out.is_empty() {
+                out.push('-');
+                pending_dash = true;
+            }
+        }
+
+        while out.ends_with('-') {
+            out.pop();
+        }
+        out
+    }
+}
+
+fn main() {
+    println!(&quot;{}&quot;, text::slugify(&quot;Learn Rust, for beginners&quot;));
+    println!(&quot;{}&quot;, text::slugify(&quot;  --Hello--World--  &quot;));
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>The function is reachable as <code>text::slugify</code> because it is <code>pub</code>. Drop the <code>pub</code> and <code>main</code> can no longer see it.</p>
+<h2 id="splitting-into-files"><span class="h2num" aria-hidden="true">02</span><span>Splitting into files</span></h2>
+<p>When the module grows, move it to <code>src/text.rs</code> and keep the declaration in <code>main.rs</code>. The file becomes the module body.</p>
+<pre class="tree"><code>src/
+├── main.rs      mod text;
+└── text.rs      pub fn slugify(...)</code></pre>
+<p>A folder works the same way when the module has submodules: <code>src/text/mod.rs</code>, or <code>src/text.rs</code> with a <code>src/text/</code> folder beside it. Pick one and stay consistent.</p>
+<h2 id="tests-live-next-to-the-code"><span class="h2num" aria-hidden="true">03</span><span>Tests live next to the code</span></h2>
+<p>A <code>#[cfg(test)]</code> module is compiled only for tests, so it costs nothing in the shipped program. <code>use super::*</code> pulls in everything from the parent module.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">pub fn slugify(input: &amp;str) -&gt; String {
+    let mut out = String::new();
+    let mut pending_dash = false;
+
+    for ch in input.chars() {
+        if ch.is_alphanumeric() {
+            for lower in ch.to_lowercase() {
+                out.push(lower);
+            }
+            pending_dash = false;
+        } else if !pending_dash &amp;&amp; !out.is_empty() {
+            out.push('-');
+            pending_dash = true;
+        }
+    }
+
+    while out.ends_with('-') {
+        out.pop();
+    }
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn collapses_runs_of_punctuation() {
+        assert_eq!(slugify(&quot;Learn Rust!! Fast&quot;), &quot;learn-rust-fast&quot;);
+    }
+
+    #[test]
+    fn trims_edges() {
+        assert_eq!(slugify(&quot;--Hello--&quot;), &quot;hello&quot;);
+    }
+
+    #[test]
+    fn keeps_numbers() {
+        assert_eq!(slugify(&quot;Lesson 3: Loops&quot;), &quot;lesson-3-loops&quot;);
+    }
+}
+
+fn main() {
+    println!(&quot;{}&quot;, slugify(&quot;Learn Rust, for beginners&quot;));
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Run them with <code>cargo test</code>. Each test is a function that fails if an assertion fails, and the runner reports how many passed.</p>
+<h2 id="assert-assert-eq-assert-ne"><span class="h2num" aria-hidden="true">04</span><span>assert, assert_eq, assert_ne</span></h2>
+<p>Three macros cover almost every check. The equality ones print both values when they fail, which is why they beat a bare <code>assert!(a == b)</code>.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let total = 2 + 2;
+    assert_eq!(total, 4);
+    assert_ne!(total, 5);
+    assert!(total &gt; 0, &quot;total should be positive&quot;);
+
+    println!(&quot;all checks passed&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<h2 id="what-to-build-next"><span class="h2num" aria-hidden="true">05</span><span>What to build next</span></h2>
+<p>Reading more lessons has diminishing returns now. Pick one of these and finish it, badly, then improve it. That loop teaches more than any tutorial.</p>
+<ul>
+  <li>A command line tool that reads a file and counts words, using <code>std::fs</code> and <code>std::env</code>.</li>
+  <li>A to-do list stored as JSON, which means your first dependency and your first <code>serde</code> derive.</li>
+  <li>A small HTTP server with <code>axum</code> or <code>actix-web</code>, returning one page and one JSON endpoint.</li>
+  <li>The <a href="https://github.com/rust-lang/rustlings">rustlings</a> exercises, which are small fixes to broken programs and map well onto what you just learned.</li>
+</ul>
+<p>Two habits carry you through the first month. Read the compiler error before changing code, and write the test that reproduces a bug before fixing it.</p>
+<h2 id="where-the-language-reference-lives"><span class="h2num" aria-hidden="true">06</span><span>Where the language reference lives</span></h2>
+<p>Four places worth bookmarking, all free and all current:</p>
+<ul>
+  <li><a href="https://doc.rust-lang.org/book/">The Rust Programming Language</a>, the official book this course follows in spirit.</li>
+  <li><a href="https://doc.rust-lang.org/std/">The standard library documentation</a>, where every method has a runnable example.</li>
+  <li><a href="https://doc.rust-lang.org/rust-by-example/">Rust by Example</a>, for when you want to see a construct rather than read about it.</li>
+  <li><a href="https://play.rust-lang.org">The Rust Playground</a>, which is the same service this site uses to run your code.</li>
+</ul>
+<aside class="callout callout--note">
+  <span class="callout__tag">The compiler is the teacher</span>
+  <div><p>Rust's error messages are written by people who expect you to read them. When one does not make sense, <code>rustc --explain</code> plus the error code gives you a full page on that exact mistake.</p></div>
+</aside>
+        <aside class="callout">
+          <span class="callout__tag">Exercise</span>
+          <div>
+            <p>Write a function with three tests: one normal case, one edge case (empty input), and one that would have caught a bug you actually hit earlier in this course.</p>
+            <details class="hint">
+              <summary>Show a hint</summary>
+              <p>An empty input test is usually <code>assert_eq!(f(""), "")</code>. Run <code>cargo test</code> and watch a deliberately broken assertion fail once, so you know what failure looks like.</p>
+            </details>
+          </div>
+        </aside>
+      </div>
+      <footer class="lesson-foot">
+        <button class="btn btn--ghost" type="button" data-complete="modules-and-tests" aria-pressed="false">
+          <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+          <span data-complete-label>Mark lesson complete</span>
+        </button>
+        <span class="complete-state" data-complete-state hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg> Completed</span>
+      </footer>
+      <nav class="lesson-foot__nav" aria-label="Lesson navigation">
+        <a class="btn btn--ghost" href="lesson-11-errors.html">Previous: Recoverable errors with Result</a>
+        <a class="btn btn--primary" href="playground.html">Open the playground</a>
+      </nav>
+    </div>
+  </div>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/vendor/prism-core.min.js"></script>
+<script src="assets/vendor/prism-clike.min.js"></script>
+<script src="assets/vendor/prism-rust.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

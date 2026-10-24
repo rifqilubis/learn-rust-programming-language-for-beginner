@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ownership: who holds the value · rust·learn</title>
+<meta name="description" content="Every value has exactly one owner. When the owner goes out of scope the value is freed. This is the idea the rest of Rust is built on.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="Ownership: who holds the value · rust·learn">
+<meta property="og:description" content="Every value has exactly one owner. When the owner goes out of scope the value is freed. This is the idea the rest of Rust is built on.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html" aria-current="page">All lessons</a>
+      <a class="site-nav__link" href="playground.html">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html" aria-current="page">All lessons</a></li>
+      <li><a href="playground.html">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<article>
+  <header class="lesson-head">
+    <div class="wrap">
+      <p class="lesson-head__meta">
+        <span class="lesson-head__num">Lesson 06</span>
+        <span>Ownership</span>
+        <span>18 min</span>
+      </p>
+      <h1 class="lesson-head__title">Ownership: who holds the value</h1>
+      <p class="lesson-head__lede">Every value has exactly one owner. When the owner goes out of scope the value is freed. This is the idea the rest of Rust is built on.</p>
+    </div>
+  </header>
+  <div class="wrap lesson-body">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc__title">On this page</p>
+      <ol>
+        <li><a href="#the-problem-ownership-solves">The problem ownership solves</a></li>
+        <li><a href="#a-move-transfers-ownership">A move transfers ownership</a></li>
+        <li><a href="#simple-values-copy">Simple values copy</a></li>
+        <li><a href="#passing-to-a-function-moves-too">Passing to a function moves too</a></li>
+        <li><a href="#clone-when-you-mean-a-copy">clone when you mean a copy</a></li>
+      </ol>
+    </nav>
+    <div>
+      <div class="prose">
+<h2 id="the-problem-ownership-solves"><span class="h2num" aria-hidden="true">01</span><span>The problem ownership solves</span></h2>
+<p>In a language with manual memory management you must free what you allocate, and forgetting is a leak while freeing twice is a crash. In a language with a garbage collector, something else decides for you and you pay for it at runtime.</p>
+<p>Rust takes a third route. The compiler tracks which variable owns each value, inserts the free at the right moment, and rejects programs where two places would both think they own the same thing. There is no runtime cost and no collector.</p>
+<h2 id="a-move-transfers-ownership"><span class="h2num" aria-hidden="true">02</span><span>A move transfers ownership</span></h2>
+<p>Assigning a <code>String</code> to another binding moves it. The first binding is no longer usable, and the compiler enforces that.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let greeting = String::from(&quot;hello&quot;);
+    let moved = greeting;
+
+    println!(&quot;{moved}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Now try using <code>greeting</code> after the move:</p>
+<figure class="code" data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let greeting = String::from(&quot;hello&quot;);
+    let moved = greeting;
+
+    println!(&quot;{greeting}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">does not compile</span>
+  </div>
+  <p class="code__note">The error is <code>E0382: borrow of moved value</code>. The compiler points at the line that moved it and the line that tried to use it, so the two places are always visible together.</p>
+</figure>
+<p>Why forbid it? A <code>String</code> is a pointer, a length, and a capacity on the stack, pointing at bytes on the heap. Copying those three words would leave two owners of one allocation, and both would free it at the end of the function. Rust moves instead of copying, so there is exactly one owner.</p>
+<h2 id="simple-values-copy"><span class="h2num" aria-hidden="true">03</span><span>Simple values copy</span></h2>
+<p>Integers, floats, booleans, and chars live entirely on the stack, so copying them is cheap and safe. These types implement a trait called <code>Copy</code>, and assignment copies rather than moves.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let number = 42;
+    let also_number = number;
+
+    println!(&quot;number: {number}&quot;);
+    println!(&quot;also_number: {also_number}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>The practical rule: if a type owns heap memory, it moves. If it is a fixed-size value, it copies.</p>
+<h2 id="passing-to-a-function-moves-too"><span class="h2num" aria-hidden="true">04</span><span>Passing to a function moves too</span></h2>
+<p>The same rule applies at call boundaries. Passing a <code>String</code> by value hands ownership to the function, and the caller cannot use it afterwards.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let report = String::from(&quot;all parts accounted for&quot;);
+    consume(report);
+    // report is no longer usable here
+}
+
+fn consume(text: String) {
+    println!(&quot;consumed: {text}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>You have three ways to keep using the value: pass a reference instead (next lesson), return ownership back from the function, or clone it if a copy is genuinely what you want.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let report = String::from(&quot;all parts accounted for&quot;);
+    let report = hand_back(report);
+    println!(&quot;still mine: {report}&quot;);
+}
+
+fn hand_back(text: String) -&gt; String {
+    println!(&quot;checked: {text}&quot;);
+    text
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Returning the value back works, but you will quickly find it clumsy, which is exactly why references exist.</p>
+<h2 id="clone-when-you-mean-a-copy"><span class="h2num" aria-hidden="true">05</span><span>clone when you mean a copy</span></h2>
+<p><code>.clone()</code> makes a real, independent duplicate. It is not a bug to use it, but every clone is an allocation, so it should be a decision and not a reflex.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let original = String::from(&quot;blueprint&quot;);
+    let duplicate = original.clone();
+
+    println!(&quot;original: {original}&quot;);
+    println!(&quot;duplicate: {duplicate}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<aside class="callout callout--note">
+  <span class="callout__tag">Scope ends, value drops</span>
+  <div><p>When a function ends, every value it owns is dropped in reverse order of declaration. That is where the free happens, and you never write it.</p></div>
+</aside>
+        <aside class="callout">
+          <span class="callout__tag">Exercise</span>
+          <div>
+            <p>Write a function that takes a <code>String</code> and returns it with an exclamation mark added. Call it twice in a row, reassigning the result each time, and print the final value.</p>
+            <details class="hint">
+              <summary>Show a hint</summary>
+              <p>The signature is <code>fn shout(mut text: String) -&gt; String</code>. Use <code>text.push('!'); text</code> as the last expression.</p>
+            </details>
+          </div>
+        </aside>
+      </div>
+      <footer class="lesson-foot">
+        <button class="btn btn--ghost" type="button" data-complete="ownership" aria-pressed="false">
+          <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+          <span data-complete-label>Mark lesson complete</span>
+        </button>
+        <span class="complete-state" data-complete-state hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg> Completed</span>
+      </footer>
+      <nav class="lesson-foot__nav" aria-label="Lesson navigation">
+        <a class="btn btn--ghost" href="lesson-05-conditionals-and-loops.html">Previous: Decisions and repetition</a>
+        <a class="btn btn--primary" href="lesson-07-borrowing.html">Next: Borrowing instead of moving</a>
+      </nav>
+    </div>
+  </div>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/vendor/prism-core.min.js"></script>
+<script src="assets/vendor/prism-clike.min.js"></script>
+<script src="assets/vendor/prism-rust.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

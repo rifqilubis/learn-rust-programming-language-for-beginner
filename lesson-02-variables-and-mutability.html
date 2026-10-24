@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variables, mutability, and shadowing · rust·learn</title>
+<meta name="description" content="Rust makes you say when a value can change. That one word removes a whole category of bugs, and it takes ten minutes to get used to.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="Variables, mutability, and shadowing · rust·learn">
+<meta property="og:description" content="Rust makes you say when a value can change. That one word removes a whole category of bugs, and it takes ten minutes to get used to.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html" aria-current="page">All lessons</a>
+      <a class="site-nav__link" href="playground.html">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html" aria-current="page">All lessons</a></li>
+      <li><a href="playground.html">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<article>
+  <header class="lesson-head">
+    <div class="wrap">
+      <p class="lesson-head__meta">
+        <span class="lesson-head__num">Lesson 02</span>
+        <span>Basics</span>
+        <span>15 min</span>
+      </p>
+      <h1 class="lesson-head__title">Variables, mutability, and shadowing</h1>
+      <p class="lesson-head__lede">Rust makes you say when a value can change. That one word removes a whole category of bugs, and it takes ten minutes to get used to.</p>
+    </div>
+  </header>
+  <div class="wrap lesson-body">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc__title">On this page</p>
+      <ol>
+        <li><a href="#a-binding-is-immutable-by-default">A binding is immutable by default</a></li>
+        <li><a href="#when-it-must-change-say-so">When it must change, say so</a></li>
+        <li><a href="#shadowing-is-a-different-tool">Shadowing is a different tool</a></li>
+        <li><a href="#constants">Constants</a></li>
+        <li><a href="#naming">Naming</a></li>
+      </ol>
+    </nav>
+    <div>
+      <div class="prose">
+<h2 id="a-binding-is-immutable-by-default"><span class="h2num" aria-hidden="true">01</span><span>A binding is immutable by default</span></h2>
+<p><code>let</code> creates a binding. Unless you say otherwise, the name cannot be reassigned, and the compiler refuses the second assignment.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let apples = 3;
+    println!(&quot;apples: {apples}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Try adding <code>apples = 4;</code> on the next line and running it. The compiler stops you with <code>cannot assign twice to immutable variable</code> and points at both the declaration and the reassignment, so you can see the two places that disagree.</p>
+<p>This is not a limitation to work around. Most values in a program never change after they are created, and the compiler is enforcing that fact for free.</p>
+<h2 id="when-it-must-change-say-so"><span class="h2num" aria-hidden="true">02</span><span>When it must change, say so</span></h2>
+<p><code>mut</code> marks a binding as changeable. It is a promise that this value has a reason to move.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let mut baskets = 1;
+    println!(&quot;baskets: {baskets}&quot;);
+
+    baskets = 2;
+    println!(&quot;baskets: {baskets}&quot;);
+
+    baskets += 3;
+    println!(&quot;baskets: {baskets}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Use <code>mut</code> where the value genuinely changes, not everywhere to silence the compiler. A file where every binding is <code>mut</code> tells you nothing about which state is actually in motion.</p>
+<h2 id="shadowing-is-a-different-tool"><span class="h2num" aria-hidden="true">03</span><span>Shadowing is a different tool</span></h2>
+<p>You can declare the same name again with a new <code>let</code>. The old binding is not changed, it is hidden, and the new one can even have a different type.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let size = 10;
+    println!(&quot;size: {size}&quot;);
+
+    let size = size * 2;
+    println!(&quot;size: {size}&quot;);
+
+    let size = &quot;large&quot;;
+    println!(&quot;size: {size}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Shadowing is how you keep a name while changing what it means, for example parsing text into a number and keeping the same name:</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let input = &quot;  42  &quot;;
+    let input: i32 = input.trim().parse().expect(&quot;not a number&quot;);
+    println!(&quot;input + 1 = {}&quot;, input + 1);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>The difference from <code>mut</code> is type and intent. <code>mut</code> means the same value changes. Shadowing means a new value takes over the name, and the old one is gone.</p>
+<h2 id="constants"><span class="h2num" aria-hidden="true">04</span><span>Constants</span></h2>
+<p><code>const</code> declares a value fixed at compile time. It needs a type, it lives for the whole program, and by convention its name is upper case.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">const MAX_PARTS: u32 = 500;
+
+fn main() {
+    println!(&quot;the workshop holds {MAX_PARTS} parts&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Use <code>const</code> for values that are the same in every run. Use <code>let</code> for everything computed at runtime.</p>
+<h2 id="naming"><span class="h2num" aria-hidden="true">05</span><span>Naming</span></h2>
+<p>Rust style is not a matter of taste here, the compiler will warn you. Bindings and functions use <code>snake_case</code>, types and enums use <code>UpperCamelCase</code>, and constants use <code>SCREAMING_SNAKE_CASE</code>.</p>
+<p>Names are read far more often than they are written, so prefer <code>remaining_attempts</code> over <code>n</code> once the meaning is not obvious from the line above.</p>
+        <aside class="callout">
+          <span class="callout__tag">Exercise</span>
+          <div>
+            <p>Start with <code>let price = 12.5;</code> and <code>let quantity = 4;</code>. Print the total. Then shadow <code>price</code> with a 10 percent discount and print the total again.</p>
+            <details class="hint">
+              <summary>Show a hint</summary>
+              <p>The second binding can be <code>let price = price * 0.9;</code>. Both lines print with <code>{:.2}</code> to keep two decimals.</p>
+            </details>
+          </div>
+        </aside>
+      </div>
+      <footer class="lesson-foot">
+        <button class="btn btn--ghost" type="button" data-complete="variables-and-mutability" aria-pressed="false">
+          <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+          <span data-complete-label>Mark lesson complete</span>
+        </button>
+        <span class="complete-state" data-complete-state hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg> Completed</span>
+      </footer>
+      <nav class="lesson-foot__nav" aria-label="Lesson navigation">
+        <a class="btn btn--ghost" href="lesson-01-install-and-first-program.html">Previous: Install Rust and run a program</a>
+        <a class="btn btn--primary" href="lesson-03-types.html">Next: Numbers, text, and tuples</a>
+      </nav>
+    </div>
+  </div>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/vendor/prism-core.min.js"></script>
+<script src="assets/vendor/prism-clike.min.js"></script>
+<script src="assets/vendor/prism-rust.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Numbers, text, and tuples · rust·learn</title>
+<meta name="description" content="Rust has a small set of built-in types and no implicit conversions between them. Learn the five you will use daily and the rest follow.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="Numbers, text, and tuples · rust·learn">
+<meta property="og:description" content="Rust has a small set of built-in types and no implicit conversions between them. Learn the five you will use daily and the rest follow.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html" aria-current="page">All lessons</a>
+      <a class="site-nav__link" href="playground.html">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html" aria-current="page">All lessons</a></li>
+      <li><a href="playground.html">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<article>
+  <header class="lesson-head">
+    <div class="wrap">
+      <p class="lesson-head__meta">
+        <span class="lesson-head__num">Lesson 03</span>
+        <span>Basics</span>
+        <span>16 min</span>
+      </p>
+      <h1 class="lesson-head__title">Numbers, text, and tuples</h1>
+      <p class="lesson-head__lede">Rust has a small set of built-in types and no implicit conversions between them. Learn the five you will use daily and the rest follow.</p>
+    </div>
+  </header>
+  <div class="wrap lesson-body">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc__title">On this page</p>
+      <ol>
+        <li><a href="#whole-numbers">Whole numbers</a></li>
+        <li><a href="#decimals">Decimals</a></li>
+        <li><a href="#text-char-and-string">Text: char and String</a></li>
+        <li><a href="#booleans">Booleans</a></li>
+        <li><a href="#tuples-group-values-of-different-types">Tuples group values of different types</a></li>
+        <li><a href="#no-silent-conversions">No silent conversions</a></li>
+      </ol>
+    </nav>
+    <div>
+      <div class="prose">
+<h2 id="whole-numbers"><span class="h2num" aria-hidden="true">01</span><span>Whole numbers</span></h2>
+<p>Integers come in signed (<code>i</code>) and unsigned (<code>u</code>) form, in widths of 8, 16, 32, 64, and 128 bits, plus <code>isize</code> and <code>usize</code> which match the machine's pointer size.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let small: u8 = 255;
+    let negative: i32 = -12;
+    let big: u64 = 18_000_000_000;
+    let index: usize = 3;
+
+    println!(&quot;{small} {negative} {big} {index}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>The underscore in <code>18_000_000_000</code> is a readability aid, not syntax you have to remember. <code>usize</code> is what you use for lengths and indexes, because that is what the standard library expects.</p>
+<p>If you do not write a type, Rust infers <code>i32</code> for integers. That default is fast on every platform, so let it work unless a specific size is part of the problem.</p>
+<h2 id="decimals"><span class="h2num" aria-hidden="true">02</span><span>Decimals</span></h2>
+<p>Floating point comes as <code>f32</code> or <code>f64</code>, and the default is <code>f64</code>. Use it for measurements, money arithmetic that has been thought through, and anything scientific. Do not use it for exact currency, because 0.1 plus 0.2 is not 0.3 in binary floating point.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let price: f64 = 19.99;
+    let tax_rate = 0.08;
+    let total = price * (1.0 + tax_rate);
+
+    println!(&quot;total: {total:.2}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p><code>{:.2}</code> means print with two decimal places. The number after the colon is a format specification, and it works on any float.</p>
+<h2 id="text-char-and-string"><span class="h2num" aria-hidden="true">03</span><span>Text: char and String</span></h2>
+<p><code>char</code> is one Unicode scalar value in single quotes. <code>String</code> is growable text you own, in double quotes.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let letter: char = 'R';
+    let name: String = String::from(&quot;Ferris&quot;);
+    let literal = &quot;borrowed text&quot;;
+
+    println!(&quot;{letter} {name} {literal}&quot;);
+    println!(&quot;{} characters in {name}&quot;, name.chars().count());
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p><code>&amp;str</code>, the type of <code>literal</code>, is a borrowed view of text. You will meet it constantly as a function parameter, and lesson 7 explains why it exists. For now, the rule of thumb is: <code>String</code> when you build or own text, <code>&amp;str</code> when you only read it.</p>
+<h2 id="booleans"><span class="h2num" aria-hidden="true">04</span><span>Booleans</span></h2>
+<p><code>bool</code> is <code>true</code> or <code>false</code> and nothing else. Rust will not accept 0 or 1 in its place, unlike C.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let ready = true;
+    let empty = &quot;&quot;.is_empty();
+
+    println!(&quot;ready: {ready}&quot;);
+    println!(&quot;empty: {empty}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<h2 id="tuples-group-values-of-different-types"><span class="h2num" aria-hidden="true">05</span><span>Tuples group values of different types</span></h2>
+<p>A tuple is a fixed set of values, each with its own type. Reach for one when you need to return two related things without inventing a struct.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let part: (i32, f64) = (7, 2.5);
+
+    println!(&quot;whole tuple: {:?}&quot;, part);
+    println!(&quot;first: {}, second: {}&quot;, part.0, part.1);
+
+    let (count, weight) = part;
+    println!(&quot;count {count}, weight {weight}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Access by position with <code>.0</code> and <code>.1</code>, or destructure into names with a pattern. <code>{:?}</code> is the debug format, the one to reach for when you want to see a value during development.</p>
+<h2 id="no-silent-conversions"><span class="h2num" aria-hidden="true">06</span><span>No silent conversions</span></h2>
+<p>Adding an <code>i32</code> to an <code>i64</code> is an error, not a promotion. You convert explicitly with <code>as</code>.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let count: i32 = 5;
+    let total: i64 = 100;
+    let sum = total + count as i64;
+
+    println!(&quot;sum: {sum}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<aside class="callout callout--note">
+  <span class="callout__tag">Why so strict</span>
+  <div><p>Implicit narrowing is where a lot of production bugs come from. Rust makes the conversion visible so you cannot do it by accident, and the <code>as</code> keyword is your signal to check the range.</p></div>
+</aside>
+        <aside class="callout">
+          <span class="callout__tag">Exercise</span>
+          <div>
+            <p>Create a tuple holding a product name, a quantity, and a unit price. Print a single receipt line using the debug format for the tuple and a two decimal format for the computed total.</p>
+            <details class="hint">
+              <summary>Show a hint</summary>
+              <p>The name is a <code>&amp;str</code> or <code>String</code>, quantity an integer, price an <code>f64</code>. Multiply quantity as <code>f64</code> by price.</p>
+            </details>
+          </div>
+        </aside>
+      </div>
+      <footer class="lesson-foot">
+        <button class="btn btn--ghost" type="button" data-complete="types" aria-pressed="false">
+          <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+          <span data-complete-label>Mark lesson complete</span>
+        </button>
+        <span class="complete-state" data-complete-state hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg> Completed</span>
+      </footer>
+      <nav class="lesson-foot__nav" aria-label="Lesson navigation">
+        <a class="btn btn--ghost" href="lesson-02-variables-and-mutability.html">Previous: Variables, mutability, and shadowing</a>
+        <a class="btn btn--primary" href="lesson-04-functions.html">Next: Functions and return values</a>
+      </nav>
+    </div>
+  </div>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/vendor/prism-core.min.js"></script>
+<script src="assets/vendor/prism-clike.min.js"></script>
+<script src="assets/vendor/prism-rust.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

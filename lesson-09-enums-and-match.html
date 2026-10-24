@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enums, match, and Option · rust·learn</title>
+<meta name="description" content="An enum says a value is one of several things. match makes you handle every one of them. Together they replace null and most boolean flags.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="Enums, match, and Option · rust·learn">
+<meta property="og:description" content="An enum says a value is one of several things. match makes you handle every one of them. Together they replace null and most boolean flags.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html" aria-current="page">All lessons</a>
+      <a class="site-nav__link" href="playground.html">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html" aria-current="page">All lessons</a></li>
+      <li><a href="playground.html">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<article>
+  <header class="lesson-head">
+    <div class="wrap">
+      <p class="lesson-head__meta">
+        <span class="lesson-head__num">Lesson 09</span>
+        <span>Data</span>
+        <span>18 min</span>
+      </p>
+      <h1 class="lesson-head__title">Enums, match, and Option</h1>
+      <p class="lesson-head__lede">An enum says a value is one of several things. match makes you handle every one of them. Together they replace null and most boolean flags.</p>
+    </div>
+  </header>
+  <div class="wrap lesson-body">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc__title">On this page</p>
+      <ol>
+        <li><a href="#variants-can-carry-data">Variants can carry data</a></li>
+        <li><a href="#match-handles-every-variant">match handles every variant</a></li>
+        <li><a href="#option-replaces-null">Option replaces null</a></li>
+        <li><a href="#the-shortcuts-worth-knowing">The shortcuts worth knowing</a></li>
+        <li><a href="#match-on-anything">match on anything</a></li>
+      </ol>
+    </nav>
+    <div>
+      <div class="prose">
+<h2 id="variants-can-carry-data"><span class="h2num" aria-hidden="true">01</span><span>Variants can carry data</span></h2>
+<p>Each variant is a distinct shape, and each can hold different data. That is more than a C enum, which is just a number.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">#[derive(Debug)]
+enum Shape {
+    Circle(f64),
+    Rectangle { width: f64, height: f64 },
+    Point,
+}
+
+fn main() {
+    let shapes = [
+        Shape::Circle(1.5),
+        Shape::Rectangle { width: 2.0, height: 3.0 },
+        Shape::Point,
+    ];
+
+    for shape in &amp;shapes {
+        println!(&quot;{:?}&quot;, shape);
+    }
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>One type, three possible shapes, and the compiler knows all of them. That knowledge is what makes <code>match</code> powerful.</p>
+<h2 id="match-handles-every-variant"><span class="h2num" aria-hidden="true">02</span><span>match handles every variant</span></h2>
+<p><code>match</code> compares a value against patterns and runs the first one that fits. It must be exhaustive, so a new variant becomes a compile error everywhere it is not handled.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">#[derive(Debug)]
+enum Shape {
+    Circle(f64),
+    Rectangle { width: f64, height: f64 },
+}
+
+impl Shape {
+    fn area(&amp;self) -&gt; f64 {
+        match self {
+            Shape::Circle(radius) =&gt; 3.141_592_653 * radius * radius,
+            Shape::Rectangle { width, height } =&gt; width * height,
+        }
+    }
+}
+
+fn main() {
+    let shapes = [
+        Shape::Circle(1.5),
+        Shape::Rectangle { width: 2.0, height: 3.0 },
+    ];
+
+    for shape in &amp;shapes {
+        println!(&quot;{:?} has area {:.3}&quot;, shape, shape.area());
+    }
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Patterns bind the data out of the variant, so <code>radius</code> and the two fields are usable directly in the arm.</p>
+<h2 id="option-replaces-null"><span class="h2num" aria-hidden="true">03</span><span>Option replaces null</span></h2>
+<p>There is no null in Rust. A value that might be missing has type <code>Option&lt;T&gt;</code>, which is either <code>Some(value)</code> or <code>None</code>. The compiler will not let you use the value without handling the missing case.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn find_part(name: &amp;str) -&gt; Option&lt;u32&gt; {
+    if name == &quot;bolt&quot; {
+        Some(40)
+    } else {
+        None
+    }
+}
+
+fn main() {
+    match find_part(&quot;bolt&quot;) {
+        Some(count) =&gt; println!(&quot;found {count}&quot;),
+        None =&gt; println!(&quot;not in stock&quot;),
+    }
+
+    match find_part(&quot;gear&quot;) {
+        Some(count) =&gt; println!(&quot;found {count}&quot;),
+        None =&gt; println!(&quot;not in stock&quot;),
+    }
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Every place that can be empty is marked in the type. There is no way to forget to check, because forgetting means the code does not compile.</p>
+<h2 id="the-shortcuts-worth-knowing"><span class="h2num" aria-hidden="true">04</span><span>The shortcuts worth knowing</span></h2>
+<p>Three methods cover most everyday uses of <code>Option</code>.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let maybe: Option&lt;u32&gt; = Some(7);
+
+    println!(&quot;{}&quot;, maybe.unwrap_or(0));
+    println!(&quot;{}&quot;, maybe.map(|value| value * 2).unwrap_or(0));
+
+    let missing: Option&lt;u32&gt; = None;
+    println!(&quot;{}&quot;, missing.unwrap_or(0));
+
+    if let Some(value) = maybe {
+        println!(&quot;present: {value}&quot;);
+    }
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p><code>unwrap_or</code> supplies a fallback. <code>map</code> transforms the value inside without leaving the <code>Option</code>. <code>if let</code> handles one variant and ignores the rest, which is shorter than a full <code>match</code> when only one arm matters.</p>
+<aside class="callout callout--note">
+  <span class="callout__tag">About unwrap</span>
+  <div><p><code>.unwrap()</code> panics on <code>None</code>. That is fine in a test or a prototype, and it is a real bug in a program people use. Prefer <code>unwrap_or</code>, <code>unwrap_or_else</code>, or a <code>match</code>.</p></div>
+</aside>
+<h2 id="match-on-anything"><span class="h2num" aria-hidden="true">05</span><span>match on anything</span></h2>
+<p><code>match</code> is not limited to enums. Ranges, literals, and guards work too, and the arms are checked for order.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    for score in [0, 42, 78, 95, 101] {
+        let grade = match score {
+            0 =&gt; &quot;nothing&quot;,
+            1..=59 =&gt; &quot;needs work&quot;,
+            60..=89 =&gt; &quot;solid&quot;,
+            90..=100 =&gt; &quot;excellent&quot;,
+            other =&gt; {
+                println!(&quot;{other} is out of range&quot;);
+                &quot;unknown&quot;
+            }
+        };
+        println!(&quot;{score}: {grade}&quot;);
+    }
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+        <aside class="callout">
+          <span class="callout__tag">Exercise</span>
+          <div>
+            <p>Define an enum <code>TrafficLight</code> with three variants and a method <code>next</code> that returns the following light. Print a full cycle using a mutable variable.</p>
+            <details class="hint">
+              <summary>Show a hint</summary>
+              <p>Return <code>Self</code> or <code>TrafficLight</code>. Match on <code>self</code>, and remember <code>self</code> is a reference inside the method, so match on <code>*self</code> or derive <code>Copy</code>.</p>
+            </details>
+          </div>
+        </aside>
+      </div>
+      <footer class="lesson-foot">
+        <button class="btn btn--ghost" type="button" data-complete="enums-and-match" aria-pressed="false">
+          <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+          <span data-complete-label>Mark lesson complete</span>
+        </button>
+        <span class="complete-state" data-complete-state hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg> Completed</span>
+      </footer>
+      <nav class="lesson-foot__nav" aria-label="Lesson navigation">
+        <a class="btn btn--ghost" href="lesson-08-structs.html">Previous: Structs and methods</a>
+        <a class="btn btn--primary" href="lesson-10-collections.html">Next: Vectors and strings</a>
+      </nav>
+    </div>
+  </div>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/vendor/prism-core.min.js"></script>
+<script src="assets/vendor/prism-clike.min.js"></script>
+<script src="assets/vendor/prism-rust.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

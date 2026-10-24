@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decisions and repetition · rust·learn</title>
+<meta name="description" content="if is an expression, loops return values, and there is no do-while to trip over. The control flow is small enough to learn in one sitting.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14110f">
+<meta property="og:title" content="Decisions and repetition · rust·learn">
+<meta property="og:description" content="if is an expression, loops return values, and there is no do-while to trip over. The control flow is small enough to learn in one sitting.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/zilla-slab-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>(function () {
+  try {
+    var stored = localStorage.getItem("rustlearn.theme");
+    if (stored === "light" || stored === "dark") {
+      document.documentElement.setAttribute("data-theme", stored);
+    }
+  } catch (error) {
+    /* storage can be blocked; the dark default still applies */
+  }
+})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap site-head__inner">
+    <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__link" href="index.html">Course</a>
+      <a class="site-nav__link" href="lessons.html" aria-current="page">All lessons</a>
+      <a class="site-nav__link" href="playground.html">Playground</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span class="sr-only" data-theme-label>Switch to light theme</span>
+      </button>
+    </nav>
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      <span class="ico ico--menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
+      <span class="ico ico--close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+      <span class="sr-only" data-nav-label>Open menu</span>
+    </button>
+  </div>
+  <div class="site-nav__panel" id="mobile-nav" data-nav-panel data-open="false">
+    <ul>
+      <li><a href="index.html">Course</a></li>
+      <li><a href="lessons.html" aria-current="page">All lessons</a></li>
+      <li><a href="playground.html">Playground</a></li>
+      <li><button class="icon-btn icon-btn--flat" type="button" data-theme-toggle aria-pressed="false">
+        <span data-theme-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg></span>
+        <span data-theme-label>Switch to light theme</span>
+      </button></li>
+    </ul>
+  </div>
+</header>
+<main id="main">
+<article>
+  <header class="lesson-head">
+    <div class="wrap">
+      <p class="lesson-head__meta">
+        <span class="lesson-head__num">Lesson 05</span>
+        <span>Basics</span>
+        <span>15 min</span>
+      </p>
+      <h1 class="lesson-head__title">Decisions and repetition</h1>
+      <p class="lesson-head__lede">if is an expression, loops return values, and there is no do-while to trip over. The control flow is small enough to learn in one sitting.</p>
+    </div>
+  </header>
+  <div class="wrap lesson-body">
+    <nav class="toc" aria-label="On this page">
+      <p class="toc__title">On this page</p>
+      <ol>
+        <li><a href="#if-is-an-expression">if is an expression</a></li>
+        <li><a href="#for-over-a-range">for over a range</a></li>
+        <li><a href="#while-and-loop">while, and loop</a></li>
+        <li><a href="#iterating-a-collection">Iterating a collection</a></li>
+        <li><a href="#leaving-early">Leaving early</a></li>
+      </ol>
+    </nav>
+    <div>
+      <div class="prose">
+<h2 id="if-is-an-expression"><span class="h2num" aria-hidden="true">01</span><span>if is an expression</span></h2>
+<p>The condition must be a real <code>bool</code>. There is no truthiness, so <code>if count</code> is an error where <code>if count &gt; 0</code> is not.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let parts = 12;
+
+    if parts == 0 {
+        println!(&quot;empty shelf&quot;);
+    } else if parts &lt; 10 {
+        println!(&quot;running low&quot;);
+    } else {
+        println!(&quot;stocked&quot;);
+    }
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Because <code>if</code> is an expression, it can produce a value, which makes this legal and idiomatic:</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let parts = 12;
+    let status = if parts &gt; 0 { &quot;stocked&quot; } else { &quot;empty&quot; };
+    println!(&quot;{status}&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Both branches must produce the same type, or the compiler cannot know what <code>status</code> is.</p>
+<h2 id="for-over-a-range"><span class="h2num" aria-hidden="true">02</span><span>for over a range</span></h2>
+<p><code>for</code> walks anything iterable. A range with two dots excludes the end, three dots includes it.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    for step in 1..4 {
+        println!(&quot;step {step}&quot;);
+    }
+
+    for step in 1..=3 {
+        println!(&quot;inclusive {step}&quot;);
+    }
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Prefer <code>for</code> over indexing. It cannot run off the end of the collection, and it reads as what you mean.</p>
+<h2 id="while-and-loop"><span class="h2num" aria-hidden="true">03</span><span>while, and loop</span></h2>
+<p><code>while</code> repeats while a condition holds. <code>loop</code> repeats until you break, and it can return a value from the break.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let mut countdown = 3;
+    while countdown &gt; 0 {
+        println!(&quot;{countdown}&quot;);
+        countdown -= 1;
+    }
+    println!(&quot;liftoff&quot;);
+
+    let mut attempts = 0;
+    let answer = loop {
+        attempts += 1;
+        if attempts == 3 {
+            break attempts * 10;
+        }
+    };
+    println!(&quot;answer {answer} after {attempts} attempts&quot;);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p><code>break value</code> is how <code>loop</code> hands back a result, which is handy when the exit condition is discovered in the middle of the body.</p>
+<h2 id="iterating-a-collection"><span class="h2num" aria-hidden="true">04</span><span>Iterating a collection</span></h2>
+<p>Iterating an array by value gives you copies of the elements. Iterating with <code>.iter()</code> gives you references, and <code>.iter_mut()</code> gives you mutable references.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    let numbers = [10, 20, 30];
+
+    for number in numbers {
+        println!(&quot;value {number}&quot;);
+    }
+
+    let mut totals = [0, 0, 0];
+    for slot in totals.iter_mut() {
+        *slot += 5;
+    }
+    println!(&quot;{:?}&quot;, totals);
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>The star in <code>*slot += 5</code> follows the reference to the value behind it. Lesson 7 explains what that means.</p>
+<h2 id="leaving-early"><span class="h2num" aria-hidden="true">05</span><span>Leaving early</span></h2>
+<p><code>break</code> leaves the nearest loop, <code>continue</code> skips to the next round, and labels let you target an outer loop when loops nest.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn main() {
+    'rows: for row in 1..=3 {
+        for column in 1..=3 {
+            if row * column == 4 {
+                println!(&quot;found 4 at row {row}, column {column}&quot;);
+                break 'rows;
+            }
+        }
+    }
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+        <aside class="callout">
+          <span class="callout__tag">Exercise</span>
+          <div>
+            <p>Print the numbers 1 to 20, but print <code>fizz</code> for multiples of 3, <code>buzz</code> for multiples of 5, and <code>fizzbuzz</code> for multiples of both.</p>
+            <details class="hint">
+              <summary>Show a hint</summary>
+              <p>Check divisibility with <code>n % 3 == 0</code>. Match on the pair of booleans if you want to see <code>match</code> early.</p>
+            </details>
+          </div>
+        </aside>
+      </div>
+      <footer class="lesson-foot">
+        <button class="btn btn--ghost" type="button" data-complete="conditionals-and-loops" aria-pressed="false">
+          <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+          <span data-complete-label>Mark lesson complete</span>
+        </button>
+        <span class="complete-state" data-complete-state hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg> Completed</span>
+      </footer>
+      <nav class="lesson-foot__nav" aria-label="Lesson navigation">
+        <a class="btn btn--ghost" href="lesson-04-functions.html">Previous: Functions and return values</a>
+        <a class="btn btn--primary" href="lesson-06-ownership.html">Next: Ownership: who holds the value</a>
+      </nav>
+    </div>
+  </div>
+</article>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__row">
+      <a class="wordmark" href="index.html">rust<span class="wordmark__dot" aria-hidden="true">·</span>learn</a>
+      <div class="site-foot__links">
+        <a href="lessons.html">All lessons</a>
+        <a href="playground.html">Playground</a>
+        <a href="https://github.com/rifqilubis/learn-rust-programming-language-for-beginner">Source on GitHub</a>
+      </div>
+    </div>
+    <p class="site-foot__note">
+      Code runs on the public <a href="https://play.rust-lang.org">Rust Playground</a>, operated by the Rust project, not by this site. Anything you run is sent there. Your progress is stored in this browser only.
+    </p>
+  </div>
+</footer>
+<script src="assets/vendor/prism-core.min.js"></script>
+<script src="assets/vendor/prism-clike.min.js"></script>
+<script src="assets/vendor/prism-rust.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>
