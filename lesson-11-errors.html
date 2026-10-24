@@ -261,11 +261,15 @@ fn main() {
       </div>
       <section class="exercise" id="exercise" data-exercise="errors" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
-        <p class="exercise__prompt">Write <code>fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt;</code> that returns <code>Err("empty list".to_string())</code> for an empty slice. Call it with <code>&amp;[2, 4, 9]</code> and with <code>&amp;[]</code>, and print both results with the debug format.</p>
+        <p class="exercise__prompt">Write <code>fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt;</code> that returns <code>Err("empty list".to_string())</code> for an empty slice. Call it with <code>&amp;[2, 4, 9]</code> and with <code>&amp;[]</code>, printing both with the debug format.</p>
         <details class="hint">
           <summary>Show a hint</summary>
-          <p>Return the error early with <code>if numbers.is_empty() { return Err(...); }</code>. Otherwise sum as <code>f64</code> with <code>numbers.iter().map(|n| *n as f64).sum::&lt;f64&gt;()</code> and divide by <code>numbers.len() as f64</code>.</p>
+          <p>Return early: <code>if numbers.is_empty() { return Err(...); }</code>. Then sum as <code>f64</code> with <code>numbers.iter().map(|n| *n as f64).sum::&lt;f64&gt;()</code> and divide by <code>numbers.len() as f64</code>.</p>
         </details>
+        <div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">The checker calls these</p>
+          <pre class="exercise__expected exercise__expected--sig">fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt;</pre>
+        </div>
         <div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">Ok(5.0)
@@ -277,13 +281,14 @@ Err("empty list")</pre>
             <span class="bench__meta" data-ex-state>not checked</span>
           </div>
           <label class="sr-only" for="ex-11-errors">Your Rust code for this exercise</label>
-          <textarea class="bench__input exercise__input" id="ex-11-errors" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt; {
-    // Empty slice -&gt; Err. Otherwise -&gt; Ok(mean).
-    Ok(0.0)
+          <textarea class="bench__input exercise__input" id="ex-11-errors" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
+    println!("{:?}", average(&amp;[2, 4, 9]));
+    println!("{:?}", average(&amp;[]));
 }
 
-fn main() {
-    // Print average(&amp;[2, 4, 9]) and average(&amp;[]) with {:?}.
+fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt; {
+    // Empty slice -&gt; Err. Otherwise -&gt; Ok(mean).
+    Ok(0.0)
 }</textarea>
           <div class="bench__actions">
             <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
@@ -297,7 +302,7 @@ fn main() {
           </div>
         </div>
         <p class="exercise__verdict" data-ex-verdict role="status"></p>
-        <script type="application/json" data-ex-config>{"mode":"run","expected":"Ok(5.0)\nErr(\"empty list\")","append":"","minTests":0}</script>
+        <script type="application/json" data-ex-config>{"slug":"errors","mode":"run","expected":"Ok(5.0)\nErr(\"empty list\")","ownTests":0}</script>
       </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="errors" aria-pressed="false">
@@ -336,6 +341,6 @@ fn main() {
 <script src="assets/vendor/prism-core.min.js"></script>
 <script src="assets/vendor/prism-clike.min.js"></script>
 <script src="assets/vendor/prism-rust.min.js"></script>
-<script src="assets/js/site.js"></script>
+<script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

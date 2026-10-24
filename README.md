@@ -7,11 +7,16 @@ Every code sample on the site runs against the public
 [Rust Playground](https://play.rust-lang.org), so the output you see is what the
 compiler actually produced.
 
-Each lesson ends with an exercise you type in the page. The checker runs your
-code the same way, compares the standard output with the output the lesson
-declares, and unlocks the next lesson only after it matches. The last lesson's
-exercise runs your own tests plus three hidden ones, so the suite has to mean
-something.
+Each lesson ends with an exercise you type in the page. Every exercise names the
+functions to write, and the checker calls those functions with arguments drawn
+when you press Check. The answers are computed in the browser and compared
+against what your code returns, so printing the exercise's expected output does
+not pass: the functions are missing, or they do not compute. The output panel
+still has to match too, and the next lesson unlocks only when both do.
+
+The last lesson asks you to write tests. Your tests are run twice: once against
+your `word_count`, and once against a deliberately broken one. If they pass the
+broken version, they are not testing anything, and the exercise stays locked.
 
 ## Run it locally
 
@@ -59,8 +64,12 @@ node tools/a11y-audit.mjs        # axe-core, WCAG 2.1/2.2 AA, both themes
 
 `verify-samples.mjs` needs a Rust toolchain and network access for the run half.
 `verify-exercises.mjs` needs only network access, and it is the check that keeps
-the exercises honest: it proves each reference solution passes its own checker,
-each starter fails it, and the hidden tests in lesson 12 reject a stub.
+the exercises honest. For every lesson it proves the reference solution passes
+and prints the expected output, and that all of these fail: the starter, a
+program that only prints the expected output, a function hard-coded to the
+example, a program that exits before the tests finish, a forged test summary,
+and forged result lines. In lesson 12 it also proves the reader's own tests are
+required and that they catch a broken `word_count`.
 
 The browser tools need Chrome and `puppeteer-core`; they are development
 dependencies, not part of the site. Start `python3 server.py` first and pass the
@@ -82,6 +91,7 @@ content/lessons.mjs            all lesson copy, the source of truth
 content/partials.mjs           sample, callout, and command markup
 build.mjs                      the generator
 assets/css/site.css            one stylesheet
+assets/js/exercises.js          exercise checks, shared by the page and the verifier
 assets/js/site.js              theme, nav, progress, runner, exercise checker
 assets/fonts/                  self-hosted Zilla Slab, Source Sans 3, Source Code Pro
 assets/vendor/                 Prism (MIT), for syntax colouring

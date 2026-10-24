@@ -258,11 +258,15 @@
       </div>
       <section class="exercise" id="exercise" data-exercise="types" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">07</span><span>Exercise</span></h2>
-        <p class="exercise__prompt">Create a tuple <code>(name, quantity, unit_price)</code> holding <code>"coffee"</code>, <code>3</code>, and <code>4.5</code>. Print the tuple with the debug format, then print <code>line total: 13.50</code> computed from the tuple's fields.</p>
+        <p class="exercise__prompt">Build the tuple <code>("coffee", 3, 4.5)</code> and print it with the debug format. Then print <code>line total: 13.50</code>, computed by <code>fn line_total(quantity: u32, price: f64) -&gt; f64</code>. The checker calls that function with other quantities and prices.</p>
         <details class="hint">
           <summary>Show a hint</summary>
-          <p>Destructure with <code>let (name, quantity, price) = item;</code>. Multiply as <code>quantity as f64 * price</code> and print the total with <code>{:.2}</code>. If you do not use <code>name</code>, prefix it with an underscore so the compiler stays quiet.</p>
+          <p>Multiply <code>quantity as f64 * price</code>. Destructure the tuple to get the two numbers, and print the total with <code>{:.2}</code>.</p>
         </details>
+        <div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">The checker calls these</p>
+          <pre class="exercise__expected exercise__expected--sig">fn line_total(quantity: u32, price: f64) -&gt; f64</pre>
+        </div>
         <div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">("coffee", 3, 4.5)
@@ -277,8 +281,14 @@ line total: 13.50</pre>
           <textarea class="bench__input exercise__input" id="ex-03-types" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
     let item = ("coffee", 3, 4.5);
 
-    // 1. Print the whole tuple with {:?}.
-    // 2. Destructure it, then print "line total: 13.50".
+    println!("{:?}", item);
+
+    let (_name, quantity, price) = item;
+    println!("line total: {:.2}", line_total(quantity, price));
+}
+
+fn line_total(quantity: u32, price: f64) -&gt; f64 {
+    0.0
 }</textarea>
           <div class="bench__actions">
             <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
@@ -292,7 +302,7 @@ line total: 13.50</pre>
           </div>
         </div>
         <p class="exercise__verdict" data-ex-verdict role="status"></p>
-        <script type="application/json" data-ex-config>{"mode":"run","expected":"(\"coffee\", 3, 4.5)\nline total: 13.50","append":"","minTests":0}</script>
+        <script type="application/json" data-ex-config>{"slug":"types","mode":"run","expected":"(\"coffee\", 3, 4.5)\nline total: 13.50","ownTests":0}</script>
       </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="types" aria-pressed="false">
@@ -331,6 +341,6 @@ line total: 13.50</pre>
 <script src="assets/vendor/prism-core.min.js"></script>
 <script src="assets/vendor/prism-clike.min.js"></script>
 <script src="assets/vendor/prism-rust.min.js"></script>
-<script src="assets/js/site.js"></script>
+<script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

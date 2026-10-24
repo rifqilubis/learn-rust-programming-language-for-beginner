@@ -126,16 +126,38 @@ const stillShut = await page.evaluate(
 );
 record("gate still closed after a wrong answer", String(stillShut));
 
+/* The reported cheat: print exactly the expected output, define nothing. */
+const printed = await answer(`fn main() {
+    println!("total: 50.00");
+    println!("discounted: 45.00");
+}`);
+record("printing the expected output", `state="${printed.state}" passed=${printed.passed} verdict="${printed.verdict}"`);
+
+/* The next cheat: define the functions, but hard-code the example. */
+const hardcoded = await answer(`fn main() {
+    println!("total: 50.00");
+    println!("discounted: 45.00");
+}
+
+fn total(_price: f64, _quantity: u32) -> f64 { 50.0 }
+fn discounted(_price: f64, _quantity: u32) -> f64 { 45.0 }`);
+record("hard-coded functions", `state="${hardcoded.state}" passed=${hardcoded.passed} verdict="${hardcoded.verdict}"`);
+
 const right = await answer(`fn main() {
     let price = 12.5;
     let quantity = 4;
 
-    let total = price * quantity as f64;
-    println!("total: {total:.2}");
+    println!("total: {:.2}", total(price, quantity));
+    println!("discounted: {:.2}", discounted(price, quantity));
+}
 
+fn total(price: f64, quantity: u32) -> f64 {
+    price * quantity as f64
+}
+
+fn discounted(price: f64, quantity: u32) -> f64 {
     let price = price * 0.9;
-    let discounted = price * quantity as f64;
-    println!("discounted: {discounted:.2}");
+    price * quantity as f64
 }`);
 record("right answer", `state="${right.state}" passed=${right.passed} verdict="${right.verdict}"`);
 
@@ -362,7 +384,8 @@ const problems = results.filter(
     (item.step === "horizontal overflow" && !item.detail.startsWith("scrollWidth 390")) ||
     (item.step === "console errors" && item.detail !== "none") ||
     (item.step === "tap targets under 44px" && item.detail !== "none") ||
-    (item.step === "light theme after reload" && !item.detail.includes("attr=light")),
+    (item.step === "light theme after reload" && !item.detail.includes("attr=light")) ||
+    ((item.step === "printing the expected output" || item.step === "hard-coded functions") && item.detail.includes("passed=true")),
 );
 console.log(`  ${results.length} checks, ${problems.length} with a problem`);
 for (const problem of problems) console.log(`  PROBLEM ${problem.step}: ${problem.detail}`);

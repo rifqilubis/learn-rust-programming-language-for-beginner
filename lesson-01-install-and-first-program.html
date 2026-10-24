@@ -206,11 +206,15 @@
       </div>
       <section class="exercise" id="exercise" data-exercise="install-and-first-program" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">08</span><span>Exercise</span></h2>
-        <p class="exercise__prompt">Print exactly two lines: <code>Hello from Rust!</code> and <code>Learning Rust in 2026</code>. The second line must come from a single <code>println!</code> with a slot for <code>Rust</code> and a slot for <code>2026</code>.</p>
+        <p class="exercise__prompt">Write <code>fn year_line(year: u32) -&gt; String</code> that returns <code>Learning Rust in 2026</code> when given 2026. Then print <code>Hello from Rust!</code> and the line for 2026. The checker calls your function with years you have not seen.</p>
         <details class="hint">
           <summary>Show a hint</summary>
-          <p>One call for the first line. For the second, use two <code>{}</code> slots and pass <code>"Rust"</code> and <code>2026</code> after the format string, separated by commas.</p>
+          <p>Use <code>format!("Learning Rust in {year}")</code> as the last expression, with no semicolon. <code>format!</code> builds a <code>String</code>; <code>println!</code> only prints one.</p>
         </details>
+        <div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">The checker calls these</p>
+          <pre class="exercise__expected exercise__expected--sig">fn year_line(year: u32) -&gt; String</pre>
+        </div>
         <div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">Hello from Rust!
@@ -223,7 +227,13 @@ Learning Rust in 2026</pre>
           </div>
           <label class="sr-only" for="ex-01-install-and-first-program">Your Rust code for this exercise</label>
           <textarea class="bench__input exercise__input" id="ex-01-install-and-first-program" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
-    // Print the first line, then the second with two slots.
+    println!("Hello from Rust!");
+    println!("{}", year_line(2026));
+}
+
+fn year_line(year: u32) -&gt; String {
+    // Return the line. Do not print it here.
+    String::new()
 }</textarea>
           <div class="bench__actions">
             <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
@@ -237,7 +247,7 @@ Learning Rust in 2026</pre>
           </div>
         </div>
         <p class="exercise__verdict" data-ex-verdict role="status"></p>
-        <script type="application/json" data-ex-config>{"mode":"run","expected":"Hello from Rust!\nLearning Rust in 2026","append":"","minTests":0}</script>
+        <script type="application/json" data-ex-config>{"slug":"install-and-first-program","mode":"run","expected":"Hello from Rust!\nLearning Rust in 2026","ownTests":0}</script>
       </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="install-and-first-program" aria-pressed="false">
@@ -276,6 +286,6 @@ Learning Rust in 2026</pre>
 <script src="assets/vendor/prism-core.min.js"></script>
 <script src="assets/vendor/prism-clike.min.js"></script>
 <script src="assets/vendor/prism-rust.min.js"></script>
-<script src="assets/js/site.js"></script>
+<script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

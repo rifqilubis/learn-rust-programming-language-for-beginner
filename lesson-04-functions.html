@@ -231,11 +231,16 @@ fn greet(name: &amp;str) {
       </div>
       <section class="exercise" id="exercise" data-exercise="functions" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
-        <p class="exercise__prompt">Write <code>celsius_to_fahrenheit(c: f64) -&gt; f64</code> and use it to print the conversions for 0, 100, and -40 in the form <code>0.0C = 32.0F</code>. Then write <code>min_max(a: i32, b: i32) -&gt; (i32, i32)</code> that returns the pair in order, and print <code>min 3, max 9</code> for the inputs 9 and 3.</p>
+        <p class="exercise__prompt">Write <code>celsius_to_fahrenheit(c: f64) -&gt; f64</code> and <code>min_max(a: i32, b: i32) -&gt; (i32, i32)</code>, which returns the smaller value first. Print the conversions for 0, 100, and -40 as <code>0.0C = 32.0F</code>, then <code>min 3, max 9</code> for the inputs 9 and 3.</p>
         <details class="hint">
           <summary>Show a hint</summary>
-          <p>The formula is <code>c * 9.0 / 5.0 + 32.0</code>. For the second, return <code>(a, b)</code> or <code>(b, a)</code> depending on the comparison, and destructure the result at the call site with <code>let (low, high) = ...</code>.</p>
+          <p>The formula is <code>c * 9.0 / 5.0 + 32.0</code>. For the second, compare the two values and return <code>(low, high)</code>. Both bodies are a single expression with no semicolon on the last line.</p>
         </details>
+        <div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">The checker calls these</p>
+          <pre class="exercise__expected exercise__expected--sig">fn celsius_to_fahrenheit(c: f64) -&gt; f64
+fn min_max(a: i32, b: i32) -&gt; (i32, i32)</pre>
+        </div>
         <div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">0.0C = 32.0F
@@ -250,17 +255,19 @@ min 3, max 9</pre>
           </div>
           <label class="sr-only" for="ex-04-functions">Your Rust code for this exercise</label>
           <textarea class="bench__input exercise__input" id="ex-04-functions" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
-    // 1. Print the three conversions with "{:.1}C = {:.1}F".
-    // 2. Call min_max(9, 3), destructure it, and print "min 3, max 9".
+    for c in [0.0, 100.0, -40.0] {
+        println!("{c:.1}C = {:.1}F", celsius_to_fahrenheit(c));
+    }
+
+    let (low, high) = min_max(9, 3);
+    println!("min {low}, max {high}");
 }
 
 fn celsius_to_fahrenheit(c: f64) -&gt; f64 {
-    // The body is one expression, and it has no semicolon.
     0.0
 }
 
 fn min_max(a: i32, b: i32) -&gt; (i32, i32) {
-    // Return the smaller value first.
     (a, b)
 }</textarea>
           <div class="bench__actions">
@@ -275,7 +282,7 @@ fn min_max(a: i32, b: i32) -&gt; (i32, i32) {
           </div>
         </div>
         <p class="exercise__verdict" data-ex-verdict role="status"></p>
-        <script type="application/json" data-ex-config>{"mode":"run","expected":"0.0C = 32.0F\n100.0C = 212.0F\n-40.0C = -40.0F\nmin 3, max 9","append":"","minTests":0}</script>
+        <script type="application/json" data-ex-config>{"slug":"functions","mode":"run","expected":"0.0C = 32.0F\n100.0C = 212.0F\n-40.0C = -40.0F\nmin 3, max 9","ownTests":0}</script>
       </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="functions" aria-pressed="false">
@@ -314,6 +321,6 @@ fn min_max(a: i32, b: i32) -&gt; (i32, i32) {
 <script src="assets/vendor/prism-core.min.js"></script>
 <script src="assets/vendor/prism-clike.min.js"></script>
 <script src="assets/vendor/prism-rust.min.js"></script>
-<script src="assets/js/site.js"></script>
+<script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

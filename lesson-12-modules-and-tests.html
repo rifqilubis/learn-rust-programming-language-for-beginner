@@ -256,14 +256,19 @@ fn main() {
       </div>
       <section class="exercise" id="exercise" data-exercise="modules-and-tests" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">07</span><span>Exercise</span></h2>
-        <p class="exercise__prompt">Implement <code>fn word_count(text: &amp;str) -&gt; usize</code> so it returns the number of whitespace-separated words, then replace the three <code>todo!()</code> calls with real assertions: a normal sentence, empty input, and input with extra spaces. The checker runs your tests, and also runs three tests of its own against your function, so a passing suite has to mean a working function.</p>
+        <p class="exercise__prompt">Implement <code>fn word_count(text: &amp;str) -&gt; usize</code> so it counts whitespace-separated words, and write three tests of your own: a normal sentence, empty input, and input with extra spaces. The checker runs your tests, then hidden ones against sentences you have not seen. It also runs your tests against a broken <code>word_count</code>: all three have to fail there, or they are not checking anything.</p>
         <details class="hint">
           <summary>Show a hint</summary>
           <p><code>text.split_whitespace().count()</code> does the counting in one line. An assertion is <code>assert_eq!(word_count("one two three"), 3);</code>. Run the checker with the <code>todo!()</code> calls still in place once, so you see what a failing test looks like.</p>
         </details>
         <div class="exercise__panel exercise__panel--brief">
-          <p class="exercise__panel-title">What the checker runs</p>
-          <p class="exercise__panel-text">Your three tests first, then three more that this page appends: a normal sentence, empty input, and messy whitespace. All six have to pass before the lesson unlocks.</p>
+          <p class="exercise__panel-title">The checker calls these</p>
+          <pre class="exercise__expected exercise__expected--sig">fn word_count(text: &amp;str) -&gt; usize
+three #[test] functions of your own</pre>
+        </div>
+        <div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">What runs</p>
+          <p class="exercise__panel-text">Your three tests, then hidden ones that call <code>word_count</code> with sentences you have not seen. All of them have to pass. Your tests are also run against a deliberately broken <code>word_count</code>: if they still pass there, they are not testing anything.</p>
         </div>
         <div class="bench exercise__bench">
           <div class="bench__bar">
@@ -286,7 +291,7 @@ mod tests {
 
     #[test]
     fn counts_words() {
-        todo!("assert the count for \"one two three\"");
+        todo!("assert the count for "one two three"");
     }
 
     #[test]
@@ -296,7 +301,7 @@ mod tests {
 
     #[test]
     fn ignores_extra_spaces() {
-        todo!("assert the count for \"  two   words \"");
+        todo!("assert the count for "  two   words "");
     }
 }</textarea>
           <div class="bench__actions">
@@ -311,7 +316,7 @@ mod tests {
           </div>
         </div>
         <p class="exercise__verdict" data-ex-verdict role="status"></p>
-        <script type="application/json" data-ex-config>{"mode":"tests","expected":"","append":"\n#[cfg(test)]\nmod hidden_check {\n    use super::*;\n\n    #[test]\n    fn hidden_counts_a_sentence() {\n        assert_eq!(word_count(\"the quick brown fox\"), 4);\n    }\n\n    #[test]\n    fn hidden_counts_empty_input() {\n        assert_eq!(word_count(\"\"), 0);\n    }\n\n    #[test]\n    fn hidden_ignores_extra_whitespace() {\n        assert_eq!(word_count(\"  one   two\\n\\nthree  \"), 3);\n    }\n}","minTests":6}</script>
+        <script type="application/json" data-ex-config>{"slug":"modules-and-tests","mode":"tests","expected":"","ownTests":3}</script>
       </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="modules-and-tests" aria-pressed="false">
@@ -350,6 +355,6 @@ mod tests {
 <script src="assets/vendor/prism-core.min.js"></script>
 <script src="assets/vendor/prism-clike.min.js"></script>
 <script src="assets/vendor/prism-rust.min.js"></script>
-<script src="assets/js/site.js"></script>
+<script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

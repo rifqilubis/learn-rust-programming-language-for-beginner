@@ -270,11 +270,15 @@
       </div>
       <section class="exercise" id="exercise" data-exercise="conditionals-and-loops" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
-        <p class="exercise__prompt">Print the numbers 1 to 15. For multiples of 3 print <code>fizz</code>, for multiples of 5 print <code>buzz</code>, and for multiples of both print <code>fizzbuzz</code>. Every other number prints as itself.</p>
+        <p class="exercise__prompt">Write <code>fn fizzbuzz(n: u32) -&gt; String</code> that returns <code>fizzbuzz</code>, <code>fizz</code>, <code>buzz</code>, or the number as text. Then print the answers for 1 to 15. The checker calls your function with numbers up to 5000.</p>
         <details class="hint">
           <summary>Show a hint</summary>
-          <p>Check divisibility with <code>n % 3 == 0</code>. Match on the pair <code>(n % 3, n % 5)</code> with arms <code>(0, 0)</code>, <code>(0, _)</code>, <code>(_, 0)</code>, and <code>_</code> if you want to see <code>match</code> early.</p>
+          <p>Match on the pair <code>(n % 3, n % 5)</code> with arms <code>(0, 0)</code>, <code>(0, _)</code>, <code>(_, 0)</code>, and <code>_</code>. Return <code>String::from(...)</code> for the words and <code>n.to_string()</code> for the rest.</p>
         </details>
+        <div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">The checker calls these</p>
+          <pre class="exercise__expected exercise__expected--sig">fn fizzbuzz(n: u32) -&gt; String</pre>
+        </div>
         <div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">1
@@ -301,8 +305,13 @@ fizzbuzz</pre>
           <label class="sr-only" for="ex-05-conditionals-and-loops">Your Rust code for this exercise</label>
           <textarea class="bench__input exercise__input" id="ex-05-conditionals-and-loops" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
     for n in 1..=15 {
-        // Decide what to print for n.
+        println!("{}", fizzbuzz(n));
     }
+}
+
+fn fizzbuzz(n: u32) -&gt; String {
+    // Return the word, not print it.
+    n.to_string()
 }</textarea>
           <div class="bench__actions">
             <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
@@ -316,7 +325,7 @@ fizzbuzz</pre>
           </div>
         </div>
         <p class="exercise__verdict" data-ex-verdict role="status"></p>
-        <script type="application/json" data-ex-config>{"mode":"run","expected":"1\n2\nfizz\n4\nbuzz\nfizz\n7\n8\nfizz\nbuzz\n11\nfizz\n13\n14\nfizzbuzz","append":"","minTests":0}</script>
+        <script type="application/json" data-ex-config>{"slug":"conditionals-and-loops","mode":"run","expected":"1\n2\nfizz\n4\nbuzz\nfizz\n7\n8\nfizz\nbuzz\n11\nfizz\n13\n14\nfizzbuzz","ownTests":0}</script>
       </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="conditionals-and-loops" aria-pressed="false">
@@ -355,6 +364,6 @@ fizzbuzz</pre>
 <script src="assets/vendor/prism-core.min.js"></script>
 <script src="assets/vendor/prism-clike.min.js"></script>
 <script src="assets/vendor/prism-rust.min.js"></script>
-<script src="assets/js/site.js"></script>
+<script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

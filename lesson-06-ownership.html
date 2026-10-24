@@ -255,11 +255,15 @@ fn hand_back(text: String) -&gt; String {
       </div>
       <section class="exercise" id="exercise" data-exercise="ownership" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
-        <p class="exercise__prompt">Write <code>fn shout(mut text: String) -&gt; String</code> that appends <code>!</code> and returns the string. Start with <code>String::from("hello")</code>, call <code>shout</code> twice in a row, reassigning the result each time, and print the final value.</p>
+        <p class="exercise__prompt">Write <code>fn shout(mut text: String) -&gt; String</code> that appends <code>!</code> and returns the string. Start with <code>String::from("hello")</code>, call <code>shout</code> twice in a row, reassigning the result each time, and print <code>hello!!</code>.</p>
         <details class="hint">
           <summary>Show a hint</summary>
-          <p>Use <code>text.push('!');</code> and then <code>text</code> as the last expression, with no semicolon. Reassign with <code>let message = shout(message);</code> after each call.</p>
+          <p>Use <code>text.push('!');</code> and then <code>text</code> as the last expression, with no semicolon. Reassign with <code>let message = shout(message);</code> after each call. The checker passes in strings you have not seen.</p>
         </details>
+        <div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">The checker calls these</p>
+          <pre class="exercise__expected exercise__expected--sig">fn shout(mut text: String) -&gt; String</pre>
+        </div>
         <div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">hello!!</pre>
@@ -273,7 +277,8 @@ fn hand_back(text: String) -&gt; String {
           <textarea class="bench__input exercise__input" id="ex-06-ownership" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
     let message = String::from("hello");
 
-    // Call shout twice, reassigning the result each time.
+    let message = shout(message);
+    let message = shout(message);
 
     println!("{message}");
 }
@@ -294,7 +299,7 @@ fn shout(mut text: String) -&gt; String {
           </div>
         </div>
         <p class="exercise__verdict" data-ex-verdict role="status"></p>
-        <script type="application/json" data-ex-config>{"mode":"run","expected":"hello!!","append":"","minTests":0}</script>
+        <script type="application/json" data-ex-config>{"slug":"ownership","mode":"run","expected":"hello!!","ownTests":0}</script>
       </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="ownership" aria-pressed="false">
@@ -333,6 +338,6 @@ fn shout(mut text: String) -&gt; String {
 <script src="assets/vendor/prism-core.min.js"></script>
 <script src="assets/vendor/prism-clike.min.js"></script>
 <script src="assets/vendor/prism-rust.min.js"></script>
-<script src="assets/js/site.js"></script>
+<script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

@@ -120,7 +120,7 @@ function scripts({ prism = false } = {}) {
     parts.push(`<script src="assets/vendor/prism-clike.min.js"></script>`);
     parts.push(`<script src="assets/vendor/prism-rust.min.js"></script>`);
   }
-  parts.push(`<script src="assets/js/site.js"></script>`);
+  parts.push(`<script type="module" src="assets/js/site.js"></script>`);
   return parts.join("\n");
 }
 
@@ -211,7 +211,7 @@ function homePage() {
       <span class="section__num">01</span>
       <div>
         <h2 class="section__title">The course, in order</h2>
-        <p class="section__lede">Each lesson is one idea, a few runnable samples, and one exercise you write in the page. The checker compares your output with the lesson's, and the next lesson unlocks when it matches.</p>
+        <p class="section__lede">Each lesson is one idea, a few runnable samples, and one exercise you write in the page. The checker calls the functions you wrote with values you have not seen, then compares your output with the lesson's. The next lesson unlocks when both pass.</p>
       </div>
     </div>
     <div class="ledger">
@@ -383,21 +383,30 @@ function exerciseBlock(lesson, sectionCount) {
   const field = `ex-${lesson.number}-${lesson.slug}`;
   const num = String(sectionCount + 1).padStart(2, "0");
   const config = JSON.stringify({
+    slug: lesson.slug,
     mode: tests ? "tests" : "run",
     expected: exercise.expected ?? "",
-    append: exercise.append ?? "",
-    minTests: exercise.minTests ?? 0,
+    ownTests: exercise.ownTests ?? 0,
   }).replace(/</g, "\\u003c");
+
+  const requirement = exercise.requires
+    ? `<div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">The checker calls these</p>
+          <pre class="exercise__expected exercise__expected--sig">${escapeHtml(exercise.requires)}</pre>
+        </div>`
+    : "";
 
   const target = tests
     ? `<div class="exercise__panel exercise__panel--brief">
-          <p class="exercise__panel-title">What the checker runs</p>
-          <p class="exercise__panel-text">Your three tests first, then three more that this page appends: a normal sentence, empty input, and messy whitespace. All six have to pass before the lesson unlocks.</p>
+          <p class="exercise__panel-title">What runs</p>
+          <p class="exercise__panel-text">Your three tests, then hidden ones that call <code>word_count</code> with sentences you have not seen. All of them have to pass. Your tests are also run against a deliberately broken <code>word_count</code>: if they still pass there, they are not testing anything.</p>
         </div>`
-    : `<div class="exercise__panel">
+    : exercise.expected
+      ? `<div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">${escapeHtml(exercise.expected)}</pre>
-        </div>`;
+        </div>`
+      : "";
 
   return `<section class="exercise" id="exercise" data-exercise="${lesson.slug}" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">${num}</span><span>Exercise</span></h2>
@@ -406,6 +415,7 @@ function exerciseBlock(lesson, sectionCount) {
           <summary>Show a hint</summary>
           <p>${exercise.hint}</p>
         </details>
+        ${requirement}
         ${target}
         <div class="bench exercise__bench">
           <div class="bench__bar">

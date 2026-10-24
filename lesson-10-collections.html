@@ -246,11 +246,16 @@
       </div>
       <section class="exercise" id="exercise" data-exercise="collections" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
-        <p class="exercise__prompt">Given <code>vec![4, 8, 15, 16, 23, 42]</code>, build a new vector of the even numbers and print it with the debug format. Then print <code>sum: 70</code>, and finally print the original vector to show it is unchanged.</p>
+        <p class="exercise__prompt">Given <code>vec![4, 8, 15, 16, 23, 42]</code>, print <code>[4, 8, 16, 42]</code>, then <code>sum: 70</code>, then the original vector. Both numbers come from <code>fn evens(numbers: &amp;[i32]) -&gt; Vec&lt;i32&gt;</code> and <code>fn even_sum(numbers: &amp;[i32]) -&gt; i32</code>, which the checker calls with other vectors.</p>
         <details class="hint">
           <summary>Show a hint</summary>
-          <p>Use <code>.iter().filter(|n| **n % 2 == 0).copied().collect::<Vec&lt;i32&gt;&gt;()</code>. Sum the new vector with <code>.iter().sum::&lt;i32&gt;()</code>. The original is untouched because <code>iter</code> only borrows it.</p>
+          <p>Use <code>.iter().filter(|n| **n % 2 == 0).copied().collect::&lt;Vec&lt;i32&gt;&gt;()</code>, and sum with <code>.iter().sum::&lt;i32&gt;()</code>. Neither function takes ownership, which is why the original stays usable.</p>
         </details>
+        <div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">The checker calls these</p>
+          <pre class="exercise__expected exercise__expected--sig">fn evens(numbers: &amp;[i32]) -&gt; Vec&lt;i32&gt;
+fn even_sum(numbers: &amp;[i32]) -&gt; i32</pre>
+        </div>
         <div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">[4, 8, 16, 42]
@@ -266,9 +271,17 @@ sum: 70
           <textarea class="bench__input exercise__input" id="ex-10-collections" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
     let numbers = vec![4, 8, 15, 16, 23, 42];
 
-    // 1. Collect the even numbers into a new vector and print it with {:?}.
-    // 2. Print "sum: 70".
-    // 3. Print the original vector again.
+    println!("{:?}", evens(&amp;numbers));
+    println!("sum: {}", even_sum(&amp;numbers));
+    println!("{:?}", numbers);
+}
+
+fn evens(numbers: &amp;[i32]) -&gt; Vec&lt;i32&gt; {
+    Vec::new()
+}
+
+fn even_sum(numbers: &amp;[i32]) -&gt; i32 {
+    0
 }</textarea>
           <div class="bench__actions">
             <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
@@ -282,7 +295,7 @@ sum: 70
           </div>
         </div>
         <p class="exercise__verdict" data-ex-verdict role="status"></p>
-        <script type="application/json" data-ex-config>{"mode":"run","expected":"[4, 8, 16, 42]\nsum: 70\n[4, 8, 15, 16, 23, 42]","append":"","minTests":0}</script>
+        <script type="application/json" data-ex-config>{"slug":"collections","mode":"run","expected":"[4, 8, 16, 42]\nsum: 70\n[4, 8, 15, 16, 23, 42]","ownTests":0}</script>
       </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="collections" aria-pressed="false">
@@ -321,6 +334,6 @@ sum: 70
 <script src="assets/vendor/prism-core.min.js"></script>
 <script src="assets/vendor/prism-clike.min.js"></script>
 <script src="assets/vendor/prism-rust.min.js"></script>
-<script src="assets/js/site.js"></script>
+<script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

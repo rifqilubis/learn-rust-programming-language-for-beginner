@@ -291,11 +291,17 @@ fn main() {
       </div>
       <section class="exercise" id="exercise" data-exercise="structs" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
-        <p class="exercise__prompt">Model a <code>Book</code> with <code>title</code>, <code>author</code>, and <code>pages</code>. Add <code>Book::new</code> and a method <code>reading_time</code> that returns minutes at 2 pages per minute. Create <code>The Hobbit</code> by <code>Tolkien</code> with 310 pages and print <code>The Hobbit by Tolkien: 155.0 minutes</code>.</p>
+        <p class="exercise__prompt">Model a <code>Book</code> with public fields <code>title</code>, <code>author</code>, and <code>pages</code>. Add <code>Book::new</code> and a method <code>reading_time</code> that returns minutes at 2 pages per minute. Create <code>The Hobbit</code> by <code>Tolkien</code> with 310 pages and print <code>The Hobbit by Tolkien: 155.0 minutes</code>.</p>
         <details class="hint">
           <summary>Show a hint</summary>
-          <p>Divide as <code>f64</code>: <code>self.pages as f64 / 2.0</code>. Return <code>f64</code> and print with <code>{:.1}</code>. Inside an <code>impl Book</code> block, the constructor takes <code>&amp;str</code> parameters and builds <code>String</code> fields with <code>to_string()</code>.</p>
+          <p>Divide as <code>f64</code>: <code>self.pages as f64 / 2.0</code>. The constructor takes <code>&amp;str</code> parameters and builds <code>String</code> fields with <code>.to_string()</code>. Fields are private by default, so write <code>pub</code> in front of each one.</p>
         </details>
+        <div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">The checker calls these</p>
+          <pre class="exercise__expected exercise__expected--sig">struct Book with pub title, pub author, pub pages
+Book::new(title: &amp;str, author: &amp;str, pages: u32) -&gt; Book
+fn reading_time(&amp;self) -&gt; f64</pre>
+        </div>
         <div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">The Hobbit by Tolkien: 155.0 minutes</pre>
@@ -307,18 +313,33 @@ fn main() {
           </div>
           <label class="sr-only" for="ex-08-structs">Your Rust code for this exercise</label>
           <textarea class="bench__input exercise__input" id="ex-08-structs" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">struct Book {
-    title: String,
-    author: String,
-    pages: u32,
+    pub title: String,
+    pub author: String,
+    pub pages: u32,
 }
 
 impl Book {
-    // fn new(...) -&gt; Book
-    // fn reading_time(&amp;self) -&gt; f64
+    fn new(title: &amp;str, author: &amp;str, pages: u32) -&gt; Book {
+        Book {
+            title: title.to_string(),
+            author: author.to_string(),
+            pages,
+        }
+    }
+
+    fn reading_time(&amp;self) -&gt; f64 {
+        0.0
+    }
 }
 
 fn main() {
-    // Build the book and print the line.
+    let book = Book::new("The Hobbit", "Tolkien", 310);
+    println!(
+        "{} by {}: {:.1} minutes",
+        book.title,
+        book.author,
+        book.reading_time()
+    );
 }</textarea>
           <div class="bench__actions">
             <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
@@ -332,7 +353,7 @@ fn main() {
           </div>
         </div>
         <p class="exercise__verdict" data-ex-verdict role="status"></p>
-        <script type="application/json" data-ex-config>{"mode":"run","expected":"The Hobbit by Tolkien: 155.0 minutes","append":"","minTests":0}</script>
+        <script type="application/json" data-ex-config>{"slug":"structs","mode":"run","expected":"The Hobbit by Tolkien: 155.0 minutes","ownTests":0}</script>
       </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="structs" aria-pressed="false">
@@ -371,6 +392,6 @@ fn main() {
 <script src="assets/vendor/prism-core.min.js"></script>
 <script src="assets/vendor/prism-clike.min.js"></script>
 <script src="assets/vendor/prism-rust.min.js"></script>
-<script src="assets/js/site.js"></script>
+<script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

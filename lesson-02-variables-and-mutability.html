@@ -224,11 +224,16 @@ fn main() {
       </div>
       <section class="exercise" id="exercise" data-exercise="variables-and-mutability" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
-        <p class="exercise__prompt">Start with <code>let price = 12.5;</code> and <code>let quantity = 4;</code>. Print <code>total: 50.00</code>. Then shadow <code>price</code> with a 10 percent discount and print <code>discounted: 45.00</code>. Both numbers need two decimals.</p>
+        <p class="exercise__prompt">Write <code>fn total(price: f64, quantity: u32) -&gt; f64</code> and <code>fn discounted(price: f64, quantity: u32) -&gt; f64</code>, where the second takes 10 percent off. For a price of 12.5 and a quantity of 4, print <code>total: 50.00</code> and <code>discounted: 45.00</code>.</p>
         <details class="hint">
           <summary>Show a hint</summary>
-          <p>The second binding can be <code>let price = price * 0.9;</code>. Cast the quantity with <code>quantity as f64</code> so the multiplication stays floating point, and print with <code>{:.2}</code>.</p>
+          <p>Cast with <code>quantity as f64</code>. Inside <code>discounted</code>, shadow the parameter with <code>let price = price * 0.9;</code> and then multiply, exactly as the lesson did in <code>main</code>. Print with <code>{:.2}</code>.</p>
         </details>
+        <div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">The checker calls these</p>
+          <pre class="exercise__expected exercise__expected--sig">fn total(price: f64, quantity: u32) -&gt; f64
+fn discounted(price: f64, quantity: u32) -&gt; f64</pre>
+        </div>
         <div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">total: 50.00
@@ -244,9 +249,16 @@ discounted: 45.00</pre>
     let price = 12.5;
     let quantity = 4;
 
-    // 1. Compute and print "total: 50.00".
-    // 2. Shadow price with a 10 percent discount.
-    // 3. Compute and print "discounted: 45.00".
+    println!("total: {:.2}", total(price, quantity));
+    println!("discounted: {:.2}", discounted(price, quantity));
+}
+
+fn total(price: f64, quantity: u32) -&gt; f64 {
+    0.0
+}
+
+fn discounted(price: f64, quantity: u32) -&gt; f64 {
+    0.0
 }</textarea>
           <div class="bench__actions">
             <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
@@ -260,7 +272,7 @@ discounted: 45.00</pre>
           </div>
         </div>
         <p class="exercise__verdict" data-ex-verdict role="status"></p>
-        <script type="application/json" data-ex-config>{"mode":"run","expected":"total: 50.00\ndiscounted: 45.00","append":"","minTests":0}</script>
+        <script type="application/json" data-ex-config>{"slug":"variables-and-mutability","mode":"run","expected":"total: 50.00\ndiscounted: 45.00","ownTests":0}</script>
       </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="variables-and-mutability" aria-pressed="false">
@@ -299,6 +311,6 @@ discounted: 45.00</pre>
 <script src="assets/vendor/prism-core.min.js"></script>
 <script src="assets/vendor/prism-clike.min.js"></script>
 <script src="assets/vendor/prism-rust.min.js"></script>
-<script src="assets/js/site.js"></script>
+<script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

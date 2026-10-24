@@ -78,8 +78,20 @@ both directions, and the mobile menu opens and closes with pointer, Enter, and
 Escape.
 
 The exercise at the end of each lesson is a real gate, not a suggestion. It is the
-same bench as everywhere else (dark, mono, oxide action), with the expected output
-printed above it so the target is never a guess. A pass compares standard output
-line for line, or runs the reader's tests plus three appended ones in the last
-lesson. The next lesson stays locked until it passes; the pass and the draft code
-both persist in `localStorage`, so a reload does not cost the reader their work.
+same bench as everywhere else (dark, mono, oxide action), with the function
+signatures and the expected output printed above it so the target is never a
+guess.
+
+A pass has to clear two independent bars. First, the hidden module calls the
+reader's named functions with arguments drawn at check time and reports what
+they return on a private marker channel; the page compares those results with
+answers it computed itself, and the answers never go to the Playground. Printing
+the expected text produces no results, and a hard-coded function fails on the
+next input. Second, the program still has to print the exercise's output, so
+deleting the `println!` calls does not pass either. The test-writing lesson
+replaces the second bar with the reader's own tests, run against a broken
+implementation so tests that cannot fail are rejected.
+
+The next lesson stays locked until the exercise passes; the pass and the draft
+code both persist in `localStorage`, so a reload does not cost the reader their
+work.

@@ -281,11 +281,17 @@ fn main() {
       </div>
       <section class="exercise" id="exercise" data-exercise="enums-and-match" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
-        <p class="exercise__prompt">Define an enum <code>TrafficLight</code> with <code>Red</code>, <code>Green</code>, and <code>Yellow</code>. Give it a method <code>next</code> that returns the following light, and a method <code>name</code> that returns a lowercase <code>&amp;str</code>. Start at <code>Red</code> and print four lines by advancing a mutable variable each time.</p>
+        <p class="exercise__prompt">Define <code>enum TrafficLight</code> with <code>Red</code>, <code>Green</code>, and <code>Yellow</code>, plus <code>fn next(self) -&gt; TrafficLight</code> and <code>fn name(self) -&gt; &amp;'static str</code> returning <code>red</code>, <code>green</code>, or <code>yellow</code>. Start at <code>Red</code>, advance a mutable variable, and print four lines.</p>
         <details class="hint">
           <summary>Show a hint</summary>
-          <p>Return <code>Self</code> or <code>TrafficLight</code> from <code>next</code>, and match on <code>self</code>. Because <code>self</code> is a reference inside the method, either match on <code>*self</code> or derive <code>Copy, Clone</code> so the value can be reused.</p>
+          <p>Match on <code>self</code> in both methods. Derive <code>Copy, Clone</code> so the value can be used after a call. The checker asks for <code>Red.next().next()</code>, so <code>next</code> must return an owned light rather than a reference.</p>
         </details>
+        <div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">The checker calls these</p>
+          <pre class="exercise__expected exercise__expected--sig">enum TrafficLight { Red, Green, Yellow }
+fn next(self) -&gt; TrafficLight
+fn name(self) -&gt; &amp;'static str</pre>
+        </div>
         <div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">red
@@ -320,7 +326,10 @@ impl TrafficLight {
 
 fn main() {
     let mut light = TrafficLight::Red;
-    // Print the light four times, advancing after each line.
+    for _ in 0..4 {
+        println!("{}", light.name());
+        light = light.next();
+    }
 }</textarea>
           <div class="bench__actions">
             <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
@@ -334,7 +343,7 @@ fn main() {
           </div>
         </div>
         <p class="exercise__verdict" data-ex-verdict role="status"></p>
-        <script type="application/json" data-ex-config>{"mode":"run","expected":"red\ngreen\nyellow\nred","append":"","minTests":0}</script>
+        <script type="application/json" data-ex-config>{"slug":"enums-and-match","mode":"run","expected":"red\ngreen\nyellow\nred","ownTests":0}</script>
       </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="enums-and-match" aria-pressed="false">
@@ -373,6 +382,6 @@ fn main() {
 <script src="assets/vendor/prism-core.min.js"></script>
 <script src="assets/vendor/prism-clike.min.js"></script>
 <script src="assets/vendor/prism-rust.min.js"></script>
-<script src="assets/js/site.js"></script>
+<script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

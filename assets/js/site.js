@@ -1,5 +1,14 @@
 /* rust·learn: theme, navigation, progress, and the Playground runner. */
 
+import {
+  checksFor,
+  createHiddenSuite,
+  gradeSubmission,
+  describeValue,
+  looksLikeCompileError,
+  stripMarkers,
+} from "./exercises.js";
+
 const PLAYGROUND_URL = "https://play.rust-lang.org/execute";
 
 const STORE = {
@@ -408,13 +417,144 @@ function normalise(text) {
     .trim();
 }
 
-/* Count the tests the reader actually wrote, and refuse a suite that is all
-   todo!() or #[ignore] markers. */
-function testReport(stdout) {
-  const text = String(stdout || "");
-  const passed = Number((text.match(/test result: ok\. (\d+) passed/) || [])[1] || 0);
-  const failed = Number((text.match(/(\d+) failed/) || [])[1] || 0);
-  return { passed, failed, ran: passed + failed };
+/* Grade an exercise on two independent axes:
+ *
+ *   1. behaviour  the hidden module calls the reader's functions with values
+ *                 drawn now, and reports each result on a private marker
+ *                 channel. The page compares those results with values it
+ *                 computed itself, so printing the expected text cannot pass;
+ *   2. output     the program must still print what the exercise asked for,
+ *                 so implementing the functions but deleting the output
+ *                 does not pass either.
+ *
+ * Both run at the same time. A pass needs both, or just behaviour for the
+ * test-writing lesson, where the output is not the point.
+ *
+ * The expected values never go to the Playground, so the reader's program
+ * cannot read them. The only way to produce a matching marker line is to
+ * compute the answer.
+ *
+ * In the test-writing lesson the reader's own tests are also run against a
+ * deliberately broken `word_count`. If they still pass, they are not testing
+ * anything, and the exercise is not finished. */
+async function gradeExercise({ code, slug, tests, expected, ownTests }) {
+  const checks = checksFor(slug);
+  const suite = createHiddenSuite(slug, checks);
+
+  if (suite.code === "") {
+    return { ok: false, kind: "config", message: "This exercise has no checks configured, so it cannot be graded." };
+  }
+
+  const wantsOutput = !tests && normalise(expected) !== "";
+  const behaviourPromise = runCode({ code: `${code}\n${suite.code}`, tests: true });
+  const outputPromise = wantsOutput ? runCode({ code, tests: false }) : Promise.resolve(null);
+
+  const [behaviour, output] = await Promise.all([behaviourPromise, outputPromise]);
+
+  for (const result of [behaviour, output]) {
+    if (result && result.error && /timed out|deadline/i.test(result.error)) {
+      return {
+        ok: false,
+        kind: "timeout",
+        message: "The program ran past the Playground's time limit. Look for a loop that never ends.",
+      };
+    }
+  }
+
+  const graded = await gradeSubmission({
+    code,
+    suite,
+    result: behaviour,
+    ownTests,
+    runTests: (source) => runCode({ code: source, tests: true }),
+  });
+
+  if (!graded.pass) {
+    if (graded.kind === "compile") {
+      return {
+        ok: false,
+        kind: "compile",
+        message: "The code did not compile against the hidden checks. Read the first compiler error: it usually names the missing function, the wrong return type, or the exact fix.",
+        result: behaviour,
+      };
+    }
+    if (graded.kind === "own-tests") {
+      return {
+        ok: false,
+        kind: "own-tests",
+        message: `${graded.message} Keep the three #[test] functions; the hint shows the shape of an assertion.`,
+        result: behaviour,
+      };
+    }
+    if (graded.missing) {
+      return {
+        ok: false,
+        kind: "hidden",
+        message: `One of the checks never reported a result (${graded.item.input}). The program probably stopped before it ran, or a function hung.`,
+        result: behaviour,
+      };
+    }
+    if (graded.duplicate || graded.unexpected) {
+      return {
+        ok: false,
+        kind: "hidden",
+        message: "The program printed a result the checker did not ask for, or printed one twice. Remove any code that writes lines starting with __RUSTLEARN__.",
+        result: behaviour,
+      };
+    }
+    if (graded.message) {
+      return {
+        ok: false,
+        kind: "hidden",
+        message: graded.message,
+        result: behaviour,
+      };
+    }
+    return {
+      ok: false,
+      kind: "hidden",
+      message: `Your function was called with ${graded.item.input} and returned ${describeValue(graded.got)}, which is not right for those inputs. Work the answer out on paper, then fix the function.`,
+      result: behaviour,
+    };
+  }
+
+  if (output) {
+    if (looksLikeCompileError(output.stderr) && !output.success) {
+      return {
+        ok: false,
+        kind: "compile",
+        message: "The hidden checks pass, but the program itself does not compile and run. Fix the compiler error in the messages below.",
+        result: output,
+      };
+    }
+    if (!output.success) {
+      return {
+        ok: false,
+        kind: "run",
+        message: "The hidden checks pass, but the program did not exit cleanly. Fix the panic or error in the messages below.",
+        result: output,
+      };
+    }
+    if (normalise(output.stdout) !== normalise(expected)) {
+      return {
+        ok: false,
+        kind: "output",
+        message: difference(output.stdout, expected),
+        result: output,
+      };
+    }
+  }
+
+  return {
+    ok: true,
+    hiddenCount: suite.count,
+    result: {
+      ...(output || behaviour),
+      stdout: stripMarkers((output || behaviour).stdout),
+      stderr: stripMarkers((output || behaviour).stderr),
+    },
+    outputChecked: Boolean(output),
+  };
 }
 
 function initExercise() {
@@ -430,7 +570,7 @@ function initExercise() {
   const configEl = root.querySelector("[data-ex-config]");
   if (!source || !check || !configEl) return;
 
-  let config = { mode: "run", expected: "", append: "", minTests: 0 };
+  let config = { slug, mode: "run", expected: "", ownTests: 0 };
   try {
     config = { ...config, ...JSON.parse(configEl.textContent) };
   } catch (error) {
@@ -494,83 +634,53 @@ function initExercise() {
     check.disabled = true;
     const idle = check.innerHTML;
     check.textContent = "Checking";
-    setState("compiling", "");
+    setState("running tests", "");
     say("", "");
     setOutput(root, { state: "compiling", tone: "", stdout: "", stderr: "", showErrors: false });
 
-    const tests = config.mode === "tests";
-    const full = tests ? `${code}\n${config.append}` : code;
-
     try {
-      const result = await runCode({ code: full, tests });
-      setOutput(root, {
-        state: result.success ? "exited 0" : tests ? "tests failed" : "did not pass",
-        tone: result.success ? "ok" : "err",
-        stdout: result.stdout,
-        stderr: result.stderr,
-        showErrors: true,
+      const verdictResult = await gradeExercise({
+        code,
+        slug,
+        tests: config.mode === "tests",
+        expected: config.expected || "",
+        ownTests: config.ownTests || 0,
       });
 
-      if (!result.success) {
-        if (result.error && /timed out|deadline/i.test(result.error)) {
-          setState("timed out", "err");
-          say("The program ran past the Playground's time limit, so it was stopped. Look for a loop that never ends.", "err");
-          return;
-        }
-        if (tests) {
-          const report = testReport(result.stdout);
-          const compiled = /error\[E\d{4}\]|error: could not compile|error: expected|error: cannot/.test(result.stderr);
-          if (compiled && report.ran === 0) {
-            setState("compile error", "err");
-            say("The code did not compile. Read the compiler messages below the output, fix the first error, and check again.", "err");
-          } else {
-            setState(`${report.failed || 1} failed`, "err");
-            say(
-              `At least one test failed${report.passed ? `, ${report.passed} passed` : ""}. The output panel names the assertion that broke.`,
-              "err",
-            );
-          }
-        } else if (String(result.stderr).includes("panicked at")) {
-          setState("panicked", "err");
-          say("The program compiled but panicked while running. The panic message is under the output; fix what it names and check again.", "err");
-        } else {
-          setState("compile error", "err");
-          say("The code did not compile. Open the compiler messages, fix the first error, and check again.", "err");
-        }
-        return;
+      if (verdictResult.result) {
+        const { result } = verdictResult;
+        setOutput(root, {
+          state: verdictResult.ok ? "all checks passed" : verdictResult.kind === "hidden" ? "checks failed" : "did not pass",
+          tone: verdictResult.ok ? "ok" : "err",
+          stdout: stripMarkers(result.stdout),
+          stderr: stripMarkers(result.stderr),
+          showErrors: true,
+        });
       }
 
-      if (tests) {
-        const report = testReport(result.stdout);
-        if (report.passed < config.minTests) {
-          setState(`${report.passed} of ${config.minTests} tests`, "err");
-          say(
-            `Only ${report.passed} of the ${config.minTests} required tests pass. Replace every todo!() with a real assertion and delete any #[ignore] attributes.`,
-            "err",
-          );
-          return;
-        }
-        if (report.failed > 0) {
-          setState(`${report.failed} failed`, "err");
-          say("A test failed even though the program exited cleanly. Read the assertion output and try again.", "err");
-          return;
-        }
-        setState(`${report.passed} tests passed`, "ok");
-        say(`All ${report.passed} tests pass, including the three this page added. Lesson unlocked.`, "ok");
+      if (verdictResult.ok) {
+        setState(`${verdictResult.hiddenCount} checks passed`, "ok");
+        say(
+          verdictResult.outputChecked
+            ? "Every hidden check passed and the output matches the exercise exactly. Lesson unlocked."
+            : "Every hidden check passed, including calls with values you had not seen. Lesson unlocked.",
+          "ok",
+        );
         unlock();
         return;
       }
 
-      const actual = normalise(result.stdout);
-      const expected = normalise(config.expected);
-      if (actual === expected) {
-        setState("matches", "ok");
-        say("That is the expected output exactly. Lesson unlocked.", "ok");
-        unlock();
-      } else {
-        setState("output differs", "err");
-        say(difference(result.stdout, config.expected), "err");
-      }
+      const labels = {
+        timeout: "timed out",
+        compile: "compile error",
+        run: "crashed",
+        output: "output differs",
+        "own-tests": "tests missing",
+        hidden: "hidden checks failed",
+        config: "checker error",
+      };
+      setState(labels[verdictResult.kind] || "did not pass", "err");
+      say(verdictResult.message, "err");
     } catch (error) {
       setState("request failed", "err");
       setOutput(root, {
