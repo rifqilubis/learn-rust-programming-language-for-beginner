@@ -15,6 +15,7 @@
 <link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <script>(function () {
+  document.documentElement.classList.add("js");
   try {
     var stored = localStorage.getItem("rustlearn.theme");
     if (stored === "light" || stored === "dark") {
@@ -79,9 +80,10 @@
         <li><a href="#strings-are-bytes-with-rules">Strings are bytes with rules</a></li>
         <li><a href="#building-text-from-parts">Building text from parts</a></li>
         <li><a href="#removing-and-checking">Removing and checking</a></li>
+        <li><a href="#exercise">Exercise</a></li>
       </ol>
     </nav>
-    <div>
+    <div class="lesson-main">
       <div class="prose">
 <h2 id="creating-a-vector"><span class="h2num" aria-hidden="true">01</span><span>Creating a vector</span></h2>
 <p><code>Vec&lt;T&gt;</code> is a growable array on the heap. The <code>vec!</code> macro is the shortest way to build one.</p>
@@ -241,17 +243,47 @@
   <span class="callout__tag">Capacity is not length</span>
   <div><p>A vector tracks how many items it holds and how much room it has. <code>push</code> occasionally reallocates, which is why a <code>&amp;vec[0]</code> held across a push will not compile. That error is the borrow checker saving you from a dangling pointer.</p></div>
 </aside>
-        <aside class="callout">
-          <span class="callout__tag">Exercise</span>
-          <div>
-            <p>Given <code>vec![4, 8, 15, 16, 23, 42]</code>, build a new vector of the even numbers, print its sum, and print the original unchanged.</p>
-            <details class="hint">
-              <summary>Show a hint</summary>
-              <p>Use <code>.iter().filter(|n| **n % 2 == 0).copied().collect::&lt;Vec&lt;i32&gt;&gt;()</code>. The original is untouched because <code>iter</code> borrows.</p>
-            </details>
-          </div>
-        </aside>
       </div>
+      <section class="exercise" id="exercise" data-exercise="collections" aria-labelledby="exercise-title">
+        <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
+        <p class="exercise__prompt">Given <code>vec![4, 8, 15, 16, 23, 42]</code>, build a new vector of the even numbers and print it with the debug format. Then print <code>sum: 70</code>, and finally print the original vector to show it is unchanged.</p>
+        <details class="hint">
+          <summary>Show a hint</summary>
+          <p>Use <code>.iter().filter(|n| **n % 2 == 0).copied().collect::<Vec&lt;i32&gt;&gt;()</code>. Sum the new vector with <code>.iter().sum::&lt;i32&gt;()</code>. The original is untouched because <code>iter</code> only borrows it.</p>
+        </details>
+        <div class="exercise__panel">
+          <p class="exercise__panel-title">Expected output</p>
+          <pre class="exercise__expected">[4, 8, 16, 42]
+sum: 70
+[4, 8, 15, 16, 23, 42]</pre>
+        </div>
+        <div class="bench exercise__bench">
+          <div class="bench__bar">
+            <span class="bench__file">main.rs</span>
+            <span class="bench__meta" data-ex-state>not checked</span>
+          </div>
+          <label class="sr-only" for="ex-10-collections">Your Rust code for this exercise</label>
+          <textarea class="bench__input exercise__input" id="ex-10-collections" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
+    let numbers = vec![4, 8, 15, 16, 23, 42];
+
+    // 1. Collect the even numbers into a new vector and print it with {:?}.
+    // 2. Print "sum: 70".
+    // 3. Print the original vector again.
+}</textarea>
+          <div class="bench__actions">
+            <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
+            <button class="btn btn--quiet" type="button" data-ex-reset>Reset code</button>
+            <span class="bench__hint">Ctrl + Enter</span>
+          </div>
+          <div class="out exercise__out" data-ex-out hidden>
+            <div class="out__head"><span>your output</span><span class="out__state" data-state></span></div>
+            <pre class="out__body" data-out></pre>
+            <details class="out__more"><summary>Compiler messages</summary><pre data-err></pre></details>
+          </div>
+        </div>
+        <p class="exercise__verdict" data-ex-verdict role="status"></p>
+        <script type="application/json" data-ex-config>{"mode":"run","expected":"[4, 8, 16, 42]\nsum: 70\n[4, 8, 15, 16, 23, 42]","append":"","minTests":0}</script>
+      </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="collections" aria-pressed="false">
           <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
@@ -261,7 +293,11 @@
       </footer>
       <nav class="lesson-foot__nav" aria-label="Lesson navigation">
         <a class="btn btn--ghost" href="lesson-09-enums-and-match.html">Previous: Enums, match, and Option</a>
-        <a class="btn btn--primary" href="lesson-11-errors.html">Next: Recoverable errors with Result</a>
+        <span class="next-gate" data-next-gate data-open="false">
+          <a class="btn btn--primary" href="lesson-11-errors.html" data-next>Next: Recoverable errors with Result</a>
+          <button class="btn btn--ghost next-gate__locked" type="button" data-next-locked disabled><svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>Next: Recoverable errors with Result</button>
+          <span class="next-gate__note" data-next-note>Finish the exercise above to unlock this.</span>
+        </span>
       </nav>
     </div>
   </div>

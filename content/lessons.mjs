@@ -76,9 +76,18 @@ ${sample(`fn main() {
     ]),
     exercise: {
       prompt:
-        "Make the program print three lines: your name, the city you are in, and the year. Use a single <code>println!</code> with three slots.",
+        "Print exactly two lines: <code>Hello from Rust!</code> and <code>Learning Rust in 2026</code>. The second line must come from a single <code>println!</code> with a slot for <code>Rust</code> and a slot for <code>2026</code>.",
       hint:
-        "One call, three <code>{}</code> slots, three values after the string, separated by commas.",
+        "One call for the first line. For the second, use two <code>{}</code> slots and pass <code>\"Rust\"</code> and <code>2026</code> after the format string, separated by commas.",
+      starter: `fn main() {
+    // Print the first line, then the second with two slots.
+}`,
+      expected: `Hello from Rust!
+Learning Rust in 2026`,
+      solution: `fn main() {
+    println!("Hello from Rust!");
+    println!("Learning {} in {}", "Rust", 2026);
+}`,
     },
   },
 
@@ -154,9 +163,30 @@ fn main() {
     ]),
     exercise: {
       prompt:
-        "Start with <code>let price = 12.5;</code> and <code>let quantity = 4;</code>. Print the total. Then shadow <code>price</code> with a 10 percent discount and print the total again.",
+        "Start with <code>let price = 12.5;</code> and <code>let quantity = 4;</code>. Print <code>total: 50.00</code>. Then shadow <code>price</code> with a 10 percent discount and print <code>discounted: 45.00</code>. Both numbers need two decimals.",
       hint:
-        "The second binding can be <code>let price = price * 0.9;</code>. Both lines print with <code>{:.2}</code> to keep two decimals.",
+        "The second binding can be <code>let price = price * 0.9;</code>. Cast the quantity with <code>quantity as f64</code> so the multiplication stays floating point, and print with <code>{:.2}</code>.",
+      starter: `fn main() {
+    let price = 12.5;
+    let quantity = 4;
+
+    // 1. Compute and print "total: 50.00".
+    // 2. Shadow price with a 10 percent discount.
+    // 3. Compute and print "discounted: 45.00".
+}`,
+      expected: `total: 50.00
+discounted: 45.00`,
+      solution: `fn main() {
+    let price = 12.5;
+    let quantity = 4;
+
+    let total = price * quantity as f64;
+    println!("total: {total:.2}");
+
+    let price = price * 0.9;
+    let discounted = price * quantity as f64;
+    println!("discounted: {discounted:.2}");
+}`,
     },
   },
 
@@ -247,9 +277,26 @@ ${callout("note", "Why so strict", `<p>Implicit narrowing is where a lot of prod
     ]),
     exercise: {
       prompt:
-        "Create a tuple holding a product name, a quantity, and a unit price. Print a single receipt line using the debug format for the tuple and a two decimal format for the computed total.",
+        "Create a tuple <code>(name, quantity, unit_price)</code> holding <code>\"coffee\"</code>, <code>3</code>, and <code>4.5</code>. Print the tuple with the debug format, then print <code>line total: 13.50</code> computed from the tuple's fields.",
       hint:
-        "The name is a <code>&amp;str</code> or <code>String</code>, quantity an integer, price an <code>f64</code>. Multiply quantity as <code>f64</code> by price.",
+        "Destructure with <code>let (name, quantity, price) = item;</code>. Multiply as <code>quantity as f64 * price</code> and print the total with <code>{:.2}</code>. If you do not use <code>name</code>, prefix it with an underscore so the compiler stays quiet.",
+      starter: `fn main() {
+    let item = ("coffee", 3, 4.5);
+
+    // 1. Print the whole tuple with {:?}.
+    // 2. Destructure it, then print "line total: 13.50".
+}`,
+      expected: `("coffee", 3, 4.5)
+line total: 13.50`,
+      solution: `fn main() {
+    let item = ("coffee", 3, 4.5);
+
+    println!("{:?}", item);
+
+    let (_name, quantity, price) = item;
+    let total = quantity as f64 * price;
+    println!("line total: {total:.2}");
+}`,
     },
   },
 
@@ -332,9 +379,47 @@ fn greet(name: &str) {
     ]),
     exercise: {
       prompt:
-        "Write a function <code>celsius_to_fahrenheit(c: f64) -&gt; f64</code> and print three conversions. Then write a second function that returns a tuple of the minimum and maximum of two numbers.",
+        "Write <code>celsius_to_fahrenheit(c: f64) -&gt; f64</code> and use it to print the conversions for 0, 100, and -40 in the form <code>0.0C = 32.0F</code>. Then write <code>min_max(a: i32, b: i32) -&gt; (i32, i32)</code> that returns the pair in order, and print <code>min 3, max 9</code> for the inputs 9 and 3.",
       hint:
-        "The formula is <code>c * 9.0 / 5.0 + 32.0</code>. For the second, return <code>(low, high)</code> and destructure it at the call site.",
+        "The formula is <code>c * 9.0 / 5.0 + 32.0</code>. For the second, return <code>(a, b)</code> or <code>(b, a)</code> depending on the comparison, and destructure the result at the call site with <code>let (low, high) = ...</code>.",
+      starter: `fn main() {
+    // 1. Print the three conversions with "{:.1}C = {:.1}F".
+    // 2. Call min_max(9, 3), destructure it, and print "min 3, max 9".
+}
+
+fn celsius_to_fahrenheit(c: f64) -> f64 {
+    // The body is one expression, and it has no semicolon.
+    0.0
+}
+
+fn min_max(a: i32, b: i32) -> (i32, i32) {
+    // Return the smaller value first.
+    (a, b)
+}`,
+      expected: `0.0C = 32.0F
+100.0C = 212.0F
+-40.0C = -40.0F
+min 3, max 9`,
+      solution: `fn main() {
+    for c in [0.0, 100.0, -40.0] {
+        println!("{c:.1}C = {:.1}F", celsius_to_fahrenheit(c));
+    }
+
+    let (low, high) = min_max(9, 3);
+    println!("min {low}, max {high}");
+}
+
+fn celsius_to_fahrenheit(c: f64) -> f64 {
+    c * 9.0 / 5.0 + 32.0
+}
+
+fn min_max(a: i32, b: i32) -> (i32, i32) {
+    if a < b {
+        (a, b)
+    } else {
+        (b, a)
+    }
+}`,
     },
   },
 
@@ -439,9 +524,39 @@ ${sample(`fn main() {
     ]),
     exercise: {
       prompt:
-        "Print the numbers 1 to 20, but print <code>fizz</code> for multiples of 3, <code>buzz</code> for multiples of 5, and <code>fizzbuzz</code> for multiples of both.",
+        "Print the numbers 1 to 15. For multiples of 3 print <code>fizz</code>, for multiples of 5 print <code>buzz</code>, and for multiples of both print <code>fizzbuzz</code>. Every other number prints as itself.",
       hint:
-        "Check divisibility with <code>n % 3 == 0</code>. Match on the pair of booleans if you want to see <code>match</code> early.",
+        "Check divisibility with <code>n % 3 == 0</code>. Match on the pair <code>(n % 3, n % 5)</code> with arms <code>(0, 0)</code>, <code>(0, _)</code>, <code>(_, 0)</code>, and <code>_</code> if you want to see <code>match</code> early.",
+      starter: `fn main() {
+    for n in 1..=15 {
+        // Decide what to print for n.
+    }
+}`,
+      expected: `1
+2
+fizz
+4
+buzz
+fizz
+7
+8
+fizz
+buzz
+11
+fizz
+13
+14
+fizzbuzz`,
+      solution: `fn main() {
+    for n in 1..=15 {
+        match (n % 3, n % 5) {
+            (0, 0) => println!("fizzbuzz"),
+            (0, _) => println!("fizz"),
+            (_, 0) => println!("buzz"),
+            _ => println!("{n}"),
+        }
+    }
+}`,
     },
   },
 
@@ -528,9 +643,35 @@ ${callout("note", "Scope ends, value drops", `<p>When a function ends, every val
     ]),
     exercise: {
       prompt:
-        "Write a function that takes a <code>String</code> and returns it with an exclamation mark added. Call it twice in a row, reassigning the result each time, and print the final value.",
+        "Write <code>fn shout(mut text: String) -&gt; String</code> that appends <code>!</code> and returns the string. Start with <code>String::from(\"hello\")</code>, call <code>shout</code> twice in a row, reassigning the result each time, and print the final value.",
       hint:
-        "The signature is <code>fn shout(mut text: String) -&gt; String</code>. Use <code>text.push('!'); text</code> as the last expression.",
+        "Use <code>text.push('!');</code> and then <code>text</code> as the last expression, with no semicolon. Reassign with <code>let message = shout(message);</code> after each call.",
+      starter: `fn main() {
+    let message = String::from("hello");
+
+    // Call shout twice, reassigning the result each time.
+
+    println!("{message}");
+}
+
+fn shout(mut text: String) -> String {
+    // Append one exclamation mark and return the string.
+    text
+}`,
+      expected: `hello!!`,
+      solution: `fn main() {
+    let message = String::from("hello");
+
+    let message = shout(message);
+    let message = shout(message);
+
+    println!("{message}");
+}
+
+fn shout(mut text: String) -> String {
+    text.push('!');
+    text
+}`,
     },
   },
 
@@ -622,12 +763,60 @@ ${sample(`fn main() {
 }`, { label: "src/main.rs", out: "work + shop\n[13, 21]" })}
 ${callout("note", "Careful with text indexes", `<p>String slices are byte offsets, and a multi-byte character will panic if you cut it in half. For text you did not write yourself, use <code>.chars()</code> instead of slicing.</p>`)}`,
       },
+      {
+        title: "When a reference comes back out",
+        html: `<p>A function that returns a reference has to tell the compiler which input it borrows from. Usually you never write that down, because elision fills it in: one input reference means the output borrows from that one.</p>
+${sample(`fn first_word(text: &str) -> &str {
+    text.split_whitespace().next().unwrap_or("")
+}
+
+fn main() {
+    println!("{}", first_word("parts on the bench"));
+}`, { label: "src/main.rs", out: "parts" })}
+<p>Two input references and one output is the case elision cannot guess. You name the lifetime, and the name is a promise that the returned reference lives no longer than the shortest of the inputs.</p>
+${sample(`fn longest<'a>(a: &'a str, b: &'a str) -> &'a str {
+    if a.len() >= b.len() {
+        a
+    } else {
+        b
+    }
+}
+
+fn main() {
+    println!("{}", longest("ferris", "crab"));
+}`, { label: "src/main.rs", out: "ferris" })}
+<p>Read <code>&#39;a</code> as "some region of the program". The signature does not create a region; it says both arguments and the result must fit inside the same one. Callers never write the lifetime, because the compiler picks the region from how you use the result.</p>
+${callout("note", "The error is the lesson", `<p>Drop the <code>&lt;&#39;a&gt;</code> and the compiler answers <code>E0106: missing lifetime specifier</code>, then suggests the exact signature you need. You will meet this error the first time you write a function like this, and the fix is always the same shape.</p>`)}`,
+      },
     ]),
     exercise: {
       prompt:
-        "Write <code>fn longest(a: &amp;str, b: &amp;str) -&gt; &amp;str</code> that returns whichever is longer. Call it with two literals and print the result.",
+        "Write <code>fn longest(a: &amp;str, b: &amp;str) -&gt; &amp;str</code> that returns whichever is longer, add the lifetime annotation the compiler asks for, and call it with <code>\"ferris\"</code> and <code>\"crab\"</code>. Then call it a second time with <code>\"claw\"</code> and <code>\"shell\"</code> and print that result too.",
       hint:
-        "Compare <code>a.len()</code> and <code>b.len()</code>. Both parameters and the return value need the same lifetime, which the compiler infers when there is a single output reference.",
+        "Compare <code>a.len()</code> and <code>b.len()</code>. Two input references and one output means you name the lifetime yourself: <code>fn longest&lt;'a&gt;(a: &amp;'a str, b: &amp;'a str) -&gt; &amp;'a str</code>. The two calls have different winners, so a function that always returns <code>a</code> fails the second line.",
+      starter: `fn main() {
+    // Print the result of longest("ferris", "crab").
+    // Print the result of longest("claw", "shell").
+}
+
+fn longest(a: &str, b: &str) -> &str {
+    // Return the longer one. This signature needs a lifetime.
+    a
+}`,
+      expected: `ferris
+shell`,
+      solution: `fn main() {
+    println!("{}", longest("ferris", "crab"));
+    println!("{}", longest("claw", "shell"));
+}
+
+fn longest<'a>(a: &'a str, b: &'a str) -> &'a str {
+    if a.len() >= b.len() {
+        a
+    } else {
+        b
+    }
+}`,
     },
   },
 
@@ -770,9 +959,53 @@ fn main() {
     ]),
     exercise: {
       prompt:
-        "Model a <code>Book</code> with a title, an author, and a page count. Add a method <code>reading_time</code> that returns minutes at 2 pages per minute, and a constructor <code>Book::new</code>.",
+        "Model a <code>Book</code> with <code>title</code>, <code>author</code>, and <code>pages</code>. Add <code>Book::new</code> and a method <code>reading_time</code> that returns minutes at 2 pages per minute. Create <code>The Hobbit</code> by <code>Tolkien</code> with 310 pages and print <code>The Hobbit by Tolkien: 155.0 minutes</code>.",
       hint:
-        "Divide as <code>f64</code>: <code>self.pages as f64 / 2.0</code>. Return <code>f64</code> and print with <code>{:.1}</code>.",
+        "Divide as <code>f64</code>: <code>self.pages as f64 / 2.0</code>. Return <code>f64</code> and print with <code>{:.1}</code>. Inside an <code>impl Book</code> block, the constructor takes <code>&amp;str</code> parameters and builds <code>String</code> fields with <code>to_string()</code>.",
+      starter: `struct Book {
+    title: String,
+    author: String,
+    pages: u32,
+}
+
+impl Book {
+    // fn new(...) -> Book
+    // fn reading_time(&self) -> f64
+}
+
+fn main() {
+    // Build the book and print the line.
+}`,
+      expected: `The Hobbit by Tolkien: 155.0 minutes`,
+      solution: `struct Book {
+    title: String,
+    author: String,
+    pages: u32,
+}
+
+impl Book {
+    fn new(title: &str, author: &str, pages: u32) -> Book {
+        Book {
+            title: title.to_string(),
+            author: author.to_string(),
+            pages,
+        }
+    }
+
+    fn reading_time(&self) -> f64 {
+        self.pages as f64 / 2.0
+    }
+}
+
+fn main() {
+    let book = Book::new("The Hobbit", "Tolkien", 310);
+    println!(
+        "{} by {}: {:.1} minutes",
+        book.title,
+        book.author,
+        book.reading_time()
+    );
+}`,
     },
   },
 
@@ -902,9 +1135,68 @@ ${sample(`fn main() {
     ]),
     exercise: {
       prompt:
-        "Define an enum <code>TrafficLight</code> with three variants and a method <code>next</code> that returns the following light. Print a full cycle using a mutable variable.",
+        "Define an enum <code>TrafficLight</code> with <code>Red</code>, <code>Green</code>, and <code>Yellow</code>. Give it a method <code>next</code> that returns the following light, and a method <code>name</code> that returns a lowercase <code>&amp;str</code>. Start at <code>Red</code> and print four lines by advancing a mutable variable each time.",
       hint:
-        "Return <code>Self</code> or <code>TrafficLight</code>. Match on <code>self</code>, and remember <code>self</code> is a reference inside the method, so match on <code>*self</code> or derive <code>Copy</code>.",
+        "Return <code>Self</code> or <code>TrafficLight</code> from <code>next</code>, and match on <code>self</code>. Because <code>self</code> is a reference inside the method, either match on <code>*self</code> or derive <code>Copy, Clone</code> so the value can be reused.",
+      starter: `#[derive(Copy, Clone)]
+enum TrafficLight {
+    Red,
+    Green,
+    Yellow,
+}
+
+impl TrafficLight {
+    fn next(self) -> TrafficLight {
+        // Red -> Green -> Yellow -> Red
+        self
+    }
+
+    fn name(self) -> &'static str {
+        // "red", "green", "yellow"
+        "red"
+    }
+}
+
+fn main() {
+    let mut light = TrafficLight::Red;
+    // Print the light four times, advancing after each line.
+}`,
+      expected: `red
+green
+yellow
+red`,
+      solution: `#[derive(Copy, Clone)]
+enum TrafficLight {
+    Red,
+    Green,
+    Yellow,
+}
+
+impl TrafficLight {
+    fn next(self) -> TrafficLight {
+        match self {
+            TrafficLight::Red => TrafficLight::Green,
+            TrafficLight::Green => TrafficLight::Yellow,
+            TrafficLight::Yellow => TrafficLight::Red,
+        }
+    }
+
+    fn name(self) -> &'static str {
+        match self {
+            TrafficLight::Red => "red",
+            TrafficLight::Green => "green",
+            TrafficLight::Yellow => "yellow",
+        }
+    }
+}
+
+fn main() {
+    let mut light = TrafficLight::Red;
+    for _ in 0..4 {
+        println!("{}", light.name());
+        light = light.next();
+    }
+}`,
     },
   },
 
@@ -999,9 +1291,30 @@ ${callout("note", "Capacity is not length", `<p>A vector tracks how many items i
     ]),
     exercise: {
       prompt:
-        "Given <code>vec![4, 8, 15, 16, 23, 42]</code>, build a new vector of the even numbers, print its sum, and print the original unchanged.",
+        "Given <code>vec![4, 8, 15, 16, 23, 42]</code>, build a new vector of the even numbers and print it with the debug format. Then print <code>sum: 70</code>, and finally print the original vector to show it is unchanged.",
       hint:
-        "Use <code>.iter().filter(|n| **n % 2 == 0).copied().collect::&lt;Vec&lt;i32&gt;&gt;()</code>. The original is untouched because <code>iter</code> borrows.",
+        "Use <code>.iter().filter(|n| **n % 2 == 0).copied().collect::<Vec&lt;i32&gt;&gt;()</code>. Sum the new vector with <code>.iter().sum::&lt;i32&gt;()</code>. The original is untouched because <code>iter</code> only borrows it.",
+      starter: `fn main() {
+    let numbers = vec![4, 8, 15, 16, 23, 42];
+
+    // 1. Collect the even numbers into a new vector and print it with {:?}.
+    // 2. Print "sum: 70".
+    // 3. Print the original vector again.
+}`,
+      expected: `[4, 8, 16, 42]
+sum: 70
+[4, 8, 15, 16, 23, 42]`,
+      solution: `fn main() {
+    let numbers = vec![4, 8, 15, 16, 23, 42];
+
+    let evens: Vec<i32> = numbers.iter().filter(|n| **n % 2 == 0).copied().collect();
+    println!("{:?}", evens);
+
+    let sum: i32 = evens.iter().sum();
+    println!("sum: {sum}");
+
+    println!("{:?}", numbers);
+}`,
     },
   },
 
@@ -1111,9 +1424,31 @@ ${callout("note", "Rule of thumb", `<p>Use <code>Result</code> when the caller c
     ]),
     exercise: {
       prompt:
-        "Write <code>fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt;</code> that returns an error when the slice is empty. Print the result of both an empty and a non-empty call.",
+        "Write <code>fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt;</code> that returns <code>Err(\"empty list\".to_string())</code> for an empty slice. Call it with <code>&amp;[2, 4, 9]</code> and with <code>&amp;[]</code>, and print both results with the debug format.",
       hint:
-        "Return <code>Err(String::from(\"empty list\"))</code> early. Otherwise sum as <code>f64</code> and divide by <code>len()</code>.",
+        "Return the error early with <code>if numbers.is_empty() { return Err(...); }</code>. Otherwise sum as <code>f64</code> with <code>numbers.iter().map(|n| *n as f64).sum::&lt;f64&gt;()</code> and divide by <code>numbers.len() as f64</code>.",
+      starter: `fn average(numbers: &[i32]) -> Result<f64, String> {
+    // Empty slice -> Err. Otherwise -> Ok(mean).
+    Ok(0.0)
+}
+
+fn main() {
+    // Print average(&[2, 4, 9]) and average(&[]) with {:?}.
+}`,
+      expected: `Ok(5.0)
+Err("empty list")`,
+      solution: `fn average(numbers: &[i32]) -> Result<f64, String> {
+    if numbers.is_empty() {
+        return Err("empty list".to_string());
+    }
+    let sum: f64 = numbers.iter().map(|n| *n as f64).sum();
+    Ok(sum / numbers.len() as f64)
+}
+
+fn main() {
+    println!("{:?}", average(&[2, 4, 9]));
+    println!("{:?}", average(&[]));
+}`,
     },
   },
 
@@ -1252,10 +1587,88 @@ ${callout("note", "The compiler is the teacher", `<p>Rust's error messages are w
       },
     ]),
     exercise: {
+      mode: "tests",
+      minTests: 6,
       prompt:
-        "Write a function with three tests: one normal case, one edge case (empty input), and one that would have caught a bug you actually hit earlier in this course.",
+        "Implement <code>fn word_count(text: &amp;str) -&gt; usize</code> so it returns the number of whitespace-separated words, then replace the three <code>todo!()</code> calls with real assertions: a normal sentence, empty input, and input with extra spaces. The checker runs your tests, and also runs three tests of its own against your function, so a passing suite has to mean a working function.",
       hint:
-        "An empty input test is usually <code>assert_eq!(f(\"\"), \"\")</code>. Run <code>cargo test</code> and watch a deliberately broken assertion fail once, so you know what failure looks like.",
+        "<code>text.split_whitespace().count()</code> does the counting in one line. An assertion is <code>assert_eq!(word_count(\"one two three\"), 3);</code>. Run the checker with the <code>todo!()</code> calls still in place once, so you see what a failing test looks like.",
+      starter: `fn word_count(text: &str) -> usize {
+    // Count the whitespace-separated words.
+    0
+}
+
+fn main() {
+    println!("{}", word_count("one two three"));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn counts_words() {
+        todo!("assert the count for \\"one two three\\"");
+    }
+
+    #[test]
+    fn counts_nothing_in_empty_text() {
+        todo!("assert the count for an empty string");
+    }
+
+    #[test]
+    fn ignores_extra_spaces() {
+        todo!("assert the count for \\"  two   words \\"");
+    }
+}`,
+      expected: "",
+      solution: `fn word_count(text: &str) -> usize {
+    text.split_whitespace().count()
+}
+
+fn main() {
+    println!("{}", word_count("one two three"));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn counts_words() {
+        assert_eq!(word_count("one two three"), 3);
+    }
+
+    #[test]
+    fn counts_nothing_in_empty_text() {
+        assert_eq!(word_count(""), 0);
+    }
+
+    #[test]
+    fn ignores_extra_spaces() {
+        assert_eq!(word_count("  two   words "), 2);
+    }
+}`,
+      append: `
+#[cfg(test)]
+mod hidden_check {
+    use super::*;
+
+    #[test]
+    fn hidden_counts_a_sentence() {
+        assert_eq!(word_count("the quick brown fox"), 4);
+    }
+
+    #[test]
+    fn hidden_counts_empty_input() {
+        assert_eq!(word_count(""), 0);
+    }
+
+    #[test]
+    fn hidden_ignores_extra_whitespace() {
+        assert_eq!(word_count("  one   two\\n\\nthree  "), 3);
+    }
+}`,
     },
   },
 ];

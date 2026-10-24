@@ -15,6 +15,7 @@
 <link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <script>(function () {
+  document.documentElement.classList.add("js");
   try {
     var stored = localStorage.getItem("rustlearn.theme");
     if (stored === "light" || stored === "dark") {
@@ -79,9 +80,10 @@
         <li><a href="#while-and-loop">while, and loop</a></li>
         <li><a href="#iterating-a-collection">Iterating a collection</a></li>
         <li><a href="#leaving-early">Leaving early</a></li>
+        <li><a href="#exercise">Exercise</a></li>
       </ol>
     </nav>
-    <div>
+    <div class="lesson-main">
       <div class="prose">
 <h2 id="if-is-an-expression"><span class="h2num" aria-hidden="true">01</span><span>if is an expression</span></h2>
 <p>The condition must be a real <code>bool</code>. There is no truthiness, so <code>if count</code> is an error where <code>if count &gt; 0</code> is not.</p>
@@ -265,17 +267,57 @@
   </div>
   
 </figure>
-        <aside class="callout">
-          <span class="callout__tag">Exercise</span>
-          <div>
-            <p>Print the numbers 1 to 20, but print <code>fizz</code> for multiples of 3, <code>buzz</code> for multiples of 5, and <code>fizzbuzz</code> for multiples of both.</p>
-            <details class="hint">
-              <summary>Show a hint</summary>
-              <p>Check divisibility with <code>n % 3 == 0</code>. Match on the pair of booleans if you want to see <code>match</code> early.</p>
-            </details>
-          </div>
-        </aside>
       </div>
+      <section class="exercise" id="exercise" data-exercise="conditionals-and-loops" aria-labelledby="exercise-title">
+        <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
+        <p class="exercise__prompt">Print the numbers 1 to 15. For multiples of 3 print <code>fizz</code>, for multiples of 5 print <code>buzz</code>, and for multiples of both print <code>fizzbuzz</code>. Every other number prints as itself.</p>
+        <details class="hint">
+          <summary>Show a hint</summary>
+          <p>Check divisibility with <code>n % 3 == 0</code>. Match on the pair <code>(n % 3, n % 5)</code> with arms <code>(0, 0)</code>, <code>(0, _)</code>, <code>(_, 0)</code>, and <code>_</code> if you want to see <code>match</code> early.</p>
+        </details>
+        <div class="exercise__panel">
+          <p class="exercise__panel-title">Expected output</p>
+          <pre class="exercise__expected">1
+2
+fizz
+4
+buzz
+fizz
+7
+8
+fizz
+buzz
+11
+fizz
+13
+14
+fizzbuzz</pre>
+        </div>
+        <div class="bench exercise__bench">
+          <div class="bench__bar">
+            <span class="bench__file">main.rs</span>
+            <span class="bench__meta" data-ex-state>not checked</span>
+          </div>
+          <label class="sr-only" for="ex-05-conditionals-and-loops">Your Rust code for this exercise</label>
+          <textarea class="bench__input exercise__input" id="ex-05-conditionals-and-loops" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
+    for n in 1..=15 {
+        // Decide what to print for n.
+    }
+}</textarea>
+          <div class="bench__actions">
+            <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
+            <button class="btn btn--quiet" type="button" data-ex-reset>Reset code</button>
+            <span class="bench__hint">Ctrl + Enter</span>
+          </div>
+          <div class="out exercise__out" data-ex-out hidden>
+            <div class="out__head"><span>your output</span><span class="out__state" data-state></span></div>
+            <pre class="out__body" data-out></pre>
+            <details class="out__more"><summary>Compiler messages</summary><pre data-err></pre></details>
+          </div>
+        </div>
+        <p class="exercise__verdict" data-ex-verdict role="status"></p>
+        <script type="application/json" data-ex-config>{"mode":"run","expected":"1\n2\nfizz\n4\nbuzz\nfizz\n7\n8\nfizz\nbuzz\n11\nfizz\n13\n14\nfizzbuzz","append":"","minTests":0}</script>
+      </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="conditionals-and-loops" aria-pressed="false">
           <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
@@ -285,7 +327,11 @@
       </footer>
       <nav class="lesson-foot__nav" aria-label="Lesson navigation">
         <a class="btn btn--ghost" href="lesson-04-functions.html">Previous: Functions and return values</a>
-        <a class="btn btn--primary" href="lesson-06-ownership.html">Next: Ownership: who holds the value</a>
+        <span class="next-gate" data-next-gate data-open="false">
+          <a class="btn btn--primary" href="lesson-06-ownership.html" data-next>Next: Ownership: who holds the value</a>
+          <button class="btn btn--ghost next-gate__locked" type="button" data-next-locked disabled><svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>Next: Ownership: who holds the value</button>
+          <span class="next-gate__note" data-next-note>Finish the exercise above to unlock this.</span>
+        </span>
       </nav>
     </div>
   </div>

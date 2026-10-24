@@ -1241,6 +1241,172 @@ samp {
   color: var(--amber);
 }
 
+/* Exercise: the editor and the checker */
+
+.exercise {
+  margin-top: 2.75rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--line-strong);
+}
+
+.exercise__title {
+  font-size: var(--step-2);
+  margin: 0 0 0.85rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: baseline;
+  scroll-margin-top: 90px;
+}
+
+.exercise__title .h2num {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--amber);
+}
+
+.exercise__prompt {
+  max-width: 68ch;
+  margin-bottom: 1rem;
+}
+
+.exercise__prompt code {
+  white-space: normal;
+}
+
+.exercise .hint {
+  margin-bottom: 1.1rem;
+}
+
+.exercise__panel {
+  max-width: 68ch;
+  margin-bottom: 1.1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.exercise__panel-title {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 0.45rem;
+}
+
+.exercise__panel-text {
+  font-size: 0.9375rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.exercise__expected {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--radius);
+  background: var(--bench);
+  color: #efe7dc;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.exercise__bench {
+  max-width: 68ch;
+}
+
+.exercise__bench .btn {
+  min-height: 44px;
+}
+
+.exercise__input {
+  min-height: 200px;
+}
+
+.exercise__out {
+  border-top: 1px solid #2a231e;
+}
+
+.exercise__verdict {
+  max-width: 68ch;
+  min-height: 1.4rem;
+  margin: 0.85rem 0 0;
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+
+.exercise__verdict[data-tone="ok"] {
+  color: var(--amber);
+}
+
+.exercise__verdict[data-tone="err"] {
+  color: var(--accent-text);
+}
+
+[data-ex-state][data-tone="ok"] {
+  color: #8fbf7f;
+}
+
+[data-ex-state][data-tone="err"] {
+  color: #e8784a;
+}
+
+.exercise[data-passed="true"] .exercise__bench {
+  border-color: color-mix(in srgb, var(--amber) 55%, #3d342d);
+}
+
+.exercise[data-passed="true"] .exercise__input {
+  caret-color: #8fbf7f;
+}
+
+/* The gate on the next lesson */
+
+.next-gate {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  max-width: 100%;
+}
+
+.next-gate [data-next-locked],
+.next-gate .next-gate__note {
+  display: none;
+}
+
+/* Without JavaScript the course still navigates; with it, the gate applies
+   from the first paint because the boot script marks the document. */
+html.js .next-gate[data-open="false"] [data-next] {
+  display: none;
+}
+
+html.js .next-gate[data-open="false"] [data-next-locked] {
+  display: inline-flex;
+}
+
+html.js .next-gate[data-open="false"] .next-gate__note {
+  display: block;
+}
+
+.next-gate__note {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--dim);
+}
+
+.lesson-main {
+  min-width: 0;
+}
+
 /* Lesson page */
 
 .lesson-head {
@@ -1294,11 +1460,14 @@ samp {
     grid-template-columns: 12rem minmax(0, 1fr);
     align-items: start;
   }
+
+  .toc {
+    position: sticky;
+    top: 88px;
+  }
 }
 
 .toc {
-  position: sticky;
-  top: 88px;
   border-top: 1px solid var(--line-strong);
   padding-top: 0.85rem;
 }
@@ -1750,4 +1919,11 @@ samp {
   .cmd .btn--quiet {
     width: 100%;
   }
+}
+
+.next-gate .btn {
+  max-width: 100%;
+  text-align: left;
+  line-height: 1.35;
+  padding-block: 0.7rem;
 }

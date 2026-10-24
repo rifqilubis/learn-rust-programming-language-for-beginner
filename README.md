@@ -7,6 +7,12 @@ Every code sample on the site runs against the public
 [Rust Playground](https://play.rust-lang.org), so the output you see is what the
 compiler actually produced.
 
+Each lesson ends with an exercise you type in the page. The checker runs your
+code the same way, compares the standard output with the output the lesson
+declares, and unlocks the next lesson only after it matches. The last lesson's
+exercise runs your own tests plus three hidden ones, so the suite has to mean
+something.
+
 ## Run it locally
 
 ```bash
@@ -44,17 +50,26 @@ Node 18 or newer. The only dependency is Node itself.
 
 ## Verify
 
-Two checks, both run against the files the build produces:
-
 ```bash
 node tools/verify-samples.mjs    # compile every sample, then run it and compare stdout
+node tools/verify-exercises.mjs  # every exercise's solution passes, its starter does not
 node tools/click-through.mjs     # click through the site in headless Chrome
 node tools/a11y-audit.mjs        # axe-core, WCAG 2.1/2.2 AA, both themes
 ```
 
 `verify-samples.mjs` needs a Rust toolchain and network access for the run half.
+`verify-exercises.mjs` needs only network access, and it is the check that keeps
+the exercises honest: it proves each reference solution passes its own checker,
+each starter fails it, and the hidden tests in lesson 12 reject a stub.
+
 The browser tools need Chrome and `puppeteer-core`; they are development
-dependencies, not part of the site.
+dependencies, not part of the site. Start `python3 server.py` first and pass the
+URL:
+
+```bash
+node tools/click-through.mjs http://127.0.0.1:8000
+node tools/a11y-audit.mjs http://127.0.0.1:8000
+```
 
 ## Layout
 
@@ -67,10 +82,10 @@ content/lessons.mjs            all lesson copy, the source of truth
 content/partials.mjs           sample, callout, and command markup
 build.mjs                      the generator
 assets/css/site.css            one stylesheet
-assets/js/site.js              theme, nav, progress, Playground runner
+assets/js/site.js              theme, nav, progress, runner, exercise checker
 assets/fonts/                  self-hosted Zilla Slab, Source Sans 3, Source Code Pro
 assets/vendor/                 Prism (MIT), for syntax colouring
-tools/                         verification scripts
+tools/                         verification scripts (samples, exercises, browser, a11y)
 server.py                      local dev server, standard library only
 DESIGN.md                      the direction this site was built against
 ```

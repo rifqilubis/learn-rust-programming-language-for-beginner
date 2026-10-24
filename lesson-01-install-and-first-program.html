@@ -15,6 +15,7 @@
 <link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <script>(function () {
+  document.documentElement.classList.add("js");
   try {
     var stored = localStorage.getItem("rustlearn.theme");
     if (stored === "light" || stored === "dark") {
@@ -81,9 +82,10 @@
         <li><a href="#run-it">Run it</a></li>
         <li><a href="#make-it-yours">Make it yours</a></li>
         <li><a href="#if-something-breaks">If something breaks</a></li>
+        <li><a href="#exercise">Exercise</a></li>
       </ol>
     </nav>
-    <div>
+    <div class="lesson-main">
       <div class="prose">
 <h2 id="what-you-are-actually-installing"><span class="h2num" aria-hidden="true">01</span><span>What you are actually installing</span></h2>
 <p>Rust ships as three pieces that work together. You install them once, through a tool called <code>rustup</code>, and then stop thinking about it.</p>
@@ -201,17 +203,42 @@
   <p class="code__note">The first line is missing its semicolon, so the compiler reaches the second <code>println!</code> while still expecting one. It reports <code>expected `;`, found `println`</code> and puts a caret at the exact spot.</p>
 </figure>
 <p>Notice the shape of the message: an error code, the file and line, a caret pointing at the exact character, and usually a suggested fix. Every error code has a full page of explanation, which you can read with <code>rustc --explain E0308</code> or any other code the compiler prints.</p>
-        <aside class="callout">
-          <span class="callout__tag">Exercise</span>
-          <div>
-            <p>Make the program print three lines: your name, the city you are in, and the year. Use a single <code>println!</code> with three slots.</p>
-            <details class="hint">
-              <summary>Show a hint</summary>
-              <p>One call, three <code>{}</code> slots, three values after the string, separated by commas.</p>
-            </details>
-          </div>
-        </aside>
       </div>
+      <section class="exercise" id="exercise" data-exercise="install-and-first-program" aria-labelledby="exercise-title">
+        <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">08</span><span>Exercise</span></h2>
+        <p class="exercise__prompt">Print exactly two lines: <code>Hello from Rust!</code> and <code>Learning Rust in 2026</code>. The second line must come from a single <code>println!</code> with a slot for <code>Rust</code> and a slot for <code>2026</code>.</p>
+        <details class="hint">
+          <summary>Show a hint</summary>
+          <p>One call for the first line. For the second, use two <code>{}</code> slots and pass <code>"Rust"</code> and <code>2026</code> after the format string, separated by commas.</p>
+        </details>
+        <div class="exercise__panel">
+          <p class="exercise__panel-title">Expected output</p>
+          <pre class="exercise__expected">Hello from Rust!
+Learning Rust in 2026</pre>
+        </div>
+        <div class="bench exercise__bench">
+          <div class="bench__bar">
+            <span class="bench__file">main.rs</span>
+            <span class="bench__meta" data-ex-state>not checked</span>
+          </div>
+          <label class="sr-only" for="ex-01-install-and-first-program">Your Rust code for this exercise</label>
+          <textarea class="bench__input exercise__input" id="ex-01-install-and-first-program" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
+    // Print the first line, then the second with two slots.
+}</textarea>
+          <div class="bench__actions">
+            <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
+            <button class="btn btn--quiet" type="button" data-ex-reset>Reset code</button>
+            <span class="bench__hint">Ctrl + Enter</span>
+          </div>
+          <div class="out exercise__out" data-ex-out hidden>
+            <div class="out__head"><span>your output</span><span class="out__state" data-state></span></div>
+            <pre class="out__body" data-out></pre>
+            <details class="out__more"><summary>Compiler messages</summary><pre data-err></pre></details>
+          </div>
+        </div>
+        <p class="exercise__verdict" data-ex-verdict role="status"></p>
+        <script type="application/json" data-ex-config>{"mode":"run","expected":"Hello from Rust!\nLearning Rust in 2026","append":"","minTests":0}</script>
+      </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="install-and-first-program" aria-pressed="false">
           <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
@@ -221,7 +248,11 @@
       </footer>
       <nav class="lesson-foot__nav" aria-label="Lesson navigation">
         <a class="btn btn--ghost" href="lessons.html">Back to the course map</a>
-        <a class="btn btn--primary" href="lesson-02-variables-and-mutability.html">Next: Variables, mutability, and shadowing</a>
+        <span class="next-gate" data-next-gate data-open="false">
+          <a class="btn btn--primary" href="lesson-02-variables-and-mutability.html" data-next>Next: Variables, mutability, and shadowing</a>
+          <button class="btn btn--ghost next-gate__locked" type="button" data-next-locked disabled><svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>Next: Variables, mutability, and shadowing</button>
+          <span class="next-gate__note" data-next-note>Finish the exercise above to unlock this.</span>
+        </span>
       </nav>
     </div>
   </div>

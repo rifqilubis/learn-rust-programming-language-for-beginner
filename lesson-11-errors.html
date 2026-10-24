@@ -15,6 +15,7 @@
 <link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <script>(function () {
+  document.documentElement.classList.add("js");
   try {
     var stored = localStorage.getItem("rustlearn.theme");
     if (stored === "light" || stored === "dark") {
@@ -79,9 +80,10 @@
         <li><a href="#the-question-mark">The question mark</a></li>
         <li><a href="#your-own-error-type">Your own error type</a></li>
         <li><a href="#panic-and-when-not-to">panic, and when not to</a></li>
+        <li><a href="#exercise">Exercise</a></li>
       </ol>
     </nav>
-    <div>
+    <div class="lesson-main">
       <div class="prose">
 <h2 id="result-is-an-enum"><span class="h2num" aria-hidden="true">01</span><span>Result is an enum</span></h2>
 <p><code>Result&lt;T, E&gt;</code> is <code>Ok(value)</code> on success and <code>Err(error)</code> on failure. Parsing text into a number is the cleanest example, because it fails all the time and never crashes.</p>
@@ -256,17 +258,47 @@ fn main() {
   <span class="callout__tag">Rule of thumb</span>
   <div><p>Use <code>Result</code> when the caller can recover. Use <code>Option</code> when the only information is presence or absence. Use <code>panic!</code> when continuing would leave the program in a state you cannot reason about.</p></div>
 </aside>
-        <aside class="callout">
-          <span class="callout__tag">Exercise</span>
-          <div>
-            <p>Write <code>fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt;</code> that returns an error when the slice is empty. Print the result of both an empty and a non-empty call.</p>
-            <details class="hint">
-              <summary>Show a hint</summary>
-              <p>Return <code>Err(String::from("empty list"))</code> early. Otherwise sum as <code>f64</code> and divide by <code>len()</code>.</p>
-            </details>
-          </div>
-        </aside>
       </div>
+      <section class="exercise" id="exercise" data-exercise="errors" aria-labelledby="exercise-title">
+        <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
+        <p class="exercise__prompt">Write <code>fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt;</code> that returns <code>Err("empty list".to_string())</code> for an empty slice. Call it with <code>&amp;[2, 4, 9]</code> and with <code>&amp;[]</code>, and print both results with the debug format.</p>
+        <details class="hint">
+          <summary>Show a hint</summary>
+          <p>Return the error early with <code>if numbers.is_empty() { return Err(...); }</code>. Otherwise sum as <code>f64</code> with <code>numbers.iter().map(|n| *n as f64).sum::&lt;f64&gt;()</code> and divide by <code>numbers.len() as f64</code>.</p>
+        </details>
+        <div class="exercise__panel">
+          <p class="exercise__panel-title">Expected output</p>
+          <pre class="exercise__expected">Ok(5.0)
+Err("empty list")</pre>
+        </div>
+        <div class="bench exercise__bench">
+          <div class="bench__bar">
+            <span class="bench__file">main.rs</span>
+            <span class="bench__meta" data-ex-state>not checked</span>
+          </div>
+          <label class="sr-only" for="ex-11-errors">Your Rust code for this exercise</label>
+          <textarea class="bench__input exercise__input" id="ex-11-errors" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt; {
+    // Empty slice -&gt; Err. Otherwise -&gt; Ok(mean).
+    Ok(0.0)
+}
+
+fn main() {
+    // Print average(&amp;[2, 4, 9]) and average(&amp;[]) with {:?}.
+}</textarea>
+          <div class="bench__actions">
+            <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
+            <button class="btn btn--quiet" type="button" data-ex-reset>Reset code</button>
+            <span class="bench__hint">Ctrl + Enter</span>
+          </div>
+          <div class="out exercise__out" data-ex-out hidden>
+            <div class="out__head"><span>your output</span><span class="out__state" data-state></span></div>
+            <pre class="out__body" data-out></pre>
+            <details class="out__more"><summary>Compiler messages</summary><pre data-err></pre></details>
+          </div>
+        </div>
+        <p class="exercise__verdict" data-ex-verdict role="status"></p>
+        <script type="application/json" data-ex-config>{"mode":"run","expected":"Ok(5.0)\nErr(\"empty list\")","append":"","minTests":0}</script>
+      </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="errors" aria-pressed="false">
           <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
@@ -276,7 +308,11 @@ fn main() {
       </footer>
       <nav class="lesson-foot__nav" aria-label="Lesson navigation">
         <a class="btn btn--ghost" href="lesson-10-collections.html">Previous: Vectors and strings</a>
-        <a class="btn btn--primary" href="lesson-12-modules-and-tests.html">Next: Modules, tests, and what next</a>
+        <span class="next-gate" data-next-gate data-open="false">
+          <a class="btn btn--primary" href="lesson-12-modules-and-tests.html" data-next>Next: Modules, tests, and what next</a>
+          <button class="btn btn--ghost next-gate__locked" type="button" data-next-locked disabled><svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>Next: Modules, tests, and what next</button>
+          <span class="next-gate__note" data-next-note>Finish the exercise above to unlock this.</span>
+        </span>
       </nav>
     </div>
   </div>

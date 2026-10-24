@@ -5,6 +5,8 @@ const PLAYGROUND_URL = "https://play.rust-lang.org/execute";
 const STORE = {
   theme: "rustlearn.theme",
   progress: "rustlearn.progress",
+  exercises: "rustlearn.exercises",
+  exerciseCode: "rustlearn.exercise-code",
 };
 
 const ICONS = {
@@ -171,7 +173,7 @@ function initCopy() {
 /* ----------------------------------------------------------- runner */
 
 function setOutput(root, { state, tone, stdout, stderr, showErrors }) {
-  const out = root.querySelector("[data-bench-out], .code__out, .pg__out");
+  const out = root.querySelector("[data-bench-out], .code__out, .pg__out, [data-ex-out]");
   if (!out) return;
 
   const stateEl = out.querySelector("[data-state]");
@@ -195,7 +197,7 @@ function setOutput(root, { state, tone, stdout, stderr, showErrors }) {
   }
 }
 
-async function runCode({ code, edition = "2024", mode = "debug" }) {
+async function runCode({ code, edition = "2024", mode = "debug", tests = false }) {
   const response = await fetch(PLAYGROUND_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -204,7 +206,7 @@ async function runCode({ code, edition = "2024", mode = "debug" }) {
       mode,
       edition,
       crateType: "bin",
-      tests: false,
+      tests: Boolean(tests),
       code,
       backtrace: false,
     }),
@@ -215,10 +217,14 @@ async function runCode({ code, edition = "2024", mode = "debug" }) {
   }
 
   const payload = await response.json();
+  /* The Playground answers 200 with { error } when the run itself fails,
+     for example when a program loops past the execution deadline. */
+  const error = typeof payload.error === "string" ? payload.error : "";
   return {
-    success: Boolean(payload.success),
+    success: Boolean(payload.success) && error === "",
     stdout: payload.stdout || "",
-    stderr: payload.stderr || "",
+    stderr: payload.stderr || error,
+    error,
   };
 }
 
@@ -241,8 +247,9 @@ function initCodeRunners() {
 
       try {
         const result = await runCode({ code: codeEl.textContent });
+        const label = result.error && /timed out|deadline/i.test(result.error) ? "timed out" : result.success ? "exited 0" : "compile error";
         setOutput(figure, {
-          state: result.success ? "exited 0" : "compile error",
+          state: label,
           tone: result.success ? "ok" : "err",
           stdout: result.stdout,
           stderr: result.stderr,
@@ -284,8 +291,9 @@ function wireTextBox({ source, run, reset, status, edition, mode, root, initial 
         edition: edition ? edition.value : "2024",
         mode: mode ? mode.value : "debug",
       });
+      const label = result.error && /timed out|deadline/i.test(result.error) ? "timed out" : result.success ? "exited 0" : "compile error";
       setOutput(root, {
-        state: result.success ? "exited 0" : "compile error",
+        state: label,
         tone: result.success ? "ok" : "err",
         stdout: result.stdout,
         stderr: result.stderr,
@@ -373,6 +381,337 @@ function initPlayground() {
   }
 }
 
+/* ---------------------------------------------------------- exercises */
+
+function readPassed() {
+  const stored = read(STORE.exercises, []);
+  return Array.isArray(stored) ? stored.filter((item) => typeof item === "string") : [];
+}
+
+function readDrafts() {
+  const stored = read(STORE.exerciseCode, {});
+  return stored && typeof stored === "object" && !Array.isArray(stored) ? stored : {};
+}
+
+function saveDraft(slug, code) {
+  const drafts = readDrafts();
+  drafts[slug] = code;
+  writeStore(STORE.exerciseCode, drafts);
+}
+
+function normalise(text) {
+  return String(text || "")
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map((line) => line.replace(/[ \t]+$/, ""))
+    .join("\n")
+    .trim();
+}
+
+/* Count the tests the reader actually wrote, and refuse a suite that is all
+   todo!() or #[ignore] markers. */
+function testReport(stdout) {
+  const text = String(stdout || "");
+  const passed = Number((text.match(/test result: ok\. (\d+) passed/) || [])[1] || 0);
+  const failed = Number((text.match(/(\d+) failed/) || [])[1] || 0);
+  return { passed, failed, ran: passed + failed };
+}
+
+function initExercise() {
+  const root = document.querySelector("[data-exercise]");
+  if (!root) return;
+
+  const slug = root.getAttribute("data-exercise");
+  const source = root.querySelector("[data-ex-source]");
+  const check = root.querySelector("[data-ex-check]");
+  const reset = root.querySelector("[data-ex-reset]");
+  const state = root.querySelector("[data-ex-state]");
+  const verdict = root.querySelector("[data-ex-verdict]");
+  const configEl = root.querySelector("[data-ex-config]");
+  if (!source || !check || !configEl) return;
+
+  let config = { mode: "run", expected: "", append: "", minTests: 0 };
+  try {
+    config = { ...config, ...JSON.parse(configEl.textContent) };
+  } catch (error) {
+    /* a broken config should not stop the page from working */
+  }
+
+  const starter = source.value;
+  const drafts = readDrafts();
+  if (typeof drafts[slug] === "string" && drafts[slug] !== "") source.value = drafts[slug];
+
+  let busy = false;
+  let escapeArmed = false;
+
+  const say = (message, tone) => {
+    if (!verdict) return;
+    verdict.textContent = message;
+    verdict.dataset.tone = tone || "";
+  };
+
+  const setState = (text, tone) => {
+    if (!state) return;
+    state.textContent = text;
+    state.dataset.tone = tone || "";
+  };
+
+  /* A pass is permanent for this lesson: editing after it unlocks does not
+     take it away, because the point is that you got there once. */
+  const unlock = () => {
+    root.dataset.passed = "true";
+    const passed = new Set(readPassed());
+    passed.add(slug);
+    writeStore(STORE.exercises, [...passed]);
+    document.dispatchEvent(new CustomEvent("exercise:result", { detail: { slug, passed: true } }));
+  };
+
+  root.dataset.passed = readPassed().includes(slug) ? "true" : "false";
+  document.dispatchEvent(new CustomEvent("exercise:result", { detail: { slug, passed: root.dataset.passed === "true" } }));
+
+  let draftTimer = 0;
+  source.addEventListener("input", () => {
+    window.clearTimeout(draftTimer);
+    draftTimer = window.setTimeout(() => saveDraft(slug, source.value), 400);
+    if (root.dataset.passed === "true") return;
+    say("", "");
+  });
+  source.addEventListener("blur", () => {
+    window.clearTimeout(draftTimer);
+    saveDraft(slug, source.value);
+  });
+  window.addEventListener("pagehide", () => saveDraft(slug, source.value));
+
+  check.addEventListener("click", async () => {
+    if (busy) return;
+    const code = source.value.trim();
+    if (code === "") {
+      say("The editor is empty. Write something first.", "err");
+      return;
+    }
+
+    busy = true;
+    check.disabled = true;
+    const idle = check.innerHTML;
+    check.textContent = "Checking";
+    setState("compiling", "");
+    say("", "");
+    setOutput(root, { state: "compiling", tone: "", stdout: "", stderr: "", showErrors: false });
+
+    const tests = config.mode === "tests";
+    const full = tests ? `${code}\n${config.append}` : code;
+
+    try {
+      const result = await runCode({ code: full, tests });
+      setOutput(root, {
+        state: result.success ? "exited 0" : tests ? "tests failed" : "did not pass",
+        tone: result.success ? "ok" : "err",
+        stdout: result.stdout,
+        stderr: result.stderr,
+        showErrors: true,
+      });
+
+      if (!result.success) {
+        if (result.error && /timed out|deadline/i.test(result.error)) {
+          setState("timed out", "err");
+          say("The program ran past the Playground's time limit, so it was stopped. Look for a loop that never ends.", "err");
+          return;
+        }
+        if (tests) {
+          const report = testReport(result.stdout);
+          const compiled = /error\[E\d{4}\]|error: could not compile|error: expected|error: cannot/.test(result.stderr);
+          if (compiled && report.ran === 0) {
+            setState("compile error", "err");
+            say("The code did not compile. Read the compiler messages below the output, fix the first error, and check again.", "err");
+          } else {
+            setState(`${report.failed || 1} failed`, "err");
+            say(
+              `At least one test failed${report.passed ? `, ${report.passed} passed` : ""}. The output panel names the assertion that broke.`,
+              "err",
+            );
+          }
+        } else if (String(result.stderr).includes("panicked at")) {
+          setState("panicked", "err");
+          say("The program compiled but panicked while running. The panic message is under the output; fix what it names and check again.", "err");
+        } else {
+          setState("compile error", "err");
+          say("The code did not compile. Open the compiler messages, fix the first error, and check again.", "err");
+        }
+        return;
+      }
+
+      if (tests) {
+        const report = testReport(result.stdout);
+        if (report.passed < config.minTests) {
+          setState(`${report.passed} of ${config.minTests} tests`, "err");
+          say(
+            `Only ${report.passed} of the ${config.minTests} required tests pass. Replace every todo!() with a real assertion and delete any #[ignore] attributes.`,
+            "err",
+          );
+          return;
+        }
+        if (report.failed > 0) {
+          setState(`${report.failed} failed`, "err");
+          say("A test failed even though the program exited cleanly. Read the assertion output and try again.", "err");
+          return;
+        }
+        setState(`${report.passed} tests passed`, "ok");
+        say(`All ${report.passed} tests pass, including the three this page added. Lesson unlocked.`, "ok");
+        unlock();
+        return;
+      }
+
+      const actual = normalise(result.stdout);
+      const expected = normalise(config.expected);
+      if (actual === expected) {
+        setState("matches", "ok");
+        say("That is the expected output exactly. Lesson unlocked.", "ok");
+        unlock();
+      } else {
+        setState("output differs", "err");
+        say(difference(result.stdout, config.expected), "err");
+      }
+    } catch (error) {
+      setState("request failed", "err");
+      setOutput(root, {
+        state: "request failed",
+        tone: "err",
+        stdout: `Could not reach the Rust Playground (${error.message}). Your code is saved in this browser; try again in a moment.`,
+        stderr: "",
+        showErrors: false,
+      });
+      say("The checker could not run. This is a network problem, not a mistake in your code.", "err");
+    } finally {
+      busy = false;
+      check.disabled = false;
+      check.innerHTML = idle;
+    }
+  });
+
+  reset.addEventListener("click", () => {
+    source.value = starter;
+    saveDraft(slug, starter);
+    const out = root.querySelector("[data-ex-out]");
+    if (out) {
+      out.hidden = true;
+      out.querySelector("[data-out]").textContent = "";
+      out.querySelector("[data-err]").textContent = "";
+      const outState = out.querySelector("[data-state]");
+      outState.textContent = "";
+      outState.className = "out__state";
+      const more = out.querySelector(".out__more");
+      if (more) {
+        more.open = false;
+        more.hidden = true;
+      }
+    }
+    setState("not checked", "");
+    say("", "");
+    source.focus();
+  });
+
+  source.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      check.click();
+      return;
+    }
+    if (event.key === "Escape") {
+      escapeArmed = true;
+      return;
+    }
+    if (event.key === "Tab") {
+      /* Tab indents, and Escape then Tab leaves the editor, so the keyboard
+         is never trapped inside a textarea. */
+      if (escapeArmed) {
+        escapeArmed = false;
+        return;
+      }
+      event.preventDefault();
+      source.setRangeText("    ", source.selectionStart, source.selectionEnd, "end");
+      saveDraft(slug, source.value);
+      return;
+    }
+    escapeArmed = false;
+  });
+}
+
+/* Explain a mismatch in terms a beginner can act on. */
+function difference(actualRaw, expectedRaw) {
+  const actual = normalise(actualRaw);
+  const expected = normalise(expectedRaw);
+  const actualLines = actual === "" ? [] : actual.split("\n");
+  const expectedLines = expected === "" ? [] : expected.split("\n");
+
+  if (actual === "") return "Your program printed nothing. The checker compares standard output, so add the println! calls the exercise asks for.";
+
+  if (actualLines.length !== expectedLines.length) {
+    return `Not yet. The page expects ${expectedLines.length} line${expectedLines.length === 1 ? "" : "s"} and your program printed ${actualLines.length}. Compare the two panels above, line by line.`;
+  }
+
+  const at = actualLines.findIndex((line, index) => line !== expectedLines[index]);
+  if (at === -1) return "Not yet. The lines match but something else differs. Reset the code and start from the exercise text.";
+  return `Not yet. Line ${at + 1} should be "${expectedLines[at]}" and yours is "${actualLines[at]}".`;
+}
+
+/* The completion button and the next link stay locked until the exercise
+   passes. Both listen for the same event, so the gate lives in one place. */
+function initExerciseGate() {
+  const button = document.querySelector("[data-complete]");
+  const next = document.querySelector("[data-next]");
+  const locked = document.querySelector("[data-next-locked]");
+  const exercise = document.querySelector("[data-exercise]");
+  const slug = button ? button.getAttribute("data-complete") : null;
+  if (!slug) return;
+
+  const passed = () => {
+    if (exercise) return exercise.dataset.passed === "true";
+    return readPassed().includes(slug);
+  };
+
+  const sync = () => {
+    const open = passed();
+    const done = new Set(readProgress()).has(slug);
+
+    if (button) {
+      button.disabled = !open && !done;
+      button.setAttribute("aria-pressed", done ? "true" : "false");
+      const label = button.querySelector("[data-complete-label]");
+      if (label) {
+        label.textContent = done
+          ? "Completed. Click to undo"
+          : open
+            ? "Mark lesson complete"
+            : "Finish the exercise to unlock";
+      }
+      const state = document.querySelector("[data-complete-state]");
+      if (state) state.hidden = !done;
+      button.style.borderColor = done ? "var(--amber)" : "";
+      button.style.color = done ? "var(--amber)" : "";
+    }
+
+    if (next && locked) {
+      const gateWrap = document.querySelector("[data-next-gate]");
+      if (gateWrap) gateWrap.dataset.open = open ? "true" : "false";
+    }
+  };
+
+  document.addEventListener("exercise:result", sync);
+  sync();
+
+  if (button) {
+    button.addEventListener("click", () => {
+      if (button.disabled) return;
+      const done = new Set(readProgress());
+      if (done.has(slug)) done.delete(slug);
+      else done.add(slug);
+      writeStore(STORE.progress, [...done]);
+      paintProgress();
+      sync();
+    });
+  }
+}
+
 /* ---------------------------------------------------------- progress */
 
 function readProgress() {
@@ -382,16 +721,19 @@ function readProgress() {
 
 function paintProgress() {
   const done = new Set(readProgress());
+  const passed = new Set(readPassed());
   const total = Number(document.body.dataset.lessonTotal || 0);
 
   document.querySelectorAll("[data-lesson-row]").forEach((row) => {
     const slug = row.getAttribute("data-lesson-row");
     const isDone = done.has(slug);
+    const isPassed = passed.has(slug);
     row.dataset.done = isDone ? "true" : "false";
+    row.dataset.passed = isPassed ? "true" : "false";
     const stateEl = row.querySelector("[data-state-for]");
     if (stateEl) {
-      stateEl.textContent = isDone ? "Completed" : "Not started";
-      stateEl.style.color = isDone ? "var(--amber)" : "";
+      stateEl.textContent = isDone ? "Completed" : isPassed ? "Exercise passed" : "Not started";
+      stateEl.style.color = isDone ? "var(--amber)" : isPassed ? "var(--muted)" : "";
     }
   });
 
@@ -405,34 +747,6 @@ function paintProgress() {
   }
 }
 
-function initComplete() {
-  const button = document.querySelector("[data-complete]");
-  if (!button) return;
-  const slug = button.getAttribute("data-complete");
-  const label = button.querySelector("[data-complete-label]");
-  const state = document.querySelector("[data-complete-state]");
-
-  const sync = () => {
-    const done = new Set(readProgress());
-    const isDone = done.has(slug);
-    button.setAttribute("aria-pressed", isDone ? "true" : "false");
-    if (label) label.textContent = isDone ? "Completed. Click to undo" : "Mark lesson complete";
-    if (state) state.hidden = !isDone;
-    button.style.borderColor = isDone ? "var(--amber)" : "";
-    button.style.color = isDone ? "var(--amber)" : "";
-  };
-
-  button.addEventListener("click", () => {
-    const done = new Set(readProgress());
-    if (done.has(slug)) done.delete(slug);
-    else done.add(slug);
-    writeStore(STORE.progress, [...done]);
-    sync();
-  });
-
-  sync();
-}
-
 /* ------------------------------------------------------------- boot */
 
 function boot() {
@@ -442,7 +756,8 @@ function boot() {
   initCodeRunners();
   initHeroBench();
   initPlayground();
-  initComplete();
+  initExercise();
+  initExerciseGate();
   paintProgress();
 }
 

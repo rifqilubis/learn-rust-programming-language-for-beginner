@@ -15,6 +15,7 @@
 <link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <script>(function () {
+  document.documentElement.classList.add("js");
   try {
     var stored = localStorage.getItem("rustlearn.theme");
     if (stored === "light" || stored === "dark") {
@@ -105,7 +106,7 @@
       <span class="section__num">01</span>
       <div>
         <h2 class="section__title">The course, in order</h2>
-        <p class="section__lede">Each lesson is one idea, a few runnable samples, and one exercise. Read them in sequence the first time; the ownership lessons assume the ones before.</p>
+        <p class="section__lede">Each lesson is one idea, a few runnable samples, and one exercise you write in the page. The checker compares your output with the lesson's, and the next lesson unlocks when it matches.</p>
       </div>
     </div>
     <div class="ledger">
@@ -269,7 +270,7 @@
         <ul class="setup__list">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span><strong>Type the samples yourself.</strong> Copying skips the part where your hands learn the syntax.</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span><strong>Break them on purpose.</strong> Delete a semicolon, move a value twice, and read what the compiler says.</span></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span><strong>Do the exercise before the next lesson.</strong> It is the only part that proves you can write it.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span><strong>Pass the exercise before the next lesson.</strong> It is the only part that proves you can write it, so it is what unlocks the rest of the course.</span></li>
         </ul>
       </div>
       <div>

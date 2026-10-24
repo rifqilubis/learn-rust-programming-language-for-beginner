@@ -15,6 +15,7 @@
 <link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <script>(function () {
+  document.documentElement.classList.add("js");
   try {
     var stored = localStorage.getItem("rustlearn.theme");
     if (stored === "light" || stored === "dark") {
@@ -80,9 +81,10 @@
         <li><a href="#booleans">Booleans</a></li>
         <li><a href="#tuples-group-values-of-different-types">Tuples group values of different types</a></li>
         <li><a href="#no-silent-conversions">No silent conversions</a></li>
+        <li><a href="#exercise">Exercise</a></li>
       </ol>
     </nav>
-    <div>
+    <div class="lesson-main">
       <div class="prose">
 <h2 id="whole-numbers"><span class="h2num" aria-hidden="true">01</span><span>Whole numbers</span></h2>
 <p>Integers come in signed (<code>i</code>) and unsigned (<code>u</code>) form, in widths of 8, 16, 32, 64, and 128 bits, plus <code>isize</code> and <code>usize</code> which match the machine's pointer size.</p>
@@ -253,17 +255,45 @@
   <span class="callout__tag">Why so strict</span>
   <div><p>Implicit narrowing is where a lot of production bugs come from. Rust makes the conversion visible so you cannot do it by accident, and the <code>as</code> keyword is your signal to check the range.</p></div>
 </aside>
-        <aside class="callout">
-          <span class="callout__tag">Exercise</span>
-          <div>
-            <p>Create a tuple holding a product name, a quantity, and a unit price. Print a single receipt line using the debug format for the tuple and a two decimal format for the computed total.</p>
-            <details class="hint">
-              <summary>Show a hint</summary>
-              <p>The name is a <code>&amp;str</code> or <code>String</code>, quantity an integer, price an <code>f64</code>. Multiply quantity as <code>f64</code> by price.</p>
-            </details>
-          </div>
-        </aside>
       </div>
+      <section class="exercise" id="exercise" data-exercise="types" aria-labelledby="exercise-title">
+        <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">07</span><span>Exercise</span></h2>
+        <p class="exercise__prompt">Create a tuple <code>(name, quantity, unit_price)</code> holding <code>"coffee"</code>, <code>3</code>, and <code>4.5</code>. Print the tuple with the debug format, then print <code>line total: 13.50</code> computed from the tuple's fields.</p>
+        <details class="hint">
+          <summary>Show a hint</summary>
+          <p>Destructure with <code>let (name, quantity, price) = item;</code>. Multiply as <code>quantity as f64 * price</code> and print the total with <code>{:.2}</code>. If you do not use <code>name</code>, prefix it with an underscore so the compiler stays quiet.</p>
+        </details>
+        <div class="exercise__panel">
+          <p class="exercise__panel-title">Expected output</p>
+          <pre class="exercise__expected">("coffee", 3, 4.5)
+line total: 13.50</pre>
+        </div>
+        <div class="bench exercise__bench">
+          <div class="bench__bar">
+            <span class="bench__file">main.rs</span>
+            <span class="bench__meta" data-ex-state>not checked</span>
+          </div>
+          <label class="sr-only" for="ex-03-types">Your Rust code for this exercise</label>
+          <textarea class="bench__input exercise__input" id="ex-03-types" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
+    let item = ("coffee", 3, 4.5);
+
+    // 1. Print the whole tuple with {:?}.
+    // 2. Destructure it, then print "line total: 13.50".
+}</textarea>
+          <div class="bench__actions">
+            <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
+            <button class="btn btn--quiet" type="button" data-ex-reset>Reset code</button>
+            <span class="bench__hint">Ctrl + Enter</span>
+          </div>
+          <div class="out exercise__out" data-ex-out hidden>
+            <div class="out__head"><span>your output</span><span class="out__state" data-state></span></div>
+            <pre class="out__body" data-out></pre>
+            <details class="out__more"><summary>Compiler messages</summary><pre data-err></pre></details>
+          </div>
+        </div>
+        <p class="exercise__verdict" data-ex-verdict role="status"></p>
+        <script type="application/json" data-ex-config>{"mode":"run","expected":"(\"coffee\", 3, 4.5)\nline total: 13.50","append":"","minTests":0}</script>
+      </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="types" aria-pressed="false">
           <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
@@ -273,7 +303,11 @@
       </footer>
       <nav class="lesson-foot__nav" aria-label="Lesson navigation">
         <a class="btn btn--ghost" href="lesson-02-variables-and-mutability.html">Previous: Variables, mutability, and shadowing</a>
-        <a class="btn btn--primary" href="lesson-04-functions.html">Next: Functions and return values</a>
+        <span class="next-gate" data-next-gate data-open="false">
+          <a class="btn btn--primary" href="lesson-04-functions.html" data-next>Next: Functions and return values</a>
+          <button class="btn btn--ghost next-gate__locked" type="button" data-next-locked disabled><svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>Next: Functions and return values</button>
+          <span class="next-gate__note" data-next-note>Finish the exercise above to unlock this.</span>
+        </span>
       </nav>
     </div>
   </div>

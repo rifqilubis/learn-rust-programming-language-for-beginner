@@ -15,6 +15,7 @@
 <link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <script>(function () {
+  document.documentElement.classList.add("js");
   try {
     var stored = localStorage.getItem("rustlearn.theme");
     if (stored === "light" || stored === "dark") {
@@ -80,9 +81,10 @@
         <li><a href="#assert-assert-eq-assert-ne">assert, assert_eq, assert_ne</a></li>
         <li><a href="#what-to-build-next">What to build next</a></li>
         <li><a href="#where-the-language-reference-lives">Where the language reference lives</a></li>
+        <li><a href="#exercise">Exercise</a></li>
       </ol>
     </nav>
-    <div>
+    <div class="lesson-main">
       <div class="prose">
 <h2 id="modules-are-namespaces"><span class="h2num" aria-hidden="true">01</span><span>Modules are namespaces</span></h2>
 <p><code>mod</code> groups related items and controls what is visible outside. Everything is private by default, and <code>pub</code> opens one item at a time.</p>
@@ -251,17 +253,66 @@ fn main() {
   <span class="callout__tag">The compiler is the teacher</span>
   <div><p>Rust's error messages are written by people who expect you to read them. When one does not make sense, <code>rustc --explain</code> plus the error code gives you a full page on that exact mistake.</p></div>
 </aside>
-        <aside class="callout">
-          <span class="callout__tag">Exercise</span>
-          <div>
-            <p>Write a function with three tests: one normal case, one edge case (empty input), and one that would have caught a bug you actually hit earlier in this course.</p>
-            <details class="hint">
-              <summary>Show a hint</summary>
-              <p>An empty input test is usually <code>assert_eq!(f(""), "")</code>. Run <code>cargo test</code> and watch a deliberately broken assertion fail once, so you know what failure looks like.</p>
-            </details>
-          </div>
-        </aside>
       </div>
+      <section class="exercise" id="exercise" data-exercise="modules-and-tests" aria-labelledby="exercise-title">
+        <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">07</span><span>Exercise</span></h2>
+        <p class="exercise__prompt">Implement <code>fn word_count(text: &amp;str) -&gt; usize</code> so it returns the number of whitespace-separated words, then replace the three <code>todo!()</code> calls with real assertions: a normal sentence, empty input, and input with extra spaces. The checker runs your tests, and also runs three tests of its own against your function, so a passing suite has to mean a working function.</p>
+        <details class="hint">
+          <summary>Show a hint</summary>
+          <p><code>text.split_whitespace().count()</code> does the counting in one line. An assertion is <code>assert_eq!(word_count("one two three"), 3);</code>. Run the checker with the <code>todo!()</code> calls still in place once, so you see what a failing test looks like.</p>
+        </details>
+        <div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">What the checker runs</p>
+          <p class="exercise__panel-text">Your three tests first, then three more that this page appends: a normal sentence, empty input, and messy whitespace. All six have to pass before the lesson unlocks.</p>
+        </div>
+        <div class="bench exercise__bench">
+          <div class="bench__bar">
+            <span class="bench__file">main.rs</span>
+            <span class="bench__meta" data-ex-state>not checked</span>
+          </div>
+          <label class="sr-only" for="ex-12-modules-and-tests">Your Rust code for this exercise</label>
+          <textarea class="bench__input exercise__input" id="ex-12-modules-and-tests" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn word_count(text: &amp;str) -&gt; usize {
+    // Count the whitespace-separated words.
+    0
+}
+
+fn main() {
+    println!("{}", word_count("one two three"));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn counts_words() {
+        todo!("assert the count for \"one two three\"");
+    }
+
+    #[test]
+    fn counts_nothing_in_empty_text() {
+        todo!("assert the count for an empty string");
+    }
+
+    #[test]
+    fn ignores_extra_spaces() {
+        todo!("assert the count for \"  two   words \"");
+    }
+}</textarea>
+          <div class="bench__actions">
+            <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
+            <button class="btn btn--quiet" type="button" data-ex-reset>Reset code</button>
+            <span class="bench__hint">Ctrl + Enter</span>
+          </div>
+          <div class="out exercise__out" data-ex-out hidden>
+            <div class="out__head"><span>your output</span><span class="out__state" data-state></span></div>
+            <pre class="out__body" data-out></pre>
+            <details class="out__more"><summary>Compiler messages</summary><pre data-err></pre></details>
+          </div>
+        </div>
+        <p class="exercise__verdict" data-ex-verdict role="status"></p>
+        <script type="application/json" data-ex-config>{"mode":"tests","expected":"","append":"\n#[cfg(test)]\nmod hidden_check {\n    use super::*;\n\n    #[test]\n    fn hidden_counts_a_sentence() {\n        assert_eq!(word_count(\"the quick brown fox\"), 4);\n    }\n\n    #[test]\n    fn hidden_counts_empty_input() {\n        assert_eq!(word_count(\"\"), 0);\n    }\n\n    #[test]\n    fn hidden_ignores_extra_whitespace() {\n        assert_eq!(word_count(\"  one   two\\n\\nthree  \"), 3);\n    }\n}","minTests":6}</script>
+      </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="modules-and-tests" aria-pressed="false">
           <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
@@ -271,7 +322,11 @@ fn main() {
       </footer>
       <nav class="lesson-foot__nav" aria-label="Lesson navigation">
         <a class="btn btn--ghost" href="lesson-11-errors.html">Previous: Recoverable errors with Result</a>
-        <a class="btn btn--primary" href="playground.html">Open the playground</a>
+        <span class="next-gate" data-next-gate data-open="false">
+          <a class="btn btn--primary" href="playground.html" data-next>Open the playground</a>
+          <button class="btn btn--ghost next-gate__locked" type="button" data-next-locked disabled><svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>Open the playground</button>
+          <span class="next-gate__note" data-next-note>Finish the exercise above to unlock this.</span>
+        </span>
       </nav>
     </div>
   </div>

@@ -76,3 +76,10 @@ Every control does something real: lessons navigate, code runs against the publi
 Rust Playground API, progress persists in `localStorage`, the theme toggle works in
 both directions, and the mobile menu opens and closes with pointer, Enter, and
 Escape.
+
+The exercise at the end of each lesson is a real gate, not a suggestion. It is the
+same bench as everywhere else (dark, mono, oxide action), with the expected output
+printed above it so the target is never a guess. A pass compares standard output
+line for line, or runs the reader's tests plus three appended ones in the last
+lesson. The next lesson stays locked until it passes; the pass and the draft code
+both persist in `localStorage`, so a reload does not cost the reader their work.

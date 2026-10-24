@@ -15,6 +15,7 @@
 <link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <script>(function () {
+  document.documentElement.classList.add("js");
   try {
     var stored = localStorage.getItem("rustlearn.theme");
     if (stored === "light" || stored === "dark") {
@@ -79,9 +80,10 @@
         <li><a href="#shadowing-is-a-different-tool">Shadowing is a different tool</a></li>
         <li><a href="#constants">Constants</a></li>
         <li><a href="#naming">Naming</a></li>
+        <li><a href="#exercise">Exercise</a></li>
       </ol>
     </nav>
-    <div>
+    <div class="lesson-main">
       <div class="prose">
 <h2 id="a-binding-is-immutable-by-default"><span class="h2num" aria-hidden="true">01</span><span>A binding is immutable by default</span></h2>
 <p><code>let</code> creates a binding. Unless you say otherwise, the name cannot be reassigned, and the compiler refuses the second assignment.</p>
@@ -219,17 +221,47 @@ fn main() {
 <h2 id="naming"><span class="h2num" aria-hidden="true">05</span><span>Naming</span></h2>
 <p>Rust style is not a matter of taste here, the compiler will warn you. Bindings and functions use <code>snake_case</code>, types and enums use <code>UpperCamelCase</code>, and constants use <code>SCREAMING_SNAKE_CASE</code>.</p>
 <p>Names are read far more often than they are written, so prefer <code>remaining_attempts</code> over <code>n</code> once the meaning is not obvious from the line above.</p>
-        <aside class="callout">
-          <span class="callout__tag">Exercise</span>
-          <div>
-            <p>Start with <code>let price = 12.5;</code> and <code>let quantity = 4;</code>. Print the total. Then shadow <code>price</code> with a 10 percent discount and print the total again.</p>
-            <details class="hint">
-              <summary>Show a hint</summary>
-              <p>The second binding can be <code>let price = price * 0.9;</code>. Both lines print with <code>{:.2}</code> to keep two decimals.</p>
-            </details>
-          </div>
-        </aside>
       </div>
+      <section class="exercise" id="exercise" data-exercise="variables-and-mutability" aria-labelledby="exercise-title">
+        <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
+        <p class="exercise__prompt">Start with <code>let price = 12.5;</code> and <code>let quantity = 4;</code>. Print <code>total: 50.00</code>. Then shadow <code>price</code> with a 10 percent discount and print <code>discounted: 45.00</code>. Both numbers need two decimals.</p>
+        <details class="hint">
+          <summary>Show a hint</summary>
+          <p>The second binding can be <code>let price = price * 0.9;</code>. Cast the quantity with <code>quantity as f64</code> so the multiplication stays floating point, and print with <code>{:.2}</code>.</p>
+        </details>
+        <div class="exercise__panel">
+          <p class="exercise__panel-title">Expected output</p>
+          <pre class="exercise__expected">total: 50.00
+discounted: 45.00</pre>
+        </div>
+        <div class="bench exercise__bench">
+          <div class="bench__bar">
+            <span class="bench__file">main.rs</span>
+            <span class="bench__meta" data-ex-state>not checked</span>
+          </div>
+          <label class="sr-only" for="ex-02-variables-and-mutability">Your Rust code for this exercise</label>
+          <textarea class="bench__input exercise__input" id="ex-02-variables-and-mutability" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
+    let price = 12.5;
+    let quantity = 4;
+
+    // 1. Compute and print "total: 50.00".
+    // 2. Shadow price with a 10 percent discount.
+    // 3. Compute and print "discounted: 45.00".
+}</textarea>
+          <div class="bench__actions">
+            <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
+            <button class="btn btn--quiet" type="button" data-ex-reset>Reset code</button>
+            <span class="bench__hint">Ctrl + Enter</span>
+          </div>
+          <div class="out exercise__out" data-ex-out hidden>
+            <div class="out__head"><span>your output</span><span class="out__state" data-state></span></div>
+            <pre class="out__body" data-out></pre>
+            <details class="out__more"><summary>Compiler messages</summary><pre data-err></pre></details>
+          </div>
+        </div>
+        <p class="exercise__verdict" data-ex-verdict role="status"></p>
+        <script type="application/json" data-ex-config>{"mode":"run","expected":"total: 50.00\ndiscounted: 45.00","append":"","minTests":0}</script>
+      </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="variables-and-mutability" aria-pressed="false">
           <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
@@ -239,7 +271,11 @@ fn main() {
       </footer>
       <nav class="lesson-foot__nav" aria-label="Lesson navigation">
         <a class="btn btn--ghost" href="lesson-01-install-and-first-program.html">Previous: Install Rust and run a program</a>
-        <a class="btn btn--primary" href="lesson-03-types.html">Next: Numbers, text, and tuples</a>
+        <span class="next-gate" data-next-gate data-open="false">
+          <a class="btn btn--primary" href="lesson-03-types.html" data-next>Next: Numbers, text, and tuples</a>
+          <button class="btn btn--ghost next-gate__locked" type="button" data-next-locked disabled><svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>Next: Numbers, text, and tuples</button>
+          <span class="next-gate__note" data-next-note>Finish the exercise above to unlock this.</span>
+        </span>
       </nav>
     </div>
   </div>

@@ -16,6 +16,7 @@ const SITE = {
 };
 
 const THEME_BOOT = `(function () {
+  document.documentElement.classList.add("js");
   try {
     var stored = localStorage.getItem("rustlearn.theme");
     if (stored === "light" || stored === "dark") {
@@ -33,6 +34,7 @@ const ICONS = {
   close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   play: '<svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg>',
+  lock: '<svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>',
 };
 
 function head({ title, description, page }) {
@@ -209,7 +211,7 @@ function homePage() {
       <span class="section__num">01</span>
       <div>
         <h2 class="section__title">The course, in order</h2>
-        <p class="section__lede">Each lesson is one idea, a few runnable samples, and one exercise. Read them in sequence the first time; the ownership lessons assume the ones before.</p>
+        <p class="section__lede">Each lesson is one idea, a few runnable samples, and one exercise you write in the page. The checker compares your output with the lesson's, and the next lesson unlocks when it matches.</p>
       </div>
     </div>
     <div class="ledger">
@@ -242,7 +244,7 @@ ${ledgerRows(lessons)}
         <ul class="setup__list">
           <li>${ICONS.check}<span><strong>Type the samples yourself.</strong> Copying skips the part where your hands learn the syntax.</span></li>
           <li>${ICONS.check}<span><strong>Break them on purpose.</strong> Delete a semicolon, move a value twice, and read what the compiler says.</span></li>
-          <li>${ICONS.check}<span><strong>Do the exercise before the next lesson.</strong> It is the only part that proves you can write it.</span></li>
+          <li>${ICONS.check}<span><strong>Pass the exercise before the next lesson.</strong> It is the only part that proves you can write it, so it is what unlocks the rest of the course.</span></li>
         </ul>
       </div>
       <div>
@@ -375,18 +377,71 @@ function playgroundPage() {
 
 /* ---------------------------------------------------------------- lesson */
 
+function exerciseBlock(lesson, sectionCount) {
+  const exercise = lesson.exercise;
+  const tests = exercise.mode === "tests";
+  const field = `ex-${lesson.number}-${lesson.slug}`;
+  const num = String(sectionCount + 1).padStart(2, "0");
+  const config = JSON.stringify({
+    mode: tests ? "tests" : "run",
+    expected: exercise.expected ?? "",
+    append: exercise.append ?? "",
+    minTests: exercise.minTests ?? 0,
+  }).replace(/</g, "\\u003c");
+
+  const target = tests
+    ? `<div class="exercise__panel exercise__panel--brief">
+          <p class="exercise__panel-title">What the checker runs</p>
+          <p class="exercise__panel-text">Your three tests first, then three more that this page appends: a normal sentence, empty input, and messy whitespace. All six have to pass before the lesson unlocks.</p>
+        </div>`
+    : `<div class="exercise__panel">
+          <p class="exercise__panel-title">Expected output</p>
+          <pre class="exercise__expected">${escapeHtml(exercise.expected)}</pre>
+        </div>`;
+
+  return `<section class="exercise" id="exercise" data-exercise="${lesson.slug}" aria-labelledby="exercise-title">
+        <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">${num}</span><span>Exercise</span></h2>
+        <p class="exercise__prompt">${exercise.prompt}</p>
+        <details class="hint">
+          <summary>Show a hint</summary>
+          <p>${exercise.hint}</p>
+        </details>
+        ${target}
+        <div class="bench exercise__bench">
+          <div class="bench__bar">
+            <span class="bench__file">main.rs</span>
+            <span class="bench__meta" data-ex-state>not checked</span>
+          </div>
+          <label class="sr-only" for="${field}">Your Rust code for this exercise</label>
+          <textarea class="bench__input exercise__input" id="${field}" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">${escapeHtml(exercise.starter)}</textarea>
+          <div class="bench__actions">
+            <button class="btn btn--primary" type="button" data-ex-check>${ICONS.play}Check answer</button>
+            <button class="btn btn--quiet" type="button" data-ex-reset>Reset code</button>
+            <span class="bench__hint">Ctrl + Enter</span>
+          </div>
+          <div class="out exercise__out" data-ex-out hidden>
+            <div class="out__head"><span>your output</span><span class="out__state" data-state></span></div>
+            <pre class="out__body" data-out></pre>
+            <details class="out__more"><summary>Compiler messages</summary><pre data-err></pre></details>
+          </div>
+        </div>
+        <p class="exercise__verdict" data-ex-verdict role="status"></p>
+        <script type="application/json" data-ex-config>${config}</script>
+      </section>`;
+}
+
 function lessonPage(lesson, index) {
   const prev = lessons[index - 1];
   const next = lessons[index + 1];
   const bodyHtml = lesson.body();
-  const toc = extractHeadings(bodyHtml);
+  const bodyHeadings = extractHeadings(bodyHtml);
+  const toc = [...bodyHeadings, { id: "exercise", text: "Exercise" }];
 
   const navPrev = prev
     ? `<a class="btn btn--ghost" href="${lessonHref(prev)}">Previous: ${prev.title}</a>`
     : `<a class="btn btn--ghost" href="lessons.html">Back to the course map</a>`;
-  const navNext = next
-    ? `<a class="btn btn--primary" href="${lessonHref(next)}">Next: ${next.title}</a>`
-    : `<a class="btn btn--primary" href="playground.html">Open the playground</a>`;
+  const nextLabel = next ? `Next: ${next.title}` : "Open the playground";
+  const nextHref = next ? lessonHref(next) : "playground.html";
 
   const body = `<article>
   <header class="lesson-head">
@@ -407,20 +462,11 @@ function lessonPage(lesson, index) {
 ${toc.map((item) => `        <li><a href="#${item.id}">${item.text}</a></li>`).join("\n")}
       </ol>
     </nav>
-    <div>
+    <div class="lesson-main">
       <div class="prose">
 ${bodyHtml}
-        <aside class="callout">
-          <span class="callout__tag">Exercise</span>
-          <div>
-            <p>${lesson.exercise.prompt}</p>
-            <details class="hint">
-              <summary>Show a hint</summary>
-              <p>${lesson.exercise.hint}</p>
-            </details>
-          </div>
-        </aside>
       </div>
+      ${exerciseBlock(lesson, bodyHeadings.length)}
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="${lesson.slug}" aria-pressed="false">
           <span data-complete-icon>${ICONS.check}</span>
@@ -430,7 +476,11 @@ ${bodyHtml}
       </footer>
       <nav class="lesson-foot__nav" aria-label="Lesson navigation">
         ${navPrev}
-        ${navNext}
+        <span class="next-gate" data-next-gate data-open="false">
+          <a class="btn btn--primary" href="${nextHref}" data-next>${nextLabel}</a>
+          <button class="btn btn--ghost next-gate__locked" type="button" data-next-locked disabled>${ICONS.lock}${nextLabel}</button>
+          <span class="next-gate__note" data-next-note>Finish the exercise above to unlock this.</span>
+        </span>
       </nav>
     </div>
   </div>

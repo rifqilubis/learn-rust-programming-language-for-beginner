@@ -76,13 +76,93 @@ await new Promise((resolve) => setTimeout(resolve, 300));
 const copyLabel = await page.$eval("[data-copy-text]", (el) => el.textContent.trim());
 record("copy command", `button now reads "${copyLabel}"`);
 
-/* progress after completing a lesson */
+/* progress after passing the exercise, then completing the lesson */
 console.log("\n== lesson 02 ==");
 record("GET lesson 02", String(await goto("/lesson-02-variables-and-mutability.html")));
+
+const gateStart = await page.evaluate(() => {
+  const gate = document.querySelector("[data-next-gate]");
+  const next = document.querySelector("[data-next]");
+  return {
+    gateOpen: gate.dataset.open,
+    nextVisible: next.getClientRects().length > 0,
+    lockedVisible: document.querySelector("[data-next-locked]").getClientRects().length > 0,
+    completeDisabled: document.querySelector("[data-complete]").disabled,
+  };
+});
+record(
+  "gate starts closed",
+  `data-open=${gateStart.gateOpen} next visible=${gateStart.nextVisible} locked button visible=${gateStart.lockedVisible} complete disabled=${gateStart.completeDisabled}`,
+);
+
+async function answer(code) {
+  await page.evaluate((source) => {
+    const textarea = document.querySelector("[data-ex-source]");
+    textarea.value = source;
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+  }, code);
+  await page.click("[data-ex-check]");
+  await page.waitForFunction(
+    () => {
+      const verdict = document.querySelector("[data-ex-verdict]");
+      const state = document.querySelector("[data-ex-state]");
+      return verdict.textContent.trim() !== "" && state.textContent.trim() !== "compiling";
+    },
+    { timeout: 60000 },
+  );
+  return page.evaluate(() => ({
+    verdict: document.querySelector("[data-ex-verdict]").textContent.trim(),
+    tone: document.querySelector("[data-ex-verdict]").dataset.tone,
+    state: document.querySelector("[data-ex-state]").textContent.trim(),
+    passed: document.querySelector("[data-exercise]").dataset.passed,
+  }));
+}
+
+const wrong = await answer('fn main() {\n    println!("nope");\n}');
+record("wrong answer", `state="${wrong.state}" passed=${wrong.passed} verdict="${wrong.verdict}"`);
+
+const stillShut = await page.evaluate(
+  () => document.querySelector("[data-next-gate]").dataset.open === "false" && document.querySelector("[data-complete]").disabled,
+);
+record("gate still closed after a wrong answer", String(stillShut));
+
+const right = await answer(`fn main() {
+    let price = 12.5;
+    let quantity = 4;
+
+    let total = price * quantity as f64;
+    println!("total: {total:.2}");
+
+    let price = price * 0.9;
+    let discounted = price * quantity as f64;
+    println!("discounted: {discounted:.2}");
+}`);
+record("right answer", `state="${right.state}" passed=${right.passed} verdict="${right.verdict}"`);
+
+const unlocked = await page.evaluate(() => ({
+  gateOpen: document.querySelector("[data-next-gate]").dataset.open,
+  nextVisible: document.querySelector("[data-next]").getClientRects().length > 0,
+  completeDisabled: document.querySelector("[data-complete]").disabled,
+}));
+record(
+  "gate opens after a pass",
+  `data-open=${unlocked.gateOpen} next visible=${unlocked.nextVisible} complete enabled=${!unlocked.completeDisabled}`,
+);
+
+const storedExercises = await page.evaluate(() => localStorage.getItem("rustlearn.exercises"));
+record("pass persisted", String(storedExercises));
+
 await page.click("[data-complete]");
 await page.waitForFunction(() => document.querySelector("[data-complete]").getAttribute("aria-pressed") === "true");
 const stored = await page.evaluate(() => localStorage.getItem("rustlearn.progress"));
 record("mark complete", `stored ${stored}`);
+
+await goto("/lesson-02-variables-and-mutability.html");
+const afterReload = await page.evaluate(() => ({
+  passed: document.querySelector("[data-exercise]").dataset.passed,
+  gateOpen: document.querySelector("[data-next-gate]").dataset.open,
+}));
+record("gate survives reload", `exercise passed=${afterReload.passed} gate data-open=${afterReload.gateOpen}`);
 
 /* run a sample inside the lesson */
 const runButtons = await page.$$("[data-run]");
@@ -182,11 +262,39 @@ const smallTargets = await page.evaluate(() => {
       if (node.closest(".skip")) return false;
       if (node.matches(inlineExceptions)) return false;
       if (getComputedStyle(node).display === "none") return false;
-      return rect.height < 44 && node.closest(".site-head, .ledger, .hero__actions, .lesson-foot, .site-foot, .toc, .pg");
+      return (
+        rect.height < 44 &&
+        node.closest(".site-head, .ledger, .hero__actions, .lesson-foot, .site-foot, .toc, .pg, .exercise, .lesson-foot__nav")
+      );
     })
     .map((node) => `${node.tagName.toLowerCase()}:${(node.textContent || "").trim().slice(0, 24)} ${Math.round(node.getBoundingClientRect().height)}px`);
 });
 record("tap targets under 44px", smallTargets.length === 0 ? "none" : smallTargets.join(", "));
+
+/* the exercise editor must not trap the keyboard */
+await goto("/lesson-04-functions.html");
+await page.focus("[data-ex-source]");
+await page.keyboard.press("Escape");
+await page.keyboard.press("Tab");
+const afterTab = await page.evaluate(() => {
+  const el = document.activeElement;
+  return { tag: el.tagName, insideEditor: Boolean(el.closest(".exercise__bench")) };
+});
+record("Escape then Tab leaves the editor", `${afterTab.tag} inside bench=${afterTab.insideEditor}`);
+
+/* with JavaScript off, the course still navigates */
+await page.setJavaScriptEnabled(false);
+await goto("/lesson-04-functions.html");
+const noJs = await page.evaluate(() => {
+  const next = document.querySelector("[data-next]");
+  const locked = document.querySelector("[data-next-locked]");
+  return {
+    nextVisible: next.getClientRects().length > 0,
+    lockedVisible: locked.getClientRects().length > 0,
+  };
+});
+record("no-JS fallback", `next link visible=${noJs.nextVisible} locked button visible=${noJs.lockedVisible}`);
+await page.setJavaScriptEnabled(true);
 
 /* keyboard: the first Tab stop is the skip link and it must show a ring */
 await page.setViewport({ width: 1280, height: 900 });

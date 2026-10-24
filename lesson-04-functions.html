@@ -15,6 +15,7 @@
 <link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <script>(function () {
+  document.documentElement.classList.add("js");
   try {
     var stored = localStorage.getItem("rustlearn.theme");
     if (stored === "light" || stored === "dark") {
@@ -79,9 +80,10 @@
         <li><a href="#early-return-is-still-available">Early return is still available</a></li>
         <li><a href="#functions-that-change-their-argument">Functions that change their argument</a></li>
         <li><a href="#functions-that-return-nothing">Functions that return nothing</a></li>
+        <li><a href="#exercise">Exercise</a></li>
       </ol>
     </nav>
-    <div>
+    <div class="lesson-main">
       <div class="prose">
 <h2 id="declaring-one"><span class="h2num" aria-hidden="true">01</span><span>Declaring one</span></h2>
 <p>Every parameter needs a type and the return type follows an arrow. Nothing is inferred across a function boundary, which is why the signature alone tells you how to call it.</p>
@@ -226,17 +228,55 @@ fn greet(name: &amp;str) {
   </div>
   
 </figure>
-        <aside class="callout">
-          <span class="callout__tag">Exercise</span>
-          <div>
-            <p>Write a function <code>celsius_to_fahrenheit(c: f64) -&gt; f64</code> and print three conversions. Then write a second function that returns a tuple of the minimum and maximum of two numbers.</p>
-            <details class="hint">
-              <summary>Show a hint</summary>
-              <p>The formula is <code>c * 9.0 / 5.0 + 32.0</code>. For the second, return <code>(low, high)</code> and destructure it at the call site.</p>
-            </details>
-          </div>
-        </aside>
       </div>
+      <section class="exercise" id="exercise" data-exercise="functions" aria-labelledby="exercise-title">
+        <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
+        <p class="exercise__prompt">Write <code>celsius_to_fahrenheit(c: f64) -&gt; f64</code> and use it to print the conversions for 0, 100, and -40 in the form <code>0.0C = 32.0F</code>. Then write <code>min_max(a: i32, b: i32) -&gt; (i32, i32)</code> that returns the pair in order, and print <code>min 3, max 9</code> for the inputs 9 and 3.</p>
+        <details class="hint">
+          <summary>Show a hint</summary>
+          <p>The formula is <code>c * 9.0 / 5.0 + 32.0</code>. For the second, return <code>(a, b)</code> or <code>(b, a)</code> depending on the comparison, and destructure the result at the call site with <code>let (low, high) = ...</code>.</p>
+        </details>
+        <div class="exercise__panel">
+          <p class="exercise__panel-title">Expected output</p>
+          <pre class="exercise__expected">0.0C = 32.0F
+100.0C = 212.0F
+-40.0C = -40.0F
+min 3, max 9</pre>
+        </div>
+        <div class="bench exercise__bench">
+          <div class="bench__bar">
+            <span class="bench__file">main.rs</span>
+            <span class="bench__meta" data-ex-state>not checked</span>
+          </div>
+          <label class="sr-only" for="ex-04-functions">Your Rust code for this exercise</label>
+          <textarea class="bench__input exercise__input" id="ex-04-functions" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
+    // 1. Print the three conversions with "{:.1}C = {:.1}F".
+    // 2. Call min_max(9, 3), destructure it, and print "min 3, max 9".
+}
+
+fn celsius_to_fahrenheit(c: f64) -&gt; f64 {
+    // The body is one expression, and it has no semicolon.
+    0.0
+}
+
+fn min_max(a: i32, b: i32) -&gt; (i32, i32) {
+    // Return the smaller value first.
+    (a, b)
+}</textarea>
+          <div class="bench__actions">
+            <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
+            <button class="btn btn--quiet" type="button" data-ex-reset>Reset code</button>
+            <span class="bench__hint">Ctrl + Enter</span>
+          </div>
+          <div class="out exercise__out" data-ex-out hidden>
+            <div class="out__head"><span>your output</span><span class="out__state" data-state></span></div>
+            <pre class="out__body" data-out></pre>
+            <details class="out__more"><summary>Compiler messages</summary><pre data-err></pre></details>
+          </div>
+        </div>
+        <p class="exercise__verdict" data-ex-verdict role="status"></p>
+        <script type="application/json" data-ex-config>{"mode":"run","expected":"0.0C = 32.0F\n100.0C = 212.0F\n-40.0C = -40.0F\nmin 3, max 9","append":"","minTests":0}</script>
+      </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="functions" aria-pressed="false">
           <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
@@ -246,7 +286,11 @@ fn greet(name: &amp;str) {
       </footer>
       <nav class="lesson-foot__nav" aria-label="Lesson navigation">
         <a class="btn btn--ghost" href="lesson-03-types.html">Previous: Numbers, text, and tuples</a>
-        <a class="btn btn--primary" href="lesson-05-conditionals-and-loops.html">Next: Decisions and repetition</a>
+        <span class="next-gate" data-next-gate data-open="false">
+          <a class="btn btn--primary" href="lesson-05-conditionals-and-loops.html" data-next>Next: Decisions and repetition</a>
+          <button class="btn btn--ghost next-gate__locked" type="button" data-next-locked disabled><svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>Next: Decisions and repetition</button>
+          <span class="next-gate__note" data-next-note>Finish the exercise above to unlock this.</span>
+        </span>
       </nav>
     </div>
   </div>

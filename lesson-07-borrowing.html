@@ -15,6 +15,7 @@
 <link rel="preload" href="assets/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 <script>(function () {
+  document.documentElement.classList.add("js");
   try {
     var stored = localStorage.getItem("rustlearn.theme");
     if (stored === "light" || stored === "dark") {
@@ -79,9 +80,11 @@
         <li><a href="#the-two-rules">The two rules</a></li>
         <li><a href="#why-the-rule-is-worth-it">Why the rule is worth it</a></li>
         <li><a href="#slices">Slices</a></li>
+        <li><a href="#when-a-reference-comes-back-out">When a reference comes back out</a></li>
+        <li><a href="#exercise">Exercise</a></li>
       </ol>
     </nav>
-    <div>
+    <div class="lesson-main">
       <div class="prose">
 <h2 id="a-reference-borrows"><span class="h2num" aria-hidden="true">01</span><span>A reference borrows</span></h2>
 <p><code>&amp;value</code> creates a reference. The owner keeps the value, and the reference is only allowed to exist for a while.</p>
@@ -241,17 +244,108 @@ fn append(target: &amp;mut String, piece: &amp;str) {
   <span class="callout__tag">Careful with text indexes</span>
   <div><p>String slices are byte offsets, and a multi-byte character will panic if you cut it in half. For text you did not write yourself, use <code>.chars()</code> instead of slicing.</p></div>
 </aside>
-        <aside class="callout">
-          <span class="callout__tag">Exercise</span>
-          <div>
-            <p>Write <code>fn longest(a: &amp;str, b: &amp;str) -&gt; &amp;str</code> that returns whichever is longer. Call it with two literals and print the result.</p>
-            <details class="hint">
-              <summary>Show a hint</summary>
-              <p>Compare <code>a.len()</code> and <code>b.len()</code>. Both parameters and the return value need the same lifetime, which the compiler infers when there is a single output reference.</p>
-            </details>
-          </div>
-        </aside>
+<h2 id="when-a-reference-comes-back-out"><span class="h2num" aria-hidden="true">06</span><span>When a reference comes back out</span></h2>
+<p>A function that returns a reference has to tell the compiler which input it borrows from. Usually you never write that down, because elision fills it in: one input reference means the output borrows from that one.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn first_word(text: &amp;str) -&gt; &amp;str {
+    text.split_whitespace().next().unwrap_or(&quot;&quot;)
+}
+
+fn main() {
+    println!(&quot;{}&quot;, first_word(&quot;parts on the bench&quot;));
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Two input references and one output is the case elision cannot guess. You name the lifetime, and the name is a promise that the returned reference lives no longer than the shortest of the inputs.</p>
+<figure class="code" data-runner data-label="src/main.rs">
+  <div class="code__label">src/main.rs</div>
+  <pre><code class="language-rust">fn longest&lt;'a&gt;(a: &amp;'a str, b: &amp;'a str) -&gt; &amp;'a str {
+    if a.len() &gt;= b.len() {
+        a
+    } else {
+        b
+    }
+}
+
+fn main() {
+    println!(&quot;{}&quot;, longest(&quot;ferris&quot;, &quot;crab&quot;));
+}</code></pre>
+  <div class="out code__out" hidden>
+    <div class="out__head"><span>output</span><span class="out__state" data-state></span></div>
+    <pre class="out__body" data-out aria-live="polite"></pre>
+    <details class="out__more">
+      <summary>Compiler messages</summary>
+      <pre data-err></pre>
+    </details>
+  </div>
+  <div class="code__foot">
+    <button class="btn btn--run" type="button" data-run hidden>Run this</button>
+    <button class="btn btn--quiet" type="button" data-copy hidden>Copy</button>
+    <span class="code__tag">runs in the browser</span>
+  </div>
+  
+</figure>
+<p>Read <code>&#39;a</code> as "some region of the program". The signature does not create a region; it says both arguments and the result must fit inside the same one. Callers never write the lifetime, because the compiler picks the region from how you use the result.</p>
+<aside class="callout callout--note">
+  <span class="callout__tag">The error is the lesson</span>
+  <div><p>Drop the <code>&lt;&#39;a&gt;</code> and the compiler answers <code>E0106: missing lifetime specifier</code>, then suggests the exact signature you need. You will meet this error the first time you write a function like this, and the fix is always the same shape.</p></div>
+</aside>
       </div>
+      <section class="exercise" id="exercise" data-exercise="borrowing" aria-labelledby="exercise-title">
+        <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">07</span><span>Exercise</span></h2>
+        <p class="exercise__prompt">Write <code>fn longest(a: &amp;str, b: &amp;str) -&gt; &amp;str</code> that returns whichever is longer, add the lifetime annotation the compiler asks for, and call it with <code>"ferris"</code> and <code>"crab"</code>. Then call it a second time with <code>"claw"</code> and <code>"shell"</code> and print that result too.</p>
+        <details class="hint">
+          <summary>Show a hint</summary>
+          <p>Compare <code>a.len()</code> and <code>b.len()</code>. Two input references and one output means you name the lifetime yourself: <code>fn longest&lt;'a&gt;(a: &amp;'a str, b: &amp;'a str) -&gt; &amp;'a str</code>. The two calls have different winners, so a function that always returns <code>a</code> fails the second line.</p>
+        </details>
+        <div class="exercise__panel">
+          <p class="exercise__panel-title">Expected output</p>
+          <pre class="exercise__expected">ferris
+shell</pre>
+        </div>
+        <div class="bench exercise__bench">
+          <div class="bench__bar">
+            <span class="bench__file">main.rs</span>
+            <span class="bench__meta" data-ex-state>not checked</span>
+          </div>
+          <label class="sr-only" for="ex-07-borrowing">Your Rust code for this exercise</label>
+          <textarea class="bench__input exercise__input" id="ex-07-borrowing" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
+    // Print the result of longest("ferris", "crab").
+    // Print the result of longest("claw", "shell").
+}
+
+fn longest(a: &amp;str, b: &amp;str) -&gt; &amp;str {
+    // Return the longer one. This signature needs a lifetime.
+    a
+}</textarea>
+          <div class="bench__actions">
+            <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>
+            <button class="btn btn--quiet" type="button" data-ex-reset>Reset code</button>
+            <span class="bench__hint">Ctrl + Enter</span>
+          </div>
+          <div class="out exercise__out" data-ex-out hidden>
+            <div class="out__head"><span>your output</span><span class="out__state" data-state></span></div>
+            <pre class="out__body" data-out></pre>
+            <details class="out__more"><summary>Compiler messages</summary><pre data-err></pre></details>
+          </div>
+        </div>
+        <p class="exercise__verdict" data-ex-verdict role="status"></p>
+        <script type="application/json" data-ex-config>{"mode":"run","expected":"ferris\nshell","append":"","minTests":0}</script>
+      </section>
       <footer class="lesson-foot">
         <button class="btn btn--ghost" type="button" data-complete="borrowing" aria-pressed="false">
           <span data-complete-icon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
@@ -261,7 +355,11 @@ fn append(target: &amp;mut String, piece: &amp;str) {
       </footer>
       <nav class="lesson-foot__nav" aria-label="Lesson navigation">
         <a class="btn btn--ghost" href="lesson-06-ownership.html">Previous: Ownership: who holds the value</a>
-        <a class="btn btn--primary" href="lesson-08-structs.html">Next: Structs and methods</a>
+        <span class="next-gate" data-next-gate data-open="false">
+          <a class="btn btn--primary" href="lesson-08-structs.html" data-next>Next: Structs and methods</a>
+          <button class="btn btn--ghost next-gate__locked" type="button" data-next-locked disabled><svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>Next: Structs and methods</button>
+          <span class="next-gate__note" data-next-note>Finish the exercise above to unlock this.</span>
+        </span>
       </nav>
     </div>
   </div>
