@@ -557,6 +557,51 @@ async function gradeExercise({ code, slug, tests, expected, ownTests }) {
   };
 }
 
+/* Tips and the reference solution are help, not a shortcut. Opening either
+   panel, copying the solution, or loading it into the editor never unlocks the
+   lesson; only a passing Check answer does. */
+function initExerciseHelp(root, { source, say, setState }) {
+  const tipsDetails = root.querySelector('details[data-ex-help="tips"]');
+  const solutionDetails = root.querySelector('details[data-ex-help="solution"]');
+  const tipsSummary = tipsDetails ? tipsDetails.querySelector("summary") : null;
+  const solutionPanel = solutionDetails ? solutionDetails.querySelector(".exercise__solution") : null;
+
+  /* <details> opens and closes natively, and CSS swaps the visible label from
+     the `open` attribute, so the help still works with JavaScript off. This
+     only clears the nudge once the tips have been opened. */
+  tipsDetails?.addEventListener("toggle", () => {
+    if (tipsDetails.open) tipsSummary?.removeAttribute("data-nudge");
+  });
+
+  const solutionCode = solutionPanel ? solutionPanel.querySelector("pre code") : null;
+  const copyButton = solutionPanel ? solutionPanel.querySelector("[data-ex-copy]") : null;
+  const fillButton = solutionPanel ? solutionPanel.querySelector("[data-ex-fill]") : null;
+
+  copyButton?.addEventListener("click", async () => {
+    const ok = await copyText(solutionCode ? solutionCode.textContent : "");
+    flash(copyButton, ok ? "Copied" : "Copy blocked");
+  });
+
+  fillButton?.addEventListener("click", () => {
+    if (!solutionCode) return;
+    source.value = solutionCode.textContent;
+    saveDraft(root.getAttribute("data-exercise"), source.value);
+    setState("not checked", "");
+    say("Solution loaded. Press Check answer to run it; the lesson stays locked until it passes.", "");
+    source.focus();
+  });
+
+  /* After a couple of failed checks, point at the tips instead of repeating
+     the same error message. Opening the panel clears the nudge. */
+  return {
+    nudgeTips() {
+      if (!tipsDetails || !tipsSummary || tipsDetails.open) return false;
+      tipsSummary.setAttribute("data-nudge", "true");
+      return true;
+    },
+  };
+}
+
 function initExercise() {
   const root = document.querySelector("[data-exercise]");
   if (!root) return;
@@ -608,6 +653,9 @@ function initExercise() {
 
   root.dataset.passed = readPassed().includes(slug) ? "true" : "false";
   document.dispatchEvent(new CustomEvent("exercise:result", { detail: { slug, passed: root.dataset.passed === "true" } }));
+
+  const help = initExerciseHelp(root, { source, say, setState });
+  let failedChecks = 0;
 
   let draftTimer = 0;
   source.addEventListener("input", () => {
@@ -681,6 +729,8 @@ function initExercise() {
       };
       setState(labels[verdictResult.kind] || "did not pass", "err");
       say(verdictResult.message, "err");
+      failedChecks += 1;
+      if (failedChecks >= 2) help.nudgeTips();
     } catch (error) {
       setState("request failed", "err");
       setOutput(root, {

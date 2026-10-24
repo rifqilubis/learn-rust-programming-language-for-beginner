@@ -271,10 +271,6 @@
       <section class="exercise" id="exercise" data-exercise="conditionals-and-loops" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
         <p class="exercise__prompt">Write <code>fn fizzbuzz(n: u32) -&gt; String</code> that returns <code>fizzbuzz</code>, <code>fizz</code>, <code>buzz</code>, or the number as text. Then print the answers for 1 to 15. The checker calls your function with numbers up to 5000.</p>
-        <details class="hint">
-          <summary>Show a hint</summary>
-          <p>Match on the pair <code>(n % 3, n % 5)</code> with arms <code>(0, 0)</code>, <code>(0, _)</code>, <code>(_, 0)</code>, and <code>_</code>. Return <code>String::from(...)</code> for the words and <code>n.to_string()</code> for the rest.</p>
-        </details>
         <div class="exercise__panel exercise__panel--brief">
           <p class="exercise__panel-title">The checker calls these</p>
           <pre class="exercise__expected exercise__expected--sig">fn fizzbuzz(n: u32) -&gt; String</pre>
@@ -296,6 +292,46 @@ fizz
 13
 14
 fizzbuzz</pre>
+        </div>
+        <div class="exercise__help">
+          <span class="exercise__help-label">Stuck?</span>
+          <details class="exercise__help-item" data-ex-help="tips">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show tips</span><span class="exercise__help-hide">Hide tips</span></summary>
+            <div class="exercise__panel exercise__tips" role="region" aria-labelledby="tips-conditionals-and-loops-title">
+              <p class="exercise__panel-title" id="tips-conditionals-and-loops-title">Work through these in order</p>
+              <ol class="exercise__tips-list">
+                <li>The <code>for</code> loop in <code>main</code> is already correct. Your job is the body of <code>fizzbuzz</code>: return the word, do not print it.</li>
+                <li>A number is a fizzbuzz when it divides by both 3 and 5, so test that case first. If you test 3 first, 15 returns <code>fizz</code> too early.</li>
+                <li>A <code>match</code> on the pair <code>(n % 3, n % 5)</code> handles all four cases at once. Put the <code>(0, 0)</code> arm first; the compiler checks every arm returns a <code>String</code>.</li>
+              </ol>
+              <p class="exercise__tips-short"><strong>Short version:</strong> Match on the pair <code>(n % 3, n % 5)</code> with arms <code>(0, 0)</code>, <code>(0, _)</code>, <code>(_, 0)</code>, and <code>_</code>. Return <code>String::from(...)</code> for the words and <code>n.to_string()</code> for the rest.</p>
+            </div>
+          </details>
+          <details class="exercise__help-item" data-ex-help="solution">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show solution</span><span class="exercise__help-hide">Hide solution</span></summary>
+            <div class="exercise__panel exercise__solution" role="region" aria-labelledby="solution-conditionals-and-loops-title">
+              <p class="exercise__panel-title" id="solution-conditionals-and-loops-title">Reference solution</p>
+              <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
+              <pre class="exercise__code"><code class="language-rust">fn main() {
+    for n in 1..=15 {
+        println!("{}", fizzbuzz(n));
+    }
+}
+
+fn fizzbuzz(n: u32) -&gt; String {
+    match (n % 3, n % 5) {
+        (0, 0) =&gt; String::from("fizzbuzz"),
+        (0, _) =&gt; String::from("fizz"),
+        (_, 0) =&gt; String::from("buzz"),
+        _ =&gt; n.to_string(),
+    }
+}</code></pre>
+              <div class="exercise__solution-actions">
+                <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
+                <button class="btn btn--quiet" type="button" data-ex-fill>Load into editor</button>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="bench exercise__bench">
           <div class="bench__bar">

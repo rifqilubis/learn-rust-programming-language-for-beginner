@@ -207,10 +207,6 @@
       <section class="exercise" id="exercise" data-exercise="install-and-first-program" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">08</span><span>Exercise</span></h2>
         <p class="exercise__prompt">Write <code>fn year_line(year: u32) -&gt; String</code> that returns <code>Learning Rust in 2026</code> when given 2026. Then print <code>Hello from Rust!</code> and the line for 2026. The checker calls your function with years you have not seen.</p>
-        <details class="hint">
-          <summary>Show a hint</summary>
-          <p>Use <code>format!("Learning Rust in {year}")</code> as the last expression, with no semicolon. <code>format!</code> builds a <code>String</code>; <code>println!</code> only prints one.</p>
-        </details>
         <div class="exercise__panel exercise__panel--brief">
           <p class="exercise__panel-title">The checker calls these</p>
           <pre class="exercise__expected exercise__expected--sig">fn year_line(year: u32) -&gt; String</pre>
@@ -219,6 +215,40 @@
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">Hello from Rust!
 Learning Rust in 2026</pre>
+        </div>
+        <div class="exercise__help">
+          <span class="exercise__help-label">Stuck?</span>
+          <details class="exercise__help-item" data-ex-help="tips">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show tips</span><span class="exercise__help-hide">Hide tips</span></summary>
+            <div class="exercise__panel exercise__tips" role="region" aria-labelledby="tips-install-and-first-program-title">
+              <p class="exercise__panel-title" id="tips-install-and-first-program-title">Work through these in order</p>
+              <ol class="exercise__tips-list">
+                <li>The two <code>println!</code> lines in <code>main</code> are already correct. The only part you need to change is the body of <code>year_line</code>.</li>
+                <li>A function returns its last expression when there is no semicolon. <code>format!("Learning Rust in {year}")</code> builds the <code>String</code> to return; <code>println!</code> only prints, so it cannot be the return value.</li>
+                <li>Match the expected text exactly: capital <code>L</code>, one space after <code>in</code>, and the year in the <code>{year}</code> slot. Compare your result with the expected output panel line by line.</li>
+              </ol>
+              <p class="exercise__tips-short"><strong>Short version:</strong> Use <code>format!("Learning Rust in {year}")</code> as the last expression, with no semicolon. <code>format!</code> builds a <code>String</code>; <code>println!</code> only prints one.</p>
+            </div>
+          </details>
+          <details class="exercise__help-item" data-ex-help="solution">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show solution</span><span class="exercise__help-hide">Hide solution</span></summary>
+            <div class="exercise__panel exercise__solution" role="region" aria-labelledby="solution-install-and-first-program-title">
+              <p class="exercise__panel-title" id="solution-install-and-first-program-title">Reference solution</p>
+              <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
+              <pre class="exercise__code"><code class="language-rust">fn main() {
+    println!("Hello from Rust!");
+    println!("{}", year_line(2026));
+}
+
+fn year_line(year: u32) -&gt; String {
+    format!("Learning Rust in {year}")
+}</code></pre>
+              <div class="exercise__solution-actions">
+                <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
+                <button class="btn btn--quiet" type="button" data-ex-fill>Load into editor</button>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="bench exercise__bench">
           <div class="bench__bar">

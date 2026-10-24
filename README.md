@@ -18,6 +18,11 @@ The last lesson asks you to write tests. Your tests are run twice: once against
 your `word_count`, and once against a deliberately broken one. If they pass the
 broken version, they are not testing anything, and the exercise stays locked.
 
+Stuck? Every exercise has **Show tips** (at least three steps, from the idea down
+to the exact line) and **Show solution** (a reference answer you can read, copy,
+or load into the editor). Neither one unlocks the lesson: loading the answer only
+fills the box, and the checker still has to run and pass it.
+
 ## Run it locally
 
 ```bash
@@ -68,8 +73,9 @@ the exercises honest. For every lesson it proves the reference solution passes
 and prints the expected output, and that all of these fail: the starter, a
 program that only prints the expected output, a function hard-coded to the
 example, a program that exits before the tests finish, a forged test summary,
-and forged result lines. In lesson 12 it also proves the reader's own tests are
-required and that they catch a broken `word_count`.
+and forged result lines. It also checks that every exercise has at least three
+beginner tips and a reference solution. In lesson 12 it proves the reader's own
+tests are required and that they catch a broken `word_count`.
 
 The browser tools need Chrome and `puppeteer-core`; they are development
 dependencies, not part of the site. Start `python3 server.py` first and pass the

@@ -232,10 +232,6 @@ fn greet(name: &amp;str) {
       <section class="exercise" id="exercise" data-exercise="functions" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
         <p class="exercise__prompt">Write <code>celsius_to_fahrenheit(c: f64) -&gt; f64</code> and <code>min_max(a: i32, b: i32) -&gt; (i32, i32)</code>, which returns the smaller value first. Print the conversions for 0, 100, and -40 as <code>0.0C = 32.0F</code>, then <code>min 3, max 9</code> for the inputs 9 and 3.</p>
-        <details class="hint">
-          <summary>Show a hint</summary>
-          <p>The formula is <code>c * 9.0 / 5.0 + 32.0</code>. For the second, compare the two values and return <code>(low, high)</code>. Both bodies are a single expression with no semicolon on the last line.</p>
-        </details>
         <div class="exercise__panel exercise__panel--brief">
           <p class="exercise__panel-title">The checker calls these</p>
           <pre class="exercise__expected exercise__expected--sig">fn celsius_to_fahrenheit(c: f64) -&gt; f64
@@ -247,6 +243,52 @@ fn min_max(a: i32, b: i32) -&gt; (i32, i32)</pre>
 100.0C = 212.0F
 -40.0C = -40.0F
 min 3, max 9</pre>
+        </div>
+        <div class="exercise__help">
+          <span class="exercise__help-label">Stuck?</span>
+          <details class="exercise__help-item" data-ex-help="tips">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show tips</span><span class="exercise__help-hide">Hide tips</span></summary>
+            <div class="exercise__panel exercise__tips" role="region" aria-labelledby="tips-functions-title">
+              <p class="exercise__panel-title" id="tips-functions-title">Work through these in order</p>
+              <ol class="exercise__tips-list">
+                <li>There are two functions to finish, and each one can be a single expression. Do <code>celsius_to_fahrenheit</code> first and run the checker to see it pass that half.</li>
+                <li>The conversion is the usual one: multiply by 9, divide by 5, add 32. Keep the decimal points on the numbers (<code>9.0</code>, <code>5.0</code>, <code>32.0</code>) because the parameter is an <code>f64</code>.</li>
+                <li>For <code>min_max</code>, compare <code>a</code> and <code>b</code> with an <code>if</code>. Return <code>(a, b)</code> when <code>a &lt; b</code>, and <code>(b, a)</code> otherwise. A block used as an expression can be the whole function body.</li>
+              </ol>
+              <p class="exercise__tips-short"><strong>Short version:</strong> The formula is <code>c * 9.0 / 5.0 + 32.0</code>. For the second, compare the two values and return <code>(low, high)</code>. Both bodies are a single expression with no semicolon on the last line.</p>
+            </div>
+          </details>
+          <details class="exercise__help-item" data-ex-help="solution">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show solution</span><span class="exercise__help-hide">Hide solution</span></summary>
+            <div class="exercise__panel exercise__solution" role="region" aria-labelledby="solution-functions-title">
+              <p class="exercise__panel-title" id="solution-functions-title">Reference solution</p>
+              <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
+              <pre class="exercise__code"><code class="language-rust">fn main() {
+    for c in [0.0, 100.0, -40.0] {
+        println!("{c:.1}C = {:.1}F", celsius_to_fahrenheit(c));
+    }
+
+    let (low, high) = min_max(9, 3);
+    println!("min {low}, max {high}");
+}
+
+fn celsius_to_fahrenheit(c: f64) -&gt; f64 {
+    c * 9.0 / 5.0 + 32.0
+}
+
+fn min_max(a: i32, b: i32) -&gt; (i32, i32) {
+    if a &lt; b {
+        (a, b)
+    } else {
+        (b, a)
+    }
+}</code></pre>
+              <div class="exercise__solution-actions">
+                <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
+                <button class="btn btn--quiet" type="button" data-ex-fill>Load into editor</button>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="bench exercise__bench">
           <div class="bench__bar">

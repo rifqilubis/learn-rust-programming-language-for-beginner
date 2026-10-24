@@ -225,10 +225,6 @@ fn main() {
       <section class="exercise" id="exercise" data-exercise="variables-and-mutability" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
         <p class="exercise__prompt">Write <code>fn total(price: f64, quantity: u32) -&gt; f64</code> and <code>fn discounted(price: f64, quantity: u32) -&gt; f64</code>, where the second takes 10 percent off. For a price of 12.5 and a quantity of 4, print <code>total: 50.00</code> and <code>discounted: 45.00</code>.</p>
-        <details class="hint">
-          <summary>Show a hint</summary>
-          <p>Cast with <code>quantity as f64</code>. Inside <code>discounted</code>, shadow the parameter with <code>let price = price * 0.9;</code> and then multiply, exactly as the lesson did in <code>main</code>. Print with <code>{:.2}</code>.</p>
-        </details>
         <div class="exercise__panel exercise__panel--brief">
           <p class="exercise__panel-title">The checker calls these</p>
           <pre class="exercise__expected exercise__expected--sig">fn total(price: f64, quantity: u32) -&gt; f64
@@ -238,6 +234,48 @@ fn discounted(price: f64, quantity: u32) -&gt; f64</pre>
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">total: 50.00
 discounted: 45.00</pre>
+        </div>
+        <div class="exercise__help">
+          <span class="exercise__help-label">Stuck?</span>
+          <details class="exercise__help-item" data-ex-help="tips">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show tips</span><span class="exercise__help-hide">Hide tips</span></summary>
+            <div class="exercise__panel exercise__tips" role="region" aria-labelledby="tips-variables-and-mutability-title">
+              <p class="exercise__panel-title" id="tips-variables-and-mutability-title">Work through these in order</p>
+              <ol class="exercise__tips-list">
+                <li>The <code>println!</code> lines in <code>main</code> already call both functions. You only need to replace the two <code>0.0</code> bodies.</li>
+                <li><code>price</code> is an <code>f64</code> and <code>quantity</code> is a <code>u32</code>. Rust will not multiply them directly, so convert first: <code>price * quantity as f64</code>.</li>
+                <li>For <code>discounted</code>, work out the new price before multiplying. The lesson shows the shadowing pattern: <code>let price = price * 0.9;</code>, then use <code>price</code> on the next line.</li>
+              </ol>
+              <p class="exercise__tips-short"><strong>Short version:</strong> Cast with <code>quantity as f64</code>. Inside <code>discounted</code>, shadow the parameter with <code>let price = price * 0.9;</code> and then multiply, exactly as the lesson did in <code>main</code>. Print with <code>{:.2}</code>.</p>
+            </div>
+          </details>
+          <details class="exercise__help-item" data-ex-help="solution">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show solution</span><span class="exercise__help-hide">Hide solution</span></summary>
+            <div class="exercise__panel exercise__solution" role="region" aria-labelledby="solution-variables-and-mutability-title">
+              <p class="exercise__panel-title" id="solution-variables-and-mutability-title">Reference solution</p>
+              <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
+              <pre class="exercise__code"><code class="language-rust">fn main() {
+    let price = 12.5;
+    let quantity = 4;
+
+    println!("total: {:.2}", total(price, quantity));
+    println!("discounted: {:.2}", discounted(price, quantity));
+}
+
+fn total(price: f64, quantity: u32) -&gt; f64 {
+    price * quantity as f64
+}
+
+fn discounted(price: f64, quantity: u32) -&gt; f64 {
+    let price = price * 0.9;
+    price * quantity as f64
+}</code></pre>
+              <div class="exercise__solution-actions">
+                <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
+                <button class="btn btn--quiet" type="button" data-ex-fill>Load into editor</button>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="bench exercise__bench">
           <div class="bench__bar">

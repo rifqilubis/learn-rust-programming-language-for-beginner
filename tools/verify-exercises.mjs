@@ -238,6 +238,14 @@ for (const lesson of lessons) {
     fail(slug, "no reference solution");
     continue;
   }
+  if (
+    !Array.isArray(exercise.tips) ||
+    exercise.tips.length < 3 ||
+    exercise.tips.some((tip) => typeof tip !== "string" || tip.trim() === "")
+  ) {
+    fail(slug, "the exercise needs at least three beginner tips");
+    continue;
+  }
 
   /* 1. The solution must compile and pass every hidden check. */
   const suite = createHiddenSuite(slug, checks);

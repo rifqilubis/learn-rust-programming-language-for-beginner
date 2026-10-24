@@ -257,10 +257,6 @@ fn main() {
       <section class="exercise" id="exercise" data-exercise="modules-and-tests" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">07</span><span>Exercise</span></h2>
         <p class="exercise__prompt">Implement <code>fn word_count(text: &amp;str) -&gt; usize</code> so it counts whitespace-separated words, and write three tests of your own: a normal sentence, empty input, and input with extra spaces. The checker runs your tests, then hidden ones against sentences you have not seen. It also runs your tests against a broken <code>word_count</code>: all three have to fail there, or they are not checking anything.</p>
-        <details class="hint">
-          <summary>Show a hint</summary>
-          <p><code>text.split_whitespace().count()</code> does the counting in one line. An assertion is <code>assert_eq!(word_count("one two three"), 3);</code>. Run the checker with the <code>todo!()</code> calls still in place once, so you see what a failing test looks like.</p>
-        </details>
         <div class="exercise__panel exercise__panel--brief">
           <p class="exercise__panel-title">The checker calls these</p>
           <pre class="exercise__expected exercise__expected--sig">fn word_count(text: &amp;str) -&gt; usize
@@ -269,6 +265,59 @@ three #[test] functions of your own</pre>
         <div class="exercise__panel exercise__panel--brief">
           <p class="exercise__panel-title">What runs</p>
           <p class="exercise__panel-text">Your three tests, then hidden ones that call <code>word_count</code> with sentences you have not seen. All of them have to pass. Your tests are also run against a deliberately broken <code>word_count</code>: if they still pass there, they are not testing anything.</p>
+        </div>
+        <div class="exercise__help">
+          <span class="exercise__help-label">Stuck?</span>
+          <details class="exercise__help-item" data-ex-help="tips">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show tips</span><span class="exercise__help-hide">Hide tips</span></summary>
+            <div class="exercise__panel exercise__tips" role="region" aria-labelledby="tips-modules-and-tests-title">
+              <p class="exercise__panel-title" id="tips-modules-and-tests-title">Work through these in order</p>
+              <ol class="exercise__tips-list">
+                <li>First make <code>word_count</code> work: <code>text.split_whitespace()</code> gives an iterator of words, and <code>.count()</code> turns it into a number.</li>
+                <li>Replace each <code>todo!(...)</code> with one real assertion. <code>assert_eq!(word_count("one two three"), 3);</code> is the shape; do the same for <code>""</code> and for a string with extra spaces.</li>
+                <li>Your tests need to fail on a wrong implementation, so assert a specific count rather than just that the function runs. The checker runs them against a deliberately broken <code>word_count</code> to prove that.</li>
+              </ol>
+              <p class="exercise__tips-short"><strong>Short version:</strong> <code>text.split_whitespace().count()</code> does the counting in one line. An assertion is <code>assert_eq!(word_count("one two three"), 3);</code>. Run the checker with the <code>todo!()</code> calls still in place once, so you see what a failing test looks like.</p>
+            </div>
+          </details>
+          <details class="exercise__help-item" data-ex-help="solution">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show solution</span><span class="exercise__help-hide">Hide solution</span></summary>
+            <div class="exercise__panel exercise__solution" role="region" aria-labelledby="solution-modules-and-tests-title">
+              <p class="exercise__panel-title" id="solution-modules-and-tests-title">Reference solution</p>
+              <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
+              <pre class="exercise__code"><code class="language-rust">fn word_count(text: &amp;str) -&gt; usize {
+    text.split_whitespace().count()
+}
+
+fn main() {
+    println!("{}", word_count("one two three"));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn counts_words() {
+        assert_eq!(word_count("one two three"), 3);
+    }
+
+    #[test]
+    fn counts_nothing_in_empty_text() {
+        assert_eq!(word_count(""), 0);
+    }
+
+    #[test]
+    fn ignores_extra_spaces() {
+        assert_eq!(word_count("  two   words "), 2);
+    }
+}</code></pre>
+              <div class="exercise__solution-actions">
+                <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
+                <button class="btn btn--quiet" type="button" data-ex-fill>Load into editor</button>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="bench exercise__bench">
           <div class="bench__bar">
@@ -291,7 +340,7 @@ mod tests {
 
     #[test]
     fn counts_words() {
-        todo!("assert the count for "one two three"");
+        todo!("assert the count for a normal sentence");
     }
 
     #[test]
@@ -301,7 +350,7 @@ mod tests {
 
     #[test]
     fn ignores_extra_spaces() {
-        todo!("assert the count for "  two   words "");
+        todo!("assert the count for a sentence with extra spaces");
     }
 }</textarea>
           <div class="bench__actions">

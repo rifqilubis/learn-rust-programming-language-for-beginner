@@ -245,6 +245,13 @@ export const CHECKS = {
   ],
 
   "conditionals-and-loops": [
+    /* Fixed boundaries come first, so a function that only special-cases one
+       value cannot slip through on six lucky random draws. */
+    ...[1, 3, 5, 15, 30].map((value) => ({
+      args: { n: { u32: [value, value] } },
+      probes: [{ rust: '::std::format!("S:{}", fizzbuzz(n))' }],
+      expect: (a) => `S:${fizzbuzzValue(a.n.value)}`,
+    })),
     {
       args: { n: { u32: [1, 5000] } },
       repeats: 6,

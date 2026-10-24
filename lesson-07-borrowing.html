@@ -308,10 +308,6 @@ fn main() {
       <section class="exercise" id="exercise" data-exercise="borrowing" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">07</span><span>Exercise</span></h2>
         <p class="exercise__prompt">Write <code>fn longest(a: &amp;str, b: &amp;str) -&gt; &amp;str</code> that returns whichever is longer. The signature in the starter is incomplete; the compiler will tell you what is missing. Call it with <code>"ferris"</code> and <code>"crab"</code>, then with <code>"claw"</code> and <code>"shell"</code>, and print both results.</p>
-        <details class="hint">
-          <summary>Show a hint</summary>
-          <p>Two input references and one output means you name the lifetime: <code>fn longest&lt;'a&gt;(a: &amp;'a str, b: &amp;'a str) -&gt; &amp;'a str</code>. The compiler error <code>E0106</code> prints that signature for you. Then compare <code>a.len()</code> and <code>b.len()</code>. The checker swaps the argument order too.</p>
-        </details>
         <div class="exercise__panel exercise__panel--brief">
           <p class="exercise__panel-title">The checker calls these</p>
           <pre class="exercise__expected exercise__expected--sig">fn longest&lt;'a&gt;(a: &amp;'a str, b: &amp;'a str) -&gt; &amp;'a str</pre>
@@ -320,6 +316,44 @@ fn main() {
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">ferris
 shell</pre>
+        </div>
+        <div class="exercise__help">
+          <span class="exercise__help-label">Stuck?</span>
+          <details class="exercise__help-item" data-ex-help="tips">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show tips</span><span class="exercise__help-hide">Hide tips</span></summary>
+            <div class="exercise__panel exercise__tips" role="region" aria-labelledby="tips-borrowing-title">
+              <p class="exercise__panel-title" id="tips-borrowing-title">Work through these in order</p>
+              <ol class="exercise__tips-list">
+                <li>Press Check with the starter as it is. The compiler will refuse the signature and quote the exact one you need; reading that error is part of the exercise.</li>
+                <li>The missing piece is a lifetime. Add <code>&lt;'a&gt;</code> after the function name, and put <code>'a</code> after each <code>&amp;</code> in the parameters and the return type.</li>
+                <li>For the body, compare <code>a.len()</code> and <code>b.len()</code>. Return <code>a</code> when it is longer or the same length, and <code>b</code> otherwise. No lifetime annotation is needed inside the body.</li>
+              </ol>
+              <p class="exercise__tips-short"><strong>Short version:</strong> Two input references and one output means you name the lifetime: <code>fn longest&lt;'a&gt;(a: &amp;'a str, b: &amp;'a str) -&gt; &amp;'a str</code>. The compiler error <code>E0106</code> prints that signature for you. Then compare <code>a.len()</code> and <code>b.len()</code>. The checker swaps the argument order too.</p>
+            </div>
+          </details>
+          <details class="exercise__help-item" data-ex-help="solution">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show solution</span><span class="exercise__help-hide">Hide solution</span></summary>
+            <div class="exercise__panel exercise__solution" role="region" aria-labelledby="solution-borrowing-title">
+              <p class="exercise__panel-title" id="solution-borrowing-title">Reference solution</p>
+              <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
+              <pre class="exercise__code"><code class="language-rust">fn main() {
+    println!("{}", longest("ferris", "crab"));
+    println!("{}", longest("claw", "shell"));
+}
+
+fn longest&lt;'a&gt;(a: &amp;'a str, b: &amp;'a str) -&gt; &amp;'a str {
+    if a.len() &gt;= b.len() {
+        a
+    } else {
+        b
+    }
+}</code></pre>
+              <div class="exercise__solution-actions">
+                <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
+                <button class="btn btn--quiet" type="button" data-ex-fill>Load into editor</button>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="bench exercise__bench">
           <div class="bench__bar">

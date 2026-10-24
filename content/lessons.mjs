@@ -79,6 +79,11 @@ ${sample(`fn main() {
         "Write <code>fn year_line(year: u32) -&gt; String</code> that returns <code>Learning Rust in 2026</code> when given 2026. Then print <code>Hello from Rust!</code> and the line for 2026. The checker calls your function with years you have not seen.",
       hint:
         "Use <code>format!(\"Learning Rust in {year}\")</code> as the last expression, with no semicolon. <code>format!</code> builds a <code>String</code>; <code>println!</code> only prints one.",
+      tips: [
+        `The two <code>println!</code> lines in <code>main</code> are already correct. The only part you need to change is the body of <code>year_line</code>.`,
+        `A function returns its last expression when there is no semicolon. <code>format!("Learning Rust in {year}")</code> builds the <code>String</code> to return; <code>println!</code> only prints, so it cannot be the return value.`,
+        `Match the expected text exactly: capital <code>L</code>, one space after <code>in</code>, and the year in the <code>{year}</code> slot. Compare your result with the expected output panel line by line.`,
+      ],
       requires: "fn year_line(year: u32) -> String",
       starter: `fn main() {
     println!("Hello from Rust!");
@@ -177,6 +182,11 @@ fn main() {
         "Write <code>fn total(price: f64, quantity: u32) -&gt; f64</code> and <code>fn discounted(price: f64, quantity: u32) -&gt; f64</code>, where the second takes 10 percent off. For a price of 12.5 and a quantity of 4, print <code>total: 50.00</code> and <code>discounted: 45.00</code>.",
       hint:
         "Cast with <code>quantity as f64</code>. Inside <code>discounted</code>, shadow the parameter with <code>let price = price * 0.9;</code> and then multiply, exactly as the lesson did in <code>main</code>. Print with <code>{:.2}</code>.",
+      tips: [
+        `The <code>println!</code> lines in <code>main</code> already call both functions. You only need to replace the two <code>0.0</code> bodies.`,
+        `<code>price</code> is an <code>f64</code> and <code>quantity</code> is a <code>u32</code>. Rust will not multiply them directly, so convert first: <code>price * quantity as f64</code>.`,
+        `For <code>discounted</code>, work out the new price before multiplying. The lesson shows the shadowing pattern: <code>let price = price * 0.9;</code>, then use <code>price</code> on the next line.`,
+      ],
       requires: "fn total(price: f64, quantity: u32) -> f64\nfn discounted(price: f64, quantity: u32) -> f64",
       starter: `fn main() {
     let price = 12.5;
@@ -304,6 +314,11 @@ ${callout("note", "Why so strict", `<p>Implicit narrowing is where a lot of prod
         "Build the tuple <code>(\"coffee\", 3, 4.5)</code> and print it with the debug format. Then print <code>line total: 13.50</code>, computed by <code>fn line_total(quantity: u32, price: f64) -&gt; f64</code>. The checker calls that function with other quantities and prices.",
       hint:
         "Multiply <code>quantity as f64 * price</code>. Destructure the tuple to get the two numbers, and print the total with <code>{:.2}</code>.",
+      tips: [
+        `The tuple printing and the <code>println!</code> in <code>main</code> are already done. Only the body of <code>line_total</code> needs work.`,
+        `The two values have different types: <code>quantity</code> is <code>u32</code>, <code>price</code> is <code>f64</code>. Convert the quantity with <code>quantity as f64</code> before multiplying.`,
+        `The last line of the function is the return value, so it needs no <code>return</code> keyword and no semicolon: <code>quantity as f64 * price</code>.`,
+      ],
       requires: "fn line_total(quantity: u32, price: f64) -> f64",
       starter: `fn main() {
     let item = ("coffee", 3, 4.5);
@@ -416,6 +431,11 @@ fn greet(name: &str) {
         "Write <code>celsius_to_fahrenheit(c: f64) -&gt; f64</code> and <code>min_max(a: i32, b: i32) -&gt; (i32, i32)</code>, which returns the smaller value first. Print the conversions for 0, 100, and -40 as <code>0.0C = 32.0F</code>, then <code>min 3, max 9</code> for the inputs 9 and 3.",
       hint:
         "The formula is <code>c * 9.0 / 5.0 + 32.0</code>. For the second, compare the two values and return <code>(low, high)</code>. Both bodies are a single expression with no semicolon on the last line.",
+      tips: [
+        `There are two functions to finish, and each one can be a single expression. Do <code>celsius_to_fahrenheit</code> first and run the checker to see it pass that half.`,
+        `The conversion is the usual one: multiply by 9, divide by 5, add 32. Keep the decimal points on the numbers (<code>9.0</code>, <code>5.0</code>, <code>32.0</code>) because the parameter is an <code>f64</code>.`,
+        `For <code>min_max</code>, compare <code>a</code> and <code>b</code> with an <code>if</code>. Return <code>(a, b)</code> when <code>a &lt; b</code>, and <code>(b, a)</code> otherwise. A block used as an expression can be the whole function body.`,
+      ],
       requires: "fn celsius_to_fahrenheit(c: f64) -> f64\nfn min_max(a: i32, b: i32) -> (i32, i32)",
       starter: `fn main() {
     for c in [0.0, 100.0, -40.0] {
@@ -564,6 +584,11 @@ ${sample(`fn main() {
         "Write <code>fn fizzbuzz(n: u32) -&gt; String</code> that returns <code>fizzbuzz</code>, <code>fizz</code>, <code>buzz</code>, or the number as text. Then print the answers for 1 to 15. The checker calls your function with numbers up to 5000.",
       hint:
         "Match on the pair <code>(n % 3, n % 5)</code> with arms <code>(0, 0)</code>, <code>(0, _)</code>, <code>(_, 0)</code>, and <code>_</code>. Return <code>String::from(...)</code> for the words and <code>n.to_string()</code> for the rest.",
+      tips: [
+        `The <code>for</code> loop in <code>main</code> is already correct. Your job is the body of <code>fizzbuzz</code>: return the word, do not print it.`,
+        `A number is a fizzbuzz when it divides by both 3 and 5, so test that case first. If you test 3 first, 15 returns <code>fizz</code> too early.`,
+        `A <code>match</code> on the pair <code>(n % 3, n % 5)</code> handles all four cases at once. Put the <code>(0, 0)</code> arm first; the compiler checks every arm returns a <code>String</code>.`,
+      ],
       requires: "fn fizzbuzz(n: u32) -> String",
       starter: `fn main() {
     for n in 1..=15 {
@@ -693,6 +718,11 @@ ${callout("note", "Scope ends, value drops", `<p>When a function ends, every val
         "Write <code>fn shout(mut text: String) -&gt; String</code> that appends <code>!</code> and returns the string. Start with <code>String::from(\"hello\")</code>, call <code>shout</code> twice in a row, reassigning the result each time, and print <code>hello!!</code>.",
       hint:
         "Use <code>text.push('!');</code> and then <code>text</code> as the last expression, with no semicolon. Reassign with <code>let message = shout(message);</code> after each call. The checker passes in strings you have not seen.",
+      tips: [
+        `The <code>main</code> function already calls <code>shout</code> twice and prints the result. Only the body of <code>shout</code> needs to change.`,
+        `The parameter is already <code>mut text: String</code>, so you can change it in place. <code>text.push('!');</code> adds one character.`,
+        `After the <code>push</code>, put <code>text</code> on the last line without a semicolon. That hands ownership back to the caller, which is why <code>main</code> can assign the result to <code>message</code> again.`,
+      ],
       requires: "fn shout(mut text: String) -> String",
       starter: `fn main() {
     let message = String::from("hello");
@@ -843,6 +873,11 @@ ${callout("note", "The error is the lesson", `<p>Drop the <code>&lt;&#39;a&gt;</
         "Write <code>fn longest(a: &amp;str, b: &amp;str) -&gt; &amp;str</code> that returns whichever is longer. The signature in the starter is incomplete; the compiler will tell you what is missing. Call it with <code>\"ferris\"</code> and <code>\"crab\"</code>, then with <code>\"claw\"</code> and <code>\"shell\"</code>, and print both results.",
       hint:
         "Two input references and one output means you name the lifetime: <code>fn longest&lt;'a&gt;(a: &amp;'a str, b: &amp;'a str) -&gt; &amp;'a str</code>. The compiler error <code>E0106</code> prints that signature for you. Then compare <code>a.len()</code> and <code>b.len()</code>. The checker swaps the argument order too.",
+      tips: [
+        `Press Check with the starter as it is. The compiler will refuse the signature and quote the exact one you need; reading that error is part of the exercise.`,
+        `The missing piece is a lifetime. Add <code>&lt;'a&gt;</code> after the function name, and put <code>'a</code> after each <code>&amp;</code> in the parameters and the return type.`,
+        `For the body, compare <code>a.len()</code> and <code>b.len()</code>. Return <code>a</code> when it is longer or the same length, and <code>b</code> otherwise. No lifetime annotation is needed inside the body.`,
+      ],
       requires: "fn longest<'a>(a: &'a str, b: &'a str) -> &'a str",
       starter: `fn main() {
     println!("{}", longest("ferris", "crab"));
@@ -1012,6 +1047,11 @@ fn main() {
         "Model a <code>Book</code> with public fields <code>title</code>, <code>author</code>, and <code>pages</code>. Add <code>Book::new</code> and a method <code>reading_time</code> that returns minutes at 2 pages per minute. Create <code>The Hobbit</code> by <code>Tolkien</code> with 310 pages and print <code>The Hobbit by Tolkien: 155.0 minutes</code>.",
       hint:
         "Divide as <code>f64</code>: <code>self.pages as f64 / 2.0</code>. The constructor takes <code>&amp;str</code> parameters and builds <code>String</code> fields with <code>.to_string()</code>. Fields are private by default, so write <code>pub</code> in front of each one.",
+      tips: [
+        `The struct, the <code>pub</code> fields, and <code>Book::new</code> are already written. You only need to fill in <code>reading_time</code>.`,
+        `The method already receives <code>&amp;self</code>, so reach the field with <code>self.pages</code>. Pages is a <code>u32</code> and the return type is <code>f64</code>, so convert with <code>self.pages as f64</code>.`,
+        `At two pages per minute, divide the page count by <code>2.0</code>. Keep the decimal point so the division stays floating point: <code>self.pages as f64 / 2.0</code>.`,
+      ],
       requires: "struct Book with pub title, pub author, pub pages\nBook::new(title: &str, author: &str, pages: u32) -> Book\nfn reading_time(&self) -> f64",
       starter: `struct Book {
     pub title: String,
@@ -1204,6 +1244,11 @@ ${sample(`fn main() {
         "Define <code>enum TrafficLight</code> with <code>Red</code>, <code>Green</code>, and <code>Yellow</code>, plus <code>fn next(self) -&gt; TrafficLight</code> and <code>fn name(self) -&gt; &amp;'static str</code> returning <code>red</code>, <code>green</code>, or <code>yellow</code>. Start at <code>Red</code>, advance a mutable variable, and print four lines.",
       hint:
         "Match on <code>self</code> in both methods. Derive <code>Copy, Clone</code> so the value can be used after a call. The checker asks for <code>Red.next().next()</code>, so <code>next</code> must return an owned light rather than a reference.",
+      tips: [
+        `The enum, the <code>#[derive(Copy, Clone)]</code>, and the <code>main</code> loop are already correct. Fill in <code>next</code> and <code>name</code>.`,
+        `In <code>next</code>, match on <code>self</code> and return the following variant: <code>Red</code> to <code>Green</code>, <code>Green</code> to <code>Yellow</code>, and <code>Yellow</code> back to <code>Red</code>.`,
+        `In <code>name</code>, match on <code>self</code> and return a plain string literal: <code>"red"</code>, <code>"green"</code>, or <code>"yellow"</code>. Do not print; the caller prints.`,
+      ],
       requires: "enum TrafficLight { Red, Green, Yellow }\nfn next(self) -> TrafficLight\nfn name(self) -> &'static str",
       starter: `#[derive(Copy, Clone)]
 enum TrafficLight {
@@ -1364,6 +1409,12 @@ ${callout("note", "Capacity is not length", `<p>A vector tracks how many items i
         "Given <code>vec![4, 8, 15, 16, 23, 42]</code>, print <code>[4, 8, 16, 42]</code>, then <code>sum: 70</code>, then the original vector. Both numbers come from <code>fn evens(numbers: &amp;[i32]) -&gt; Vec&lt;i32&gt;</code> and <code>fn even_sum(numbers: &amp;[i32]) -&gt; i32</code>, which the checker calls with other vectors.",
       hint:
         "Use <code>.iter().filter(|n| **n % 2 == 0).copied().collect::&lt;Vec&lt;i32&gt;&gt;()</code>, and sum with <code>.iter().sum::&lt;i32&gt;()</code>. Neither function takes ownership, which is why the original stays usable.",
+      tips: [
+        `The <code>main</code> function already prints everything in the right order. You only need to implement <code>evens</code> and <code>even_sum</code>.`,
+        `Both functions receive a slice, <code>&amp;[i32]</code>, so iterate with <code>numbers.iter()</code>. Each item is <code>&amp;i32</code> inside the closure, which is why the check is <code>**n % 2 == 0</code>.`,
+        `<code>.filter(...)</code> keeps the numbers that pass the test, <code>.copied()</code> turns <code>&amp;i32</code> back into <code>i32</code>, and <code>.collect()</code> builds the <code>Vec&lt;i32&gt;</code> the return type asks for.`,
+        `For <code>even_sum</code>, reuse <code>evens(numbers)</code> and add up the result with <code>.iter().sum()</code>. Reusing the function you already wrote means one list of even numbers, not two separate rules.`,
+      ],
       requires: "fn evens(numbers: &[i32]) -> Vec<i32>\nfn even_sum(numbers: &[i32]) -> i32",
       starter: `fn main() {
     let numbers = vec![4, 8, 15, 16, 23, 42];
@@ -1510,6 +1561,11 @@ ${callout("note", "Rule of thumb", `<p>Use <code>Result</code> when the caller c
         "Write <code>fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt;</code> that returns <code>Err(\"empty list\".to_string())</code> for an empty slice. Call it with <code>&amp;[2, 4, 9]</code> and with <code>&amp;[]</code>, printing both with the debug format.",
       hint:
         "Return early: <code>if numbers.is_empty() { return Err(...); }</code>. Then sum as <code>f64</code> with <code>numbers.iter().map(|n| *n as f64).sum::&lt;f64&gt;()</code> and divide by <code>numbers.len() as f64</code>.",
+      tips: [
+        `The two <code>println!</code> calls in <code>main</code> are done. Implement <code>average</code> so the first call returns <code>Ok(5.0)</code> and the second returns <code>Err(...)</code>.`,
+        `Handle the empty slice first. <code>numbers.is_empty()</code> tells you there is nothing to average, so return <code>Err("empty list".to_string())</code> early.`,
+        `For the normal case, add the numbers as <code>f64</code> and divide by the length. Convert with <code>*n as f64</code> and <code>numbers.len() as f64</code>, then wrap the mean in <code>Ok(...)</code>.`,
+      ],
       requires: "fn average(numbers: &[i32]) -> Result<f64, String>",
       starter: `fn main() {
     println!("{:?}", average(&[2, 4, 9]));
@@ -1678,6 +1734,11 @@ ${callout("note", "The compiler is the teacher", `<p>Rust's error messages are w
         "Implement <code>fn word_count(text: &amp;str) -&gt; usize</code> so it counts whitespace-separated words, and write three tests of your own: a normal sentence, empty input, and input with extra spaces. The checker runs your tests, then hidden ones against sentences you have not seen. It also runs your tests against a broken <code>word_count</code>: all three have to fail there, or they are not checking anything.",
       hint:
         "<code>text.split_whitespace().count()</code> does the counting in one line. An assertion is <code>assert_eq!(word_count(\"one two three\"), 3);</code>. Run the checker with the <code>todo!()</code> calls still in place once, so you see what a failing test looks like.",
+      tips: [
+        `First make <code>word_count</code> work: <code>text.split_whitespace()</code> gives an iterator of words, and <code>.count()</code> turns it into a number.`,
+        `Replace each <code>todo!(...)</code> with one real assertion. <code>assert_eq!(word_count("one two three"), 3);</code> is the shape; do the same for <code>""</code> and for a string with extra spaces.`,
+        `Your tests need to fail on a wrong implementation, so assert a specific count rather than just that the function runs. The checker runs them against a deliberately broken <code>word_count</code> to prove that.`,
+      ],
       requires: "fn word_count(text: &str) -> usize\nthree #[test] functions of your own",
       starter: `fn word_count(text: &str) -> usize {
     // Count the whitespace-separated words.
@@ -1694,7 +1755,7 @@ mod tests {
 
     #[test]
     fn counts_words() {
-        todo!("assert the count for \"one two three\"");
+        todo!("assert the count for a normal sentence");
     }
 
     #[test]
@@ -1704,7 +1765,7 @@ mod tests {
 
     #[test]
     fn ignores_extra_spaces() {
-        todo!("assert the count for \"  two   words \"");
+        todo!("assert the count for a sentence with extra spaces");
     }
 }`,
       expected: ``,

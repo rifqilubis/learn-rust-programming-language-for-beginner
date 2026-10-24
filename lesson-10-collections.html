@@ -247,10 +247,6 @@
       <section class="exercise" id="exercise" data-exercise="collections" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
         <p class="exercise__prompt">Given <code>vec![4, 8, 15, 16, 23, 42]</code>, print <code>[4, 8, 16, 42]</code>, then <code>sum: 70</code>, then the original vector. Both numbers come from <code>fn evens(numbers: &amp;[i32]) -&gt; Vec&lt;i32&gt;</code> and <code>fn even_sum(numbers: &amp;[i32]) -&gt; i32</code>, which the checker calls with other vectors.</p>
-        <details class="hint">
-          <summary>Show a hint</summary>
-          <p>Use <code>.iter().filter(|n| **n % 2 == 0).copied().collect::&lt;Vec&lt;i32&gt;&gt;()</code>, and sum with <code>.iter().sum::&lt;i32&gt;()</code>. Neither function takes ownership, which is why the original stays usable.</p>
-        </details>
         <div class="exercise__panel exercise__panel--brief">
           <p class="exercise__panel-title">The checker calls these</p>
           <pre class="exercise__expected exercise__expected--sig">fn evens(numbers: &amp;[i32]) -&gt; Vec&lt;i32&gt;
@@ -261,6 +257,48 @@ fn even_sum(numbers: &amp;[i32]) -&gt; i32</pre>
           <pre class="exercise__expected">[4, 8, 16, 42]
 sum: 70
 [4, 8, 15, 16, 23, 42]</pre>
+        </div>
+        <div class="exercise__help">
+          <span class="exercise__help-label">Stuck?</span>
+          <details class="exercise__help-item" data-ex-help="tips">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show tips</span><span class="exercise__help-hide">Hide tips</span></summary>
+            <div class="exercise__panel exercise__tips" role="region" aria-labelledby="tips-collections-title">
+              <p class="exercise__panel-title" id="tips-collections-title">Work through these in order</p>
+              <ol class="exercise__tips-list">
+                <li>The <code>main</code> function already prints everything in the right order. You only need to implement <code>evens</code> and <code>even_sum</code>.</li>
+                <li>Both functions receive a slice, <code>&amp;[i32]</code>, so iterate with <code>numbers.iter()</code>. Each item is <code>&amp;i32</code> inside the closure, which is why the check is <code>**n % 2 == 0</code>.</li>
+                <li><code>.filter(...)</code> keeps the numbers that pass the test, <code>.copied()</code> turns <code>&amp;i32</code> back into <code>i32</code>, and <code>.collect()</code> builds the <code>Vec&lt;i32&gt;</code> the return type asks for.</li>
+                <li>For <code>even_sum</code>, reuse <code>evens(numbers)</code> and add up the result with <code>.iter().sum()</code>. Reusing the function you already wrote means one list of even numbers, not two separate rules.</li>
+              </ol>
+              <p class="exercise__tips-short"><strong>Short version:</strong> Use <code>.iter().filter(|n| **n % 2 == 0).copied().collect::&lt;Vec&lt;i32&gt;&gt;()</code>, and sum with <code>.iter().sum::&lt;i32&gt;()</code>. Neither function takes ownership, which is why the original stays usable.</p>
+            </div>
+          </details>
+          <details class="exercise__help-item" data-ex-help="solution">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show solution</span><span class="exercise__help-hide">Hide solution</span></summary>
+            <div class="exercise__panel exercise__solution" role="region" aria-labelledby="solution-collections-title">
+              <p class="exercise__panel-title" id="solution-collections-title">Reference solution</p>
+              <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
+              <pre class="exercise__code"><code class="language-rust">fn main() {
+    let numbers = vec![4, 8, 15, 16, 23, 42];
+
+    println!("{:?}", evens(&amp;numbers));
+    println!("sum: {}", even_sum(&amp;numbers));
+    println!("{:?}", numbers);
+}
+
+fn evens(numbers: &amp;[i32]) -&gt; Vec&lt;i32&gt; {
+    numbers.iter().filter(|n| **n % 2 == 0).copied().collect()
+}
+
+fn even_sum(numbers: &amp;[i32]) -&gt; i32 {
+    evens(numbers).iter().sum()
+}</code></pre>
+              <div class="exercise__solution-actions">
+                <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
+                <button class="btn btn--quiet" type="button" data-ex-fill>Load into editor</button>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="bench exercise__bench">
           <div class="bench__bar">

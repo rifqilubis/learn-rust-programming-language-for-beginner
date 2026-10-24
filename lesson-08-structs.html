@@ -292,10 +292,6 @@ fn main() {
       <section class="exercise" id="exercise" data-exercise="structs" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
         <p class="exercise__prompt">Model a <code>Book</code> with public fields <code>title</code>, <code>author</code>, and <code>pages</code>. Add <code>Book::new</code> and a method <code>reading_time</code> that returns minutes at 2 pages per minute. Create <code>The Hobbit</code> by <code>Tolkien</code> with 310 pages and print <code>The Hobbit by Tolkien: 155.0 minutes</code>.</p>
-        <details class="hint">
-          <summary>Show a hint</summary>
-          <p>Divide as <code>f64</code>: <code>self.pages as f64 / 2.0</code>. The constructor takes <code>&amp;str</code> parameters and builds <code>String</code> fields with <code>.to_string()</code>. Fields are private by default, so write <code>pub</code> in front of each one.</p>
-        </details>
         <div class="exercise__panel exercise__panel--brief">
           <p class="exercise__panel-title">The checker calls these</p>
           <pre class="exercise__expected exercise__expected--sig">struct Book with pub title, pub author, pub pages
@@ -305,6 +301,61 @@ fn reading_time(&amp;self) -&gt; f64</pre>
         <div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">The Hobbit by Tolkien: 155.0 minutes</pre>
+        </div>
+        <div class="exercise__help">
+          <span class="exercise__help-label">Stuck?</span>
+          <details class="exercise__help-item" data-ex-help="tips">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show tips</span><span class="exercise__help-hide">Hide tips</span></summary>
+            <div class="exercise__panel exercise__tips" role="region" aria-labelledby="tips-structs-title">
+              <p class="exercise__panel-title" id="tips-structs-title">Work through these in order</p>
+              <ol class="exercise__tips-list">
+                <li>The struct, the <code>pub</code> fields, and <code>Book::new</code> are already written. You only need to fill in <code>reading_time</code>.</li>
+                <li>The method already receives <code>&amp;self</code>, so reach the field with <code>self.pages</code>. Pages is a <code>u32</code> and the return type is <code>f64</code>, so convert with <code>self.pages as f64</code>.</li>
+                <li>At two pages per minute, divide the page count by <code>2.0</code>. Keep the decimal point so the division stays floating point: <code>self.pages as f64 / 2.0</code>.</li>
+              </ol>
+              <p class="exercise__tips-short"><strong>Short version:</strong> Divide as <code>f64</code>: <code>self.pages as f64 / 2.0</code>. The constructor takes <code>&amp;str</code> parameters and builds <code>String</code> fields with <code>.to_string()</code>. Fields are private by default, so write <code>pub</code> in front of each one.</p>
+            </div>
+          </details>
+          <details class="exercise__help-item" data-ex-help="solution">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show solution</span><span class="exercise__help-hide">Hide solution</span></summary>
+            <div class="exercise__panel exercise__solution" role="region" aria-labelledby="solution-structs-title">
+              <p class="exercise__panel-title" id="solution-structs-title">Reference solution</p>
+              <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
+              <pre class="exercise__code"><code class="language-rust">struct Book {
+    pub title: String,
+    pub author: String,
+    pub pages: u32,
+}
+
+impl Book {
+    fn new(title: &amp;str, author: &amp;str, pages: u32) -&gt; Book {
+        Book {
+            title: title.to_string(),
+            author: author.to_string(),
+            pages,
+        }
+    }
+
+    fn reading_time(&amp;self) -&gt; f64 {
+        self.pages as f64 / 2.0
+    }
+}
+
+fn main() {
+    let book = Book::new("The Hobbit", "Tolkien", 310);
+    println!(
+        "{} by {}: {:.1} minutes",
+        book.title,
+        book.author,
+        book.reading_time()
+    );
+}</code></pre>
+              <div class="exercise__solution-actions">
+                <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
+                <button class="btn btn--quiet" type="button" data-ex-fill>Load into editor</button>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="bench exercise__bench">
           <div class="bench__bar">

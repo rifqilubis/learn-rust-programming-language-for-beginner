@@ -259,10 +259,6 @@
       <section class="exercise" id="exercise" data-exercise="types" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">07</span><span>Exercise</span></h2>
         <p class="exercise__prompt">Build the tuple <code>("coffee", 3, 4.5)</code> and print it with the debug format. Then print <code>line total: 13.50</code>, computed by <code>fn line_total(quantity: u32, price: f64) -&gt; f64</code>. The checker calls that function with other quantities and prices.</p>
-        <details class="hint">
-          <summary>Show a hint</summary>
-          <p>Multiply <code>quantity as f64 * price</code>. Destructure the tuple to get the two numbers, and print the total with <code>{:.2}</code>.</p>
-        </details>
         <div class="exercise__panel exercise__panel--brief">
           <p class="exercise__panel-title">The checker calls these</p>
           <pre class="exercise__expected exercise__expected--sig">fn line_total(quantity: u32, price: f64) -&gt; f64</pre>
@@ -271,6 +267,44 @@
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">("coffee", 3, 4.5)
 line total: 13.50</pre>
+        </div>
+        <div class="exercise__help">
+          <span class="exercise__help-label">Stuck?</span>
+          <details class="exercise__help-item" data-ex-help="tips">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show tips</span><span class="exercise__help-hide">Hide tips</span></summary>
+            <div class="exercise__panel exercise__tips" role="region" aria-labelledby="tips-types-title">
+              <p class="exercise__panel-title" id="tips-types-title">Work through these in order</p>
+              <ol class="exercise__tips-list">
+                <li>The tuple printing and the <code>println!</code> in <code>main</code> are already done. Only the body of <code>line_total</code> needs work.</li>
+                <li>The two values have different types: <code>quantity</code> is <code>u32</code>, <code>price</code> is <code>f64</code>. Convert the quantity with <code>quantity as f64</code> before multiplying.</li>
+                <li>The last line of the function is the return value, so it needs no <code>return</code> keyword and no semicolon: <code>quantity as f64 * price</code>.</li>
+              </ol>
+              <p class="exercise__tips-short"><strong>Short version:</strong> Multiply <code>quantity as f64 * price</code>. Destructure the tuple to get the two numbers, and print the total with <code>{:.2}</code>.</p>
+            </div>
+          </details>
+          <details class="exercise__help-item" data-ex-help="solution">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show solution</span><span class="exercise__help-hide">Hide solution</span></summary>
+            <div class="exercise__panel exercise__solution" role="region" aria-labelledby="solution-types-title">
+              <p class="exercise__panel-title" id="solution-types-title">Reference solution</p>
+              <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
+              <pre class="exercise__code"><code class="language-rust">fn main() {
+    let item = ("coffee", 3, 4.5);
+
+    println!("{:?}", item);
+
+    let (_name, quantity, price) = item;
+    println!("line total: {:.2}", line_total(quantity, price));
+}
+
+fn line_total(quantity: u32, price: f64) -&gt; f64 {
+    quantity as f64 * price
+}</code></pre>
+              <div class="exercise__solution-actions">
+                <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
+                <button class="btn btn--quiet" type="button" data-ex-fill>Load into editor</button>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="bench exercise__bench">
           <div class="bench__bar">

@@ -95,3 +95,16 @@ implementation so tests that cannot fail are rejected.
 The next lesson stays locked until the exercise passes; the pass and the draft
 code both persist in `localStorage`, so a reload does not cost the reader their
 work.
+
+Being stuck is not a failure state, so every exercise also carries help. Two
+native `<details>` disclosures sit between the target and the editor: **Show
+tips** opens at least three graduated steps (plus the original one-line hint as
+a short version), and **Show solution** opens a reference answer with Copy and
+Load into editor. They work with JavaScript off and are large enough to tap.
+
+None of that is a bypass. Opening either panel, copying the solution, or loading
+it into the editor changes no progress state; the gate opens only when Check
+answer actually passes. Loading the solution fills the editor and leaves the
+lesson locked, and after two failed checks the tips control is nudged so the
+reader notices it. The build fails if a lesson is missing three tips or a
+non-empty solution, and `verify-exercises.mjs` rejects the same omission.

@@ -282,10 +282,6 @@ fn main() {
       <section class="exercise" id="exercise" data-exercise="enums-and-match" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
         <p class="exercise__prompt">Define <code>enum TrafficLight</code> with <code>Red</code>, <code>Green</code>, and <code>Yellow</code>, plus <code>fn next(self) -&gt; TrafficLight</code> and <code>fn name(self) -&gt; &amp;'static str</code> returning <code>red</code>, <code>green</code>, or <code>yellow</code>. Start at <code>Red</code>, advance a mutable variable, and print four lines.</p>
-        <details class="hint">
-          <summary>Show a hint</summary>
-          <p>Match on <code>self</code> in both methods. Derive <code>Copy, Clone</code> so the value can be used after a call. The checker asks for <code>Red.next().next()</code>, so <code>next</code> must return an owned light rather than a reference.</p>
-        </details>
         <div class="exercise__panel exercise__panel--brief">
           <p class="exercise__panel-title">The checker calls these</p>
           <pre class="exercise__expected exercise__expected--sig">enum TrafficLight { Red, Green, Yellow }
@@ -298,6 +294,64 @@ fn name(self) -&gt; &amp;'static str</pre>
 green
 yellow
 red</pre>
+        </div>
+        <div class="exercise__help">
+          <span class="exercise__help-label">Stuck?</span>
+          <details class="exercise__help-item" data-ex-help="tips">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show tips</span><span class="exercise__help-hide">Hide tips</span></summary>
+            <div class="exercise__panel exercise__tips" role="region" aria-labelledby="tips-enums-and-match-title">
+              <p class="exercise__panel-title" id="tips-enums-and-match-title">Work through these in order</p>
+              <ol class="exercise__tips-list">
+                <li>The enum, the <code>#[derive(Copy, Clone)]</code>, and the <code>main</code> loop are already correct. Fill in <code>next</code> and <code>name</code>.</li>
+                <li>In <code>next</code>, match on <code>self</code> and return the following variant: <code>Red</code> to <code>Green</code>, <code>Green</code> to <code>Yellow</code>, and <code>Yellow</code> back to <code>Red</code>.</li>
+                <li>In <code>name</code>, match on <code>self</code> and return a plain string literal: <code>"red"</code>, <code>"green"</code>, or <code>"yellow"</code>. Do not print; the caller prints.</li>
+              </ol>
+              <p class="exercise__tips-short"><strong>Short version:</strong> Match on <code>self</code> in both methods. Derive <code>Copy, Clone</code> so the value can be used after a call. The checker asks for <code>Red.next().next()</code>, so <code>next</code> must return an owned light rather than a reference.</p>
+            </div>
+          </details>
+          <details class="exercise__help-item" data-ex-help="solution">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show solution</span><span class="exercise__help-hide">Hide solution</span></summary>
+            <div class="exercise__panel exercise__solution" role="region" aria-labelledby="solution-enums-and-match-title">
+              <p class="exercise__panel-title" id="solution-enums-and-match-title">Reference solution</p>
+              <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
+              <pre class="exercise__code"><code class="language-rust">#[derive(Copy, Clone)]
+enum TrafficLight {
+    Red,
+    Green,
+    Yellow,
+}
+
+impl TrafficLight {
+    fn next(self) -&gt; TrafficLight {
+        match self {
+            TrafficLight::Red =&gt; TrafficLight::Green,
+            TrafficLight::Green =&gt; TrafficLight::Yellow,
+            TrafficLight::Yellow =&gt; TrafficLight::Red,
+        }
+    }
+
+    fn name(self) -&gt; &amp;'static str {
+        match self {
+            TrafficLight::Red =&gt; "red",
+            TrafficLight::Green =&gt; "green",
+            TrafficLight::Yellow =&gt; "yellow",
+        }
+    }
+}
+
+fn main() {
+    let mut light = TrafficLight::Red;
+    for _ in 0..4 {
+        println!("{}", light.name());
+        light = light.next();
+    }
+}</code></pre>
+              <div class="exercise__solution-actions">
+                <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
+                <button class="btn btn--quiet" type="button" data-ex-fill>Load into editor</button>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="bench exercise__bench">
           <div class="bench__bar">

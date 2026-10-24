@@ -95,6 +95,122 @@ record(
   `data-open=${gateStart.gateOpen} next visible=${gateStart.nextVisible} locked button visible=${gateStart.lockedVisible} complete disabled=${gateStart.completeDisabled}`,
 );
 
+/* Help must be available before a reader ever gets a code working, and must
+   never be the thing that opens the gate. A <details> starts closed; opening
+   it should reveal the tips, change the label, and leave the exercise exactly
+   as it was. */
+const helpStart = await page.evaluate(() => {
+  const details = [...document.querySelectorAll("[data-ex-help]")];
+  const exercise = document.querySelector("[data-exercise]");
+  return {
+    count: details.length,
+    tipsOpen: details.find((item) => item.dataset.exHelp === "tips")?.open,
+    solutionOpen: details.find((item) => item.dataset.exHelp === "solution")?.open,
+    passed: exercise.dataset.passed,
+    gateOpen: document.querySelector("[data-next-gate]").dataset.open,
+    completeDisabled: document.querySelector("[data-complete]").disabled,
+  };
+});
+record(
+  "help starts closed",
+  `${helpStart.count} panels, tips open=${helpStart.tipsOpen} solution open=${helpStart.solutionOpen}, passed=${helpStart.passed}, gate=${helpStart.gateOpen}`,
+);
+
+await page.click('[data-ex-help="tips"] summary');
+await page.waitForFunction(() => {
+  const details = document.querySelector('[data-ex-help="tips"]');
+  const hide = details.querySelector(".exercise__help-hide");
+  return details.open && hide && getComputedStyle(hide).display !== "none";
+});
+const tipsOpen = await page.evaluate(() => {
+  const details = document.querySelector('[data-ex-help="tips"]');
+  const hide = details.querySelector(".exercise__help-hide");
+  const exercise = document.querySelector("[data-exercise]");
+  return {
+    open: details.open,
+    label: hide && getComputedStyle(hide).display !== "none" ? hide.textContent.trim() : "Show tips",
+    tips: details.querySelectorAll(".exercise__tips-list li").length,
+    hasShort: Boolean(details.querySelector(".exercise__tips-short")),
+    passed: exercise.dataset.passed,
+    gateOpen: document.querySelector("[data-next-gate]").dataset.open,
+    completeDisabled: document.querySelector("[data-complete]").disabled,
+  };
+});
+record(
+  "tips open",
+  `label="${tipsOpen.label}" ${tipsOpen.tips} tips, short version=${tipsOpen.hasShort}, passed=${tipsOpen.passed}, gate=${tipsOpen.gateOpen}`,
+);
+
+await page.click('[data-ex-help="tips"] summary');
+await page.waitForFunction(() => {
+  const details = document.querySelector('[data-ex-help="tips"]');
+  const hide = details.querySelector(".exercise__help-hide");
+  return !details.open && (!hide || getComputedStyle(hide).display === "none");
+});
+const tipsClosed = await page.evaluate(() => {
+  const details = document.querySelector('[data-ex-help="tips"]');
+  return details.querySelector(".exercise__help-show").textContent.trim();
+});
+record("tips close", `label="${tipsClosed}"`);
+
+const editorBeforeSolution = await page.$eval("[data-ex-source]", (el) => el.value);
+await page.click('[data-ex-help="solution"] summary');
+await page.waitForFunction(() => {
+  const details = document.querySelector('[data-ex-help="solution"]');
+  const hide = details.querySelector(".exercise__help-hide");
+  return details.open && hide && getComputedStyle(hide).display !== "none";
+});
+const solutionOpen = await page.evaluate(() => {
+  const details = document.querySelector('[data-ex-help="solution"]');
+  const exercise = document.querySelector("[data-exercise]");
+  return {
+    label: details.querySelector(".exercise__help-hide").textContent.trim(),
+    code: details.querySelector("pre code").textContent.trim(),
+    hasCopy: Boolean(details.querySelector("[data-ex-copy]")),
+    hasFill: Boolean(details.querySelector("[data-ex-fill]")),
+    passed: exercise.dataset.passed,
+    gateOpen: document.querySelector("[data-next-gate]").dataset.open,
+    completeDisabled: document.querySelector("[data-complete]").disabled,
+    editor: document.querySelector("[data-ex-source]").value,
+  };
+});
+record(
+  "solution open",
+  `label="${solutionOpen.label}" ${solutionOpen.code.split("\n").length} lines, copy=${solutionOpen.hasCopy}, load=${solutionOpen.hasFill}, passed=${solutionOpen.passed}, gate=${solutionOpen.gateOpen}, editor unchanged=${solutionOpen.editor === editorBeforeSolution}`,
+);
+
+await page.click("[data-ex-fill]");
+await page.waitForFunction(
+  (starterValue) => document.querySelector("[data-ex-source]").value !== starterValue,
+  {},
+  editorBeforeSolution,
+);
+const loaded = await page.evaluate(() => {
+  const exercise = document.querySelector("[data-exercise]");
+  return {
+    editorMatchesSolution:
+      document.querySelector("[data-ex-source]").value ===
+      document.querySelector('[data-ex-help="solution"] pre code').textContent,
+    passed: exercise.dataset.passed,
+    gateOpen: document.querySelector("[data-next-gate]").dataset.open,
+    completeDisabled: document.querySelector("[data-complete]").disabled,
+    state: document.querySelector("[data-ex-state]").textContent.trim(),
+    verdict: document.querySelector("[data-ex-verdict]").textContent.trim(),
+  };
+});
+record(
+  "loading the solution does not unlock",
+  `editor matches=${loaded.editorMatchesSolution}, passed=${loaded.passed}, gate=${loaded.gateOpen}, complete disabled=${loaded.completeDisabled}, state="${loaded.state}"`,
+);
+
+/* Reset the editor so the rest of the flow still tests a reader solving it. */
+await page.click("[data-ex-reset]");
+await page.waitForFunction(
+  (starterValue) => document.querySelector("[data-ex-source]").value === starterValue,
+  {},
+  editorBeforeSolution,
+);
+
 async function answer(code) {
   await page.evaluate((source) => {
     const textarea = document.querySelector("[data-ex-source]");
@@ -132,6 +248,21 @@ const printed = await answer(`fn main() {
     println!("discounted: 45.00");
 }`);
 record("printing the expected output", `state="${printed.state}" passed=${printed.passed} verdict="${printed.verdict}"`);
+
+/* Two failures should point the reader at the help without opening it for
+   them. Opening the tips clears the nudge. */
+const nudged = await page.evaluate(() =>
+  document.querySelector('[data-ex-help="tips"] summary').getAttribute("data-nudge"),
+);
+record("tips nudged after two failures", String(nudged));
+await page.click('[data-ex-help="tips"] summary');
+await page.waitForFunction(() => document.querySelector('[data-ex-help="tips"]').open);
+const nudgeCleared = await page.evaluate(() =>
+  document.querySelector('[data-ex-help="tips"] summary').hasAttribute("data-nudge"),
+);
+record("opening tips clears the nudge", String(!nudgeCleared));
+await page.click('[data-ex-help="tips"] summary');
+await page.waitForFunction(() => !document.querySelector('[data-ex-help="tips"]').open);
 
 /* The next cheat: define the functions, but hard-code the example. */
 const hardcoded = await answer(`fn main() {
@@ -265,6 +396,43 @@ const overflow = await page.evaluate(() => ({
 }));
 record("horizontal overflow", `scrollWidth ${overflow.scrollWidth} vs clientWidth ${overflow.clientWidth}`);
 
+/* Help has to be tappable on a phone too, and its panels must not widen the
+   page when they open. */
+await goto("/lesson-02-variables-and-mutability.html");
+const helpSizes = await page.evaluate(() => {
+  const summaries = [...document.querySelectorAll("[data-ex-help] > summary")];
+  return summaries.map((summary) => {
+    const rect = summary.getBoundingClientRect();
+    return `${summary.innerText.trim()} ${Math.round(rect.width)}x${Math.round(rect.height)}`;
+  });
+});
+record("help tap targets", helpSizes.join(", "));
+await page.click('[data-ex-help="tips"] summary');
+await page.click('[data-ex-help="solution"] summary');
+const helpOverflow = await page.evaluate(() => ({
+  scrollWidth: document.documentElement.scrollWidth,
+  clientWidth: document.documentElement.clientWidth,
+  panelWidth: document.querySelector('[data-ex-help="solution"] .exercise__panel').getBoundingClientRect().width,
+  codeWidth: document.querySelector('[data-ex-help="solution"] pre').scrollWidth,
+}));
+record(
+  "open help on mobile",
+  `scrollWidth ${helpOverflow.scrollWidth} vs clientWidth ${helpOverflow.clientWidth}, solution code ${helpOverflow.codeWidth}px inside ${Math.round(helpOverflow.panelWidth)}px panel`,
+);
+
+/* The on-this-page links are standalone targets too, not inline links. */
+const tocSizes = await page.$$eval(".toc a", (links) =>
+  links.map((link) => Math.round(link.getBoundingClientRect().height)),
+);
+record(
+  "toc tap targets",
+  tocSizes.every((height) => height >= 44) ? "all at least 44px" : `${Math.min(...tocSizes)}px minimum`,
+);
+
+/* The tap-target scan below is about the home page; return to it now that the
+   help checks have finished. */
+await goto("/index.html");
+
 await page.click("[data-nav-toggle]");
 await page.waitForFunction(() => document.querySelector("[data-nav-panel]").dataset.open === "true");
 record("menu opens", "panel data-open=true");
@@ -316,6 +484,27 @@ const noJs = await page.evaluate(() => {
   };
 });
 record("no-JS fallback", `next link visible=${noJs.nextVisible} locked button visible=${noJs.lockedVisible}`);
+
+/* Help is native <details>, so it has to open with JavaScript off too. */
+const noJsHelp = await page.evaluate(() => {
+  const details = document.querySelector('[data-ex-help="tips"]');
+  return { exists: Boolean(details), open: details ? details.open : null };
+});
+record("no-JS help exists", `details=${noJsHelp.exists} starts open=${noJsHelp.open}`);
+await page.click('[data-ex-help="tips"] summary');
+const noJsHelpOpen = await page.evaluate(() => {
+  const details = document.querySelector('[data-ex-help="tips"]');
+  const hide = details.querySelector(".exercise__help-hide");
+  return {
+    open: details.open,
+    tips: details.querySelectorAll(".exercise__tips-list li").length,
+    label: hide && getComputedStyle(hide).display !== "none" ? hide.textContent.trim() : "Show tips",
+  };
+});
+record(
+  "no-JS help opens",
+  `open=${noJsHelpOpen.open} ${noJsHelpOpen.tips} tips label="${noJsHelpOpen.label}"`,
+);
 await page.setJavaScriptEnabled(true);
 
 /* keyboard: the first Tab stop is the skip link and it must show a ring */
@@ -384,6 +573,17 @@ const problems = results.filter(
     (item.step === "horizontal overflow" && !item.detail.startsWith("scrollWidth 390")) ||
     (item.step === "console errors" && item.detail !== "none") ||
     (item.step === "tap targets under 44px" && item.detail !== "none") ||
+    (item.step === "help tap targets" && /(^|, )\S.* (4[0-3]|[0-9]|[12][0-9]|3[0-9])px/.test(item.detail)) ||
+    (item.step === "open help on mobile" && !item.detail.startsWith("scrollWidth 390")) ||
+    (item.step === "toc tap targets" && item.detail !== "all at least 44px") ||
+    (item.step === "tips nudged after two failures" && item.detail !== "true") ||
+    (item.step === "opening tips clears the nudge" && item.detail !== "true") ||
+    (item.step === "help starts closed" && !/tips open=false solution open=false, passed=false, gate=false/.test(item.detail)) ||
+    (item.step === "tips open" && (!item.detail.includes('label="Hide tips"') || item.detail.includes("gate=true"))) ||
+    (item.step === "tips close" && item.detail !== 'label="Show tips"') ||
+    (item.step === "solution open" && (!item.detail.includes('label="Hide solution"') || item.detail.includes("gate=true"))) ||
+    (item.step === "loading the solution does not unlock" && /passed=true/.test(item.detail)) ||
+    (item.step === "loading the solution does not unlock" && !/editor matches=true/.test(item.detail)) ||
     (item.step === "light theme after reload" && !item.detail.includes("attr=light")) ||
     ((item.step === "printing the expected output" || item.step === "hard-coded functions") && item.detail.includes("passed=true")),
 );

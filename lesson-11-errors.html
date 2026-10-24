@@ -262,10 +262,6 @@ fn main() {
       <section class="exercise" id="exercise" data-exercise="errors" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">06</span><span>Exercise</span></h2>
         <p class="exercise__prompt">Write <code>fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt;</code> that returns <code>Err("empty list".to_string())</code> for an empty slice. Call it with <code>&amp;[2, 4, 9]</code> and with <code>&amp;[]</code>, printing both with the debug format.</p>
-        <details class="hint">
-          <summary>Show a hint</summary>
-          <p>Return early: <code>if numbers.is_empty() { return Err(...); }</code>. Then sum as <code>f64</code> with <code>numbers.iter().map(|n| *n as f64).sum::&lt;f64&gt;()</code> and divide by <code>numbers.len() as f64</code>.</p>
-        </details>
         <div class="exercise__panel exercise__panel--brief">
           <p class="exercise__panel-title">The checker calls these</p>
           <pre class="exercise__expected exercise__expected--sig">fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt;</pre>
@@ -274,6 +270,44 @@ fn main() {
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">Ok(5.0)
 Err("empty list")</pre>
+        </div>
+        <div class="exercise__help">
+          <span class="exercise__help-label">Stuck?</span>
+          <details class="exercise__help-item" data-ex-help="tips">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show tips</span><span class="exercise__help-hide">Hide tips</span></summary>
+            <div class="exercise__panel exercise__tips" role="region" aria-labelledby="tips-errors-title">
+              <p class="exercise__panel-title" id="tips-errors-title">Work through these in order</p>
+              <ol class="exercise__tips-list">
+                <li>The two <code>println!</code> calls in <code>main</code> are done. Implement <code>average</code> so the first call returns <code>Ok(5.0)</code> and the second returns <code>Err(...)</code>.</li>
+                <li>Handle the empty slice first. <code>numbers.is_empty()</code> tells you there is nothing to average, so return <code>Err("empty list".to_string())</code> early.</li>
+                <li>For the normal case, add the numbers as <code>f64</code> and divide by the length. Convert with <code>*n as f64</code> and <code>numbers.len() as f64</code>, then wrap the mean in <code>Ok(...)</code>.</li>
+              </ol>
+              <p class="exercise__tips-short"><strong>Short version:</strong> Return early: <code>if numbers.is_empty() { return Err(...); }</code>. Then sum as <code>f64</code> with <code>numbers.iter().map(|n| *n as f64).sum::&lt;f64&gt;()</code> and divide by <code>numbers.len() as f64</code>.</p>
+            </div>
+          </details>
+          <details class="exercise__help-item" data-ex-help="solution">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show solution</span><span class="exercise__help-hide">Hide solution</span></summary>
+            <div class="exercise__panel exercise__solution" role="region" aria-labelledby="solution-errors-title">
+              <p class="exercise__panel-title" id="solution-errors-title">Reference solution</p>
+              <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
+              <pre class="exercise__code"><code class="language-rust">fn main() {
+    println!("{:?}", average(&amp;[2, 4, 9]));
+    println!("{:?}", average(&amp;[]));
+}
+
+fn average(numbers: &amp;[i32]) -&gt; Result&lt;f64, String&gt; {
+    if numbers.is_empty() {
+        return Err("empty list".to_string());
+    }
+    let sum: f64 = numbers.iter().map(|n| *n as f64).sum();
+    Ok(sum / numbers.len() as f64)
+}</code></pre>
+              <div class="exercise__solution-actions">
+                <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
+                <button class="btn btn--quiet" type="button" data-ex-fill>Load into editor</button>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="bench exercise__bench">
           <div class="bench__bar">

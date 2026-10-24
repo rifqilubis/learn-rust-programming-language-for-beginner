@@ -382,12 +382,25 @@ function exerciseBlock(lesson, sectionCount) {
   const tests = exercise.mode === "tests";
   const field = `ex-${lesson.number}-${lesson.slug}`;
   const num = String(sectionCount + 1).padStart(2, "0");
+  const tipsId = `tips-${lesson.slug}`;
+  const solutionId = `solution-${lesson.slug}`;
   const config = JSON.stringify({
     slug: lesson.slug,
     mode: tests ? "tests" : "run",
     expected: exercise.expected ?? "",
     ownTests: exercise.ownTests ?? 0,
   }).replace(/</g, "\\u003c");
+
+  if (
+    !Array.isArray(exercise.tips) ||
+    exercise.tips.length < 3 ||
+    exercise.tips.some((tip) => typeof tip !== "string" || tip.trim() === "")
+  ) {
+    throw new Error(`lesson ${lesson.slug}: add at least three beginner tips to the exercise`);
+  }
+  if (typeof exercise.solution !== "string" || exercise.solution.trim() === "") {
+    throw new Error(`lesson ${lesson.slug}: add a reference solution to the exercise`);
+  }
 
   const requirement = exercise.requires
     ? `<div class="exercise__panel exercise__panel--brief">
@@ -408,15 +421,43 @@ function exerciseBlock(lesson, sectionCount) {
         </div>`
       : "";
 
+  /* Help sits below the target and above the editor, where a stuck reader is
+     already looking. It is a native disclosure, so it still works with
+     JavaScript off, and opening either panel never unlocks the lesson: only a
+     passing Check answer does. Loading the solution only fills the box; it
+     does not run or pass anything. */
+  const help = `<div class="exercise__help">
+          <span class="exercise__help-label">Stuck?</span>
+          <details class="exercise__help-item" data-ex-help="tips">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show tips</span><span class="exercise__help-hide">Hide tips</span></summary>
+            <div class="exercise__panel exercise__tips" role="region" aria-labelledby="${tipsId}-title">
+              <p class="exercise__panel-title" id="${tipsId}-title">Work through these in order</p>
+              <ol class="exercise__tips-list">
+${exercise.tips.map((tip) => `                <li>${tip}</li>`).join("\n")}
+              </ol>
+              <p class="exercise__tips-short"><strong>Short version:</strong> ${exercise.hint}</p>
+            </div>
+          </details>
+          <details class="exercise__help-item" data-ex-help="solution">
+            <summary class="btn btn--ghost"><span class="exercise__help-show">Show solution</span><span class="exercise__help-hide">Hide solution</span></summary>
+            <div class="exercise__panel exercise__solution" role="region" aria-labelledby="${solutionId}-title">
+              <p class="exercise__panel-title" id="${solutionId}-title">Reference solution</p>
+              <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
+              <pre class="exercise__code"><code class="language-rust">${escapeHtml(exercise.solution)}</code></pre>
+              <div class="exercise__solution-actions">
+                <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
+                <button class="btn btn--quiet" type="button" data-ex-fill>Load into editor</button>
+              </div>
+            </div>
+          </details>
+        </div>`;
+
   return `<section class="exercise" id="exercise" data-exercise="${lesson.slug}" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">${num}</span><span>Exercise</span></h2>
         <p class="exercise__prompt">${exercise.prompt}</p>
-        <details class="hint">
-          <summary>Show a hint</summary>
-          <p>${exercise.hint}</p>
-        </details>
         ${requirement}
         ${target}
+        ${help}
         <div class="bench exercise__bench">
           <div class="bench__bar">
             <span class="bench__file">main.rs</span>

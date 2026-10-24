@@ -118,6 +118,12 @@ svg {
   max-width: 100%;
 }
 
+/* A class that sets `display` must never resurrect a hidden panel. Buttons are
+   the usual offender, because .btn is inline-flex. */
+[hidden] {
+  display: none !important;
+}
+
 h1,
 h2,
 h3,
@@ -1306,6 +1312,151 @@ samp {
   margin: 0;
 }
 
+/* Help: tips and the reference solution. Both panels stay hidden until the
+   reader asks for them, and neither one unlocks the lesson. */
+
+.exercise__help {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.6rem;
+  max-width: 68ch;
+  margin: 0 0 1.1rem;
+}
+
+.exercise__help-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-right: 0.15rem;
+}
+
+.exercise__help-item {
+  min-width: 0;
+}
+
+.exercise__help-item[open] {
+  flex: 1 1 100%;
+}
+
+/* Swap the visible label from the `open` attribute alone, so the disclosure
+   still says the right thing when JavaScript is off. */
+.exercise__help-hide {
+  display: none;
+}
+
+.exercise__help-item[open] .exercise__help-show {
+  display: none;
+}
+
+.exercise__help-item[open] .exercise__help-hide {
+  display: inline;
+}
+
+.exercise__help-item > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.exercise__help-item > summary::-webkit-details-marker {
+  display: none;
+}
+
+.exercise__help-item > summary::after {
+  content: "+";
+  font-family: var(--mono);
+  font-size: 0.9em;
+  opacity: 0.7;
+}
+
+.exercise__help-item[open] > summary::after {
+  content: "−";
+}
+
+.exercise__help-item[open] > summary {
+  margin-bottom: 0.8rem;
+}
+
+.exercise__help .btn {
+  min-height: 44px;
+  padding-inline: 0.9rem;
+}
+
+.exercise__help .btn[data-nudge="true"] {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.exercise__help-item .exercise__panel {
+  margin-bottom: 0;
+}
+
+.exercise__tips-list {
+  margin: 0;
+  padding-left: 1.35rem;
+  display: grid;
+  gap: 0.55rem;
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+
+.exercise__tips-list li::marker {
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+.exercise__tips-list code {
+  white-space: normal;
+}
+
+.exercise__tips-short {
+  margin: 0.85rem 0 0;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.exercise__code {
+  margin: 0.75rem 0 0;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid #2a231e;
+  border-radius: var(--radius);
+  background: var(--bench);
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: #efe7dc;
+  tab-size: 4;
+}
+
+.exercise__code code {
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  white-space: pre;
+  color: inherit;
+}
+
+.exercise__solution-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+
+.exercise__solution-actions .btn {
+  min-height: 44px;
+}
+
 .exercise__expected {
   margin: 0;
   padding: 0.55rem 0.7rem;
@@ -1491,7 +1642,9 @@ html.js .next-gate[data-open="false"] .next-gate__note {
 }
 
 .toc a {
-  display: block;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   padding: 0.4rem 0;
   font-size: 0.875rem;
   color: var(--muted);

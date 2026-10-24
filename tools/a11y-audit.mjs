@@ -28,6 +28,17 @@ for (const theme of ["dark", "light"]) {
     await page.goto(base + path, { waitUntil: "networkidle2" });
     await page.evaluate((value) => localStorage.setItem("rustlearn.theme", value), theme);
     await page.reload({ waitUntil: "networkidle2" });
+
+    /* The tips and solution are closed by default. Open them so axe checks
+       the panels a stuck reader actually sees, not just the summary row. */
+    if (path.startsWith("/lesson-")) {
+      await page.evaluate(() => {
+        document.querySelectorAll("[data-ex-help]").forEach((details) => {
+          details.open = true;
+        });
+      });
+    }
+
     await page.evaluate(axeSource);
     const result = await page.evaluate(async () => {
       const report = await window.axe.run(document, {
