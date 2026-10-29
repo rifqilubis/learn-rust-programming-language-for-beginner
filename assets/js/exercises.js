@@ -14,13 +14,21 @@
  *      private marker channel (`__RUSTLEARN__<nonce> <id> <value>`).
  *   3. It compares each returned value with a value it computed itself.
  *
- * The expected values never leave this module, so a program cannot read them
- * out of its own source. To produce a matching marker line it has to compute
- * the answer. Printing the exercise's expected output produces no marker
- * lines at all, and forging a test summary produces none either.
+ * The expected values never leave this module. What does reach the playground
+ * is the hidden module: the drawn arguments, the nonce, and the probe calls.
+ * So the reader's program can read its own source, learn the arguments, and
+ * forge a marker line for a given id only by producing the value the grader
+ * will compare against — which it can only do by computing the answer. The
+ * nonce is therefore not a secret; it only stops a program from accidentally
+ * colliding with the channel, and rejects stray `__RUSTLEARN__` output.
+ * Printing the exercise's expected output produces no marker lines at all,
+ * and forging a test summary produces none either.
  *
- * The marker channel writes straight to stdout rather than through `print!`,
- * because the test harness captures `print!` output from passing tests.
+ * The marker channel writes to the stderr handle directly rather than through
+ * `print!` or `eprintln!`, because the test harness captures macro output from
+ * passing tests and a marker sent that way would never reach the grader. A raw
+ * fd would also work but `std::os::fd` is Unix-only, and the verifier has to
+ * run wherever the reader builds.
  *
  * A check is:
  *
@@ -139,11 +147,44 @@ export function sameEncoded(got, want) {
   return Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(b));
 }
 
+/**
+ * True when the program has a `println!` whose format string has at least
+ * `slots` `{}` placeholders and which passes at least `slots` values.
+ *
+ * Lesson 1 uses this to require the `{}` syntax. The output alone cannot show
+ * whether the reader typed slots or copied the whole line as one string.
+ *
+ * When `plainLine` is given, the source must not contain that text inside any
+ * string literal. That rejects a correct plain `println!` plus an unrelated
+ * two-slot call that never produced the output.
+ *
+ * shortcut: comments are stripped with regexes and arguments are split on
+ * commas, so a `//` inside a string or a comma inside an argument is treated
+ * as punctuation. Upgrade to a real Rust parser if a lesson needs either.
+ */
+export function usesFormatSlots(code, slots = 2, plainLine = "") {
+  const source = String(code || "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/[^\n]*/g, "");
+  if (plainLine) {
+    const literal = /"((?:[^"\\]|\\.)*)"/g;
+    for (const match of source.matchAll(literal)) {
+      if (match[1].includes(plainLine)) return false;
+    }
+  }
+  const call = /\bprintln!\s*\(\s*"((?:[^"\\]|\\.)*)"\s*,([\s\S]*?)\)\s*;/g;
+  for (const match of source.matchAll(call)) {
+    const count = (match[1].match(/\{\}/g) || []).length;
+    const args = match[2].split(",").filter((arg) => arg.trim() !== "").length;
+    if (count >= slots && args >= slots) return true;
+  }
+  return false;
+}
+
 /* Exact function and method types. A probe compares the text a function
    returns, which would also accept a custom type whose Display says the right
    thing, so the hidden module pins the signature first. */
 export const SIGNATURES = {
-  "install-and-first-program": ["let _: fn(u32) -> ::std::string::String = year_line;"],
   "variables-and-mutability": [
     "let _: fn(f64, u32) -> f64 = total;",
     "let _: fn(f64, u32) -> f64 = discounted;",
@@ -191,14 +232,9 @@ const ERR_MATCH = `match average(&numbers) {
 }`;
 
 export const CHECKS = {
-  "install-and-first-program": [
-    {
-      args: { year: { u32: [1900, 2100] } },
-      repeats: 3,
-      probes: [{ rust: '::std::format!("S:{}", year_line(year))' }],
-      expect: (a) => `S:Learning Rust in ${a.year.value}`,
-    },
-  ],
+  /* Lesson 1 has no entry on purpose. It comes before `fn` is taught, so there
+     is no function to call. It is graded on its output plus a check that the
+     added line uses two `{}` slots, which the output alone cannot prove. */
 
   "variables-and-mutability": [
     {
@@ -357,6 +393,16 @@ export const CHECKS = {
           : `V:[${even.join(", ")}]`;
       },
     },
+    {
+      /* A drawn list can contain no even numbers, and then the starter's empty
+         vector and zero sum would be right. This fixed list always has evens. */
+      repeats: 1,
+      probes: [
+        { rust: '::std::format!("V:{:?}", evens(&[1, 2, 3, 4]))' },
+        { rust: '::std::format!("I:{}", even_sum(&[1, 2, 3, 4]))' },
+      ],
+      expect: (a, probe) => (probe.rust.includes("even_sum") ? "I:6" : "V:[2, 4]"),
+    },
   ],
 
   errors: [
@@ -401,6 +447,16 @@ export function checksFor(slug) {
   return CHECKS[slug] || [];
 }
 
+/** A Rust string literal for known lesson text (no control characters). */
+function rustString(value) {
+  return `"${String(value)
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t")}"`;
+}
+
 function randomNonce() {
   const bytes = new Uint8Array(4);
   if (globalThis.crypto && typeof globalThis.crypto.getRandomValues === "function") {
@@ -418,11 +474,19 @@ function randomNonce() {
  * The expected values stay in this process. They are never part of `code`,
  * so nothing the reader's program can read contains the answer.
  */
-export function createHiddenSuite(slug, checks) {
+export function createHiddenSuite(slug, checks, output = "") {
   const nonce = randomNonce();
   const expected = [];
   const tests = [];
   let index = 0;
+
+  /* Lesson 1 has no function to call, and it is graded in a normal run, not
+     under `cargo test`: `cfg!(test)` is false and `#[test]` functions never
+     run there, so a plain line cannot be paired with a slot call that only
+     runs in the harness. The preface wraps println! and writes a marker when a
+     two-slot call builds the expected second line; the page requires that
+     marker from the same run that produced the output. */
+  const formatCheck = slug === "install-and-first-program";
 
   const signatures = SIGNATURES[slug] || [];
   if (signatures.length > 0) {
@@ -480,11 +544,16 @@ mod hidden_check_${nonce} {
         use ::std::io::Write as _;
         /* The result channel is stderr: the test harness writes its own
            progress to stdout from other threads, and a direct write there can
-           land in the middle of a line. */
-        let mut out = unsafe { <::std::fs::File as ::std::os::fd::FromRawFd>::from_raw_fd(2) };
+           land in the middle of a line.
+
+           The write goes through the stderr handle directly rather than
+           print!, because the harness captures print! output from passing
+           tests, so a marker sent that way would never reach the grader. A
+           raw fd would do the same job but std::os::fd is Unix-only, and the
+           verifier has to run wherever the reader builds. */
+        let mut out = ::std::io::stderr();
         let _ = out.write_all(::std::format!("${MARKER}{} {} {}\\n", NONCE, index, value).as_bytes());
         let _ = out.flush();
-        ::std::mem::forget(out);
     }
 
 ${tests.join("\n\n")}
@@ -492,7 +561,28 @@ ${tests.join("\n\n")}
 `
     : "";
 
-  return { nonce, code, expected, count: tests.length };
+  const preface = formatCheck
+    ? `const __RUSTLEARN_LINE_${nonce}: &str = ${rustString(String(output).split("\n")[1] || "")};
+
+#[allow(unused_macros)]
+macro_rules! println {
+    ($fmt:literal, $a:expr, $b:expr $(, $rest:expr)* $(,)?) => {{
+        let __line = ::std::format!($fmt, $a, $b $(, $rest)*);
+        if $fmt.matches("{}").count() >= 2 && __line == __RUSTLEARN_LINE_${nonce} {
+            ::std::eprintln!("${MARKER}slot ${nonce}");
+        }
+        ::std::println!("{}", __line);
+    }};
+    ($fmt:literal $(, $arg:expr)* $(,)?) => {{
+        ::std::println!($fmt $(, $arg)*);
+    }};
+    ($($tt:tt)*) => {{ ::std::println!($($tt)*); }};
+}
+
+`
+    : "";
+
+  return { nonce, code, expected, count: tests.length, preface, formatCheck };
 }
 
 /**
@@ -514,6 +604,12 @@ export function parseProbeLines(output, nonce) {
     seen.set(id, list);
   }
   return seen;
+}
+
+/** The stderr line the lesson-1 println! wrapper writes when a two-slot call
+ *  built the expected second line. */
+export function slotMarker(nonce) {
+  return `${MARKER}slot ${nonce}`;
 }
 
 /** Compare what the run reported with what the page computed. */
@@ -665,10 +761,14 @@ export async function gradeSubmission({ code, suite, result, ownTests = 0, runTe
   if (!graded.pass || ownTests <= 0) return graded;
 
   const mutants = mutantSources(code);
-  if (mutants.length === 0) return graded;
+  const control = controlSource(code);
+  if (mutants.length === 0 || control === "") return graded;
 
-  const runs = await Promise.all(mutants.map((source) => runTests(source)));
-  const caught = runs.some((run) => countFailedTests(run.stdout) >= ownTests);
+  /* The wrong runs must fail through the test harness, not through printed
+     fake failure lines. The control run proves the tests are checking the
+     count rather than noticing that the source was renamed. */
+  const runs = await Promise.all([...mutants, control].map((source) => runTests(source)));
+  const caught = runs.slice(0, mutants.length).some((run) => mutantCaught(run, ownTests));
   if (!caught) {
     return {
       pass: false,
@@ -676,6 +776,17 @@ export async function gradeSubmission({ code, suite, result, ownTests = 0, runTe
       seen: graded.seen,
       ownPassed: graded.ownPassed,
       message: `Your tests still pass when word_count is deliberately broken. All ${ownTests} of them should fail then, so check the value the function returns: assert_eq!(word_count("one two three"), 3).`,
+    };
+  }
+  const controlRun = runs[runs.length - 1];
+  if (!testsStillPass(controlRun, ownTests)) {
+    return {
+      pass: false,
+      kind: "own-tests",
+      seen: graded.seen,
+      ownPassed: graded.ownPassed,
+      message:
+        "Your tests fail when word_count is correct but written differently. Check the count the function returns, not the source code.",
     };
   }
   return graded;
@@ -747,36 +858,62 @@ export function looksLikeCompileError(stderr) {
 }
 
 /**
- * Rename the reader's `word_count` and put deliberately broken versions in
- * its place, so their own tests can be run against code that is wrong.
+ * Rename the reader's `word_count` and put a replacement body in its place.
  *
- * Two different wrong versions are used, and both the replacement name and
- * the body are drawn fresh, so a test cannot recognise the run by looking for
- * a fixed string in its own source. A test suite that is actually checking
- * the count fails against at least one of them.
- *
- * Returns an empty list when the source does not define `word_count`, in
- * which case the caller skips the check rather than guessing.
+ * Returns an empty string when the source does not define `word_count`.
  */
-export function mutantSources(code) {
+function replaceWordCount(code, body, marker) {
   const pattern = /\bfn\s+word_count\s*\(/g;
-  const matches = String(code).match(pattern);
-  if (!matches || matches.length === 0) return [];
+  if (!String(code).match(pattern)) return "";
 
   const suffix = randomNonce().slice(0, 6);
   const renamed = String(code).replace(pattern, `fn word_count_original_${suffix}(`);
-  const wrong = [
-    "text.split_whitespace().count() + 1",
-    "text.lines().count()",
-  ];
 
-  return wrong.map(
-    (body, index) => `${renamed}
-/* ${randomNonce()} */
+  return `${renamed}
+/* ${marker} ${randomNonce()} */
 fn word_count(text: &str) -> usize {
-    let _ = "${suffix}${index}";
+    let _ = "${suffix}";
     ${body}
 }
-`,
-  );
+`;
+}
+
+/**
+ * Two deliberately broken `word_count` versions, so the reader's own tests
+ * can be run against code that is wrong. A test suite that is actually
+ * checking the count fails against at least one of them.
+ */
+export function mutantSources(code) {
+  return [
+    "text.split_whitespace().count() + 1",
+    "text.lines().count()",
+  ]
+    .map((body, index) => replaceWordCount(code, body, `wrong-${index}`))
+    .filter(Boolean);
+}
+
+/**
+ * A correct `word_count` written differently. The reader's tests must still
+ * pass here: a test that only notices the source was renamed is not checking
+ * the count, so it is not the test the lesson asked for.
+ */
+export function controlSource(code) {
+  const bodies = [
+    "text.split_whitespace().collect::<::std::vec::Vec<_>>().len()",
+    "text.split_whitespace().fold(0, |count, _| count + 1)",
+    "text.split_whitespace().map(|_| ()).count()",
+  ];
+  return replaceWordCount(code, pick(bodies), "control");
+}
+
+/** True when a run failed the reader's tests because `word_count` was wrong. */
+export function mutantCaught(run, ownTests) {
+  const summary = readTestSummary(run.stdout);
+  return run.success === false && summary.status === "FAILED" && summary.failed >= ownTests;
+}
+
+/** True when the reader's tests still pass on a correct implementation. */
+export function testsStillPass(run, ownTests) {
+  const summary = readTestSummary(run.stdout);
+  return run.success === true && summary.ok && countOwnPasses(run.stdout) >= ownTests;
 }

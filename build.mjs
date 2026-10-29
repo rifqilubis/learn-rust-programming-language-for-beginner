@@ -455,7 +455,7 @@ ${exercise.tips.map((tip) => `                <li>${tip}</li>`).join("\n")}
   return `<section class="exercise" id="exercise" data-exercise="${lesson.slug}" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">${num}</span><span>Exercise</span></h2>
         <p class="exercise__prompt">${exercise.prompt}</p>
-        ${requirement}
+${requirement ? "        " + requirement : ""}
         ${target}
         ${help}
         <div class="bench exercise__bench">

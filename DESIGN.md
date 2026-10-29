@@ -78,11 +78,11 @@ both directions, and the mobile menu opens and closes with pointer, Enter, and
 Escape.
 
 The exercise at the end of each lesson is a real gate, not a suggestion. It is the
-same bench as everywhere else (dark, mono, oxide action), with the function
-signatures and the expected output printed above it so the target is never a
-guess.
+same bench as everywhere else (dark, mono, oxide action), with the expected output
+printed above it and, from lesson 2 on, the function signatures, so the target is
+never a guess.
 
-A pass has to clear two independent bars. First, the hidden module calls the
+A pass normally has to clear two independent bars. First, the hidden module calls the
 reader's named functions with arguments drawn at check time and reports what
 they return on a private marker channel; the page compares those results with
 answers it computed itself, and the answers never go to the Playground. Printing
@@ -90,7 +90,12 @@ the expected text produces no results, and a hard-coded function fails on the
 next input. Second, the program still has to print the exercise's output, so
 deleting the `println!` calls does not pass either. The test-writing lesson
 replaces the second bar with the reader's own tests, run against a broken
-implementation so tests that cannot fail are rejected.
+implementation so tests that cannot fail are rejected, then against a correct
+implementation written differently so tests that only inspect the source are
+rejected too. Lesson 1 is the exception: it comes before `fn` is taught, so its
+exercise is two `println!` lines, and the second must use two `{}` slots. The
+output comparison, a source check, and a marker from the same normal run that a
+two-slot call built the expected second line are the whole check.
 
 The next lesson stays locked until the exercise passes; the pass and the draft
 code both persist in `localStorage`, so a reload does not cost the reader their
@@ -108,3 +113,8 @@ answer actually passes. Loading the solution fills the editor and leaves the
 lesson locked, and after two failed checks the tips control is nudged so the
 reader notices it. The build fails if a lesson is missing three tips or a
 non-empty solution, and `verify-exercises.mjs` rejects the same omission.
+
+The gate is motivational, not an authority. Progress is client-side
+`localStorage`, so it can be edited, and the no-JavaScript fallback leaves the
+lesson links reachable. Neither is worth a server on a static self-study site;
+the exercise checker itself is what has to be honest.

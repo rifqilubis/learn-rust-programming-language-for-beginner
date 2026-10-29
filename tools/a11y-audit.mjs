@@ -1,7 +1,8 @@
-import puppeteer from "/tmp/verify/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js";
+import puppeteer from "puppeteer";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 
-const axeSource = readFileSync("/tmp/verify/node_modules/axe-core/axe.min.js", "utf8");
+const axeSource = readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
 const base = process.argv[2] || "http://localhost:8123";
 
 const pages = [
@@ -14,8 +15,8 @@ const pages = [
 ];
 
 const browser = await puppeteer.launch({
-  executablePath: "/usr/bin/google-chrome",
-  headless: "new",
+  ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),
+  headless: true,
   args: ["--no-sandbox", "--disable-dev-shm-usage"],
 });
 

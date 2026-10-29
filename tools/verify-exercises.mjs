@@ -20,6 +20,16 @@
  *   8. the reader's own tests are required in the lesson that asks for them,
  *      and are rejected when they cannot fail.
  *
+ * Lesson 1 is the exception. It comes before `fn` is taught, so it has no
+ * function checks. It is graded on its output, a source check that the added
+ * line uses two `{}` slots, and a marker from the same normal run proving a
+ * two-slot call built the expected second line. Checks 3-8 do not apply. The
+ * verifier asserts the solution prints the output and uses slots, that the slot
+ * line runs, that a plain `println!` without slots does not satisfy the check,
+ * and that a plain output with a slot call that never runs (dead, split across
+ * calls, placed on the first line, guarded by `cfg!(test)`, or inside a
+ * `#[test]`) does not pass.
+ *
  * The hidden checks draw random arguments and a fresh nonce on every run, so
  * every run is a new exam. This file imports the same module the page uses.
  */
@@ -33,14 +43,19 @@ import {
   checksFor,
   gradeRun,
   gradeSubmission,
-  countFailedTests,
   mutantSources,
+  mutantCaught,
+  controlSource,
+  testsStillPass,
   looksLikeCompileError,
+  usesFormatSlots,
+  slotMarker,
 } from "../assets/js/exercises.js";
 import { lessons } from "../content/lessons.mjs";
+import { findRustc } from "./rustc-path.mjs";
 
 const localOnly = process.argv.includes("--local");
-const rustc = join(process.env.CARGO_HOME || join(process.env.HOME || "", ".cargo"), "bin", "rustc");
+const rustc = findRustc();
 const version = spawnSync(rustc, ["--version"], { encoding: "utf8" });
 if (version.status !== 0) {
   console.error("verify-exercises: rustc not found. Install the toolchain first (lesson 01).");
@@ -108,10 +123,9 @@ function printOnly(exercise) {
   return `fn main() {\n${lines.map((line) => `    println!(${JSON.stringify(line)});`).join("\n")}\n}`;
 }
 
-/* A function that returns the right answer for the example only. */
+/* A function that returns the right answer for the example only. Lesson 1 has
+   no entry: it is output-only, so it takes the other branch above. */
 const HARDCODED = {
-  "install-and-first-program": `fn main() { println!("Hello from Rust!"); println!("{}", year_line(2026)); }
-fn year_line(_year: u32) -> String { String::from("Learning Rust in 2026") }`,
   "variables-and-mutability": `fn main() {}
 fn total(_price: f64, _quantity: u32) -> f64 { 50.0 }
 fn discounted(_price: f64, _quantity: u32) -> f64 { 45.0 }`,
@@ -230,10 +244,6 @@ for (const lesson of lessons) {
   const { slug, exercise } = lesson;
   const checks = checksFor(slug);
 
-  if (!Array.isArray(checks) || checks.length === 0) {
-    fail(slug, "no hidden checks are configured");
-    continue;
-  }
   if (typeof exercise.solution !== "string" || exercise.solution.trim() === "") {
     fail(slug, "no reference solution");
     continue;
@@ -244,6 +254,160 @@ for (const lesson of lessons) {
     exercise.tips.some((tip) => typeof tip !== "string" || tip.trim() === "")
   ) {
     fail(slug, "the exercise needs at least three beginner tips");
+    continue;
+  }
+
+  /* A lesson with no function checks is graded on its output plus, for lesson
+     1, a source check for the `{}` slots and a marker from that same normal run
+     proving a two-slot call built the expected second line. This is only
+     allowed before `fn` is taught: there is no function to call, and printing
+     is the whole task. */
+  if (!Array.isArray(checks) || checks.length === 0) {
+    if (normalise(exercise.expected) === "") {
+      fail(slug, "no hidden checks and no expected output, so nothing is graded");
+      continue;
+    }
+    const suite = createHiddenSuite(slug, checks, exercise.expected);
+    if (suite.formatCheck) {
+      const formatCompiled = compileCheck(`${suite.preface}${exercise.solution}\n${suite.code}`);
+      if (!formatCompiled.ok) {
+        fail(slug, "reference solution does not compile with the slot check", formatCompiled.stderr);
+        continue;
+      }
+      console.log(`ok    ${slug}  solution compiles with the slot check`);
+    }
+    const compiled = compileCheck(exercise.solution);
+    if (!compiled.ok) {
+      fail(slug, "reference solution does not compile", compiled.stderr);
+      continue;
+    }
+    console.log(`ok    ${slug}  solution compiles (output-only lesson)`);
+
+    const plainLine = normalise(exercise.expected).split("\n")[1] || "";
+    if (!usesFormatSlots(exercise.solution, 2, plainLine)) {
+      fail(slug, "reference solution does not use two {} slots");
+      continue;
+    }
+    console.log(`ok    ${slug}  solution uses two {} slots`);
+
+    if (usesFormatSlots(printOnly(exercise), 2, plainLine)) {
+      fail(slug, "a plain println! solution satisfies the slot check");
+      continue;
+    }
+    console.log(`ok    ${slug}  a plain println! solution does not satisfy the slot check`);
+
+    const deadSlot = `fn main() {
+    println!("Hello from Rust!");
+    println!("${plainLine}");
+    if false {
+        println!("Learning {} in {}", "Rust", 2026);
+    }
+}`;
+    if (usesFormatSlots(deadSlot, 2, plainLine)) {
+      fail(slug, "a plain output with an unrelated two-slot call satisfies the slot check");
+      continue;
+    }
+    console.log(`ok    ${slug}  a plain output with a dead two-slot call does not satisfy the slot check`);
+
+    if (localOnly) continue;
+
+    /* Lesson 1 is checked in one normal run: the wrapped println! reports the
+       slot line on stderr, and that marker only counts if it came from the run
+       that printed the output. */
+    const printed = suite.formatCheck
+      ? await run(`${suite.preface}${exercise.solution}`, false)
+      : await run(exercise.solution, false);
+    if (!printed.success || normalise(printed.stdout) !== normalise(exercise.expected)) {
+      fail(slug, "reference solution does not print the expected output", printed.stdout || printed.stderr);
+      continue;
+    }
+    console.log(`ok    ${slug}  solution prints the expected output`);
+
+    if (suite.formatCheck) {
+      if (!String(printed.stderr).includes(slotMarker(suite.nonce))) {
+        fail(slug, "the reference solution's slot line does not run", printed.stderr);
+        continue;
+      }
+      console.log(`ok    ${slug}  the slot line runs when main runs`);
+
+      /* These cheats print the right output but never run a two-slot call that
+         builds it. Each one reaches the source check, so only the marker can
+         reject it. The last two matter most: under `cargo test` they would run,
+         which is why the check is a normal run now. */
+      const cheats = [
+        {
+          name: "an executed plain line plus a dead two-slot call",
+          code: `fn main() {
+    println!("Hello from Rust!");
+    print!("Learning Rust in ");
+    println!("2026");
+    if false {
+        println!("Learning {} in {}", "Rust", 2026);
+    }
+}`,
+        },
+        {
+          name: "a two-slot call on the first line",
+          code: `fn main() {
+    println!("{} {}", "Hello", "from Rust!");
+    print!("Learning Rust in ");
+    println!("2026");
+}`,
+        },
+        {
+          name: "a slot call guarded by cfg!(test)",
+          code: `fn main() {
+    println!("Hello from Rust!");
+    print!("Learning Rust in ");
+    println!("2026");
+    if cfg!(test) {
+        println!("Learning {} in {}", "Rust", 2026);
+    }
+}`,
+        },
+        {
+          name: "a slot call inside a reader #[test]",
+          code: `fn main() {
+    println!("Hello from Rust!");
+    print!("Learning Rust in ");
+    println!("2026");
+}
+
+#[test]
+fn reader_test() {
+    println!("Learning {} in {}", "Rust", 2026);
+}`,
+        },
+      ];
+      let cheatsRejected = true;
+      for (const cheat of cheats) {
+        if (!usesFormatSlots(cheat.code, 2, plainLine)) {
+          fail(slug, `the ${cheat.name} cheat did not reach the runtime slot check`);
+          cheatsRejected = false;
+          break;
+        }
+        const cheatRun = await run(`${suite.preface}${cheat.code}`, false);
+        if (normalise(cheatRun.stdout) !== normalise(exercise.expected)) {
+          fail(slug, `the ${cheat.name} cheat did not print the expected output`);
+          cheatsRejected = false;
+          break;
+        }
+        if (String(cheatRun.stderr).includes(slotMarker(suite.nonce))) {
+          fail(slug, `${cheat.name} passes`);
+          cheatsRejected = false;
+          break;
+        }
+      }
+      if (!cheatsRejected) continue;
+      console.log(`ok    ${slug}  plain output with a slot call that never runs does not pass`);
+    }
+
+    const unfinished = await run(exercise.starter, false);
+    if (unfinished.success && normalise(unfinished.stdout) === normalise(exercise.expected)) {
+      fail(slug, "starter code already prints the expected output, so there is nothing to solve");
+      continue;
+    }
+    console.log(`ok    ${slug}  starter does not print the expected output`);
     continue;
   }
 
@@ -352,12 +516,20 @@ for (const lesson of lessons) {
       continue;
     }
     const runs = await Promise.all(broken.map((source) => run(source)));
-    const caught = runs.some((result) => countFailedTests(result.stdout) >= exercise.ownTests);
+    const caught = runs.some((result) => mutantCaught(result, exercise.ownTests));
     if (!caught) {
       fail(slug, "the reader's own tests still pass against a deliberately broken word_count");
       continue;
     }
     console.log(`ok    ${slug}  the reader's own tests catch a broken word_count`);
+
+    const control = controlSource(exercise.solution);
+    const controlRun = control ? await run(control) : null;
+    if (!controlRun || !testsStillPass(controlRun, exercise.ownTests)) {
+      fail(slug, "the reader's own tests fail against a correct word_count written differently");
+      continue;
+    }
+    console.log(`ok    ${slug}  the reader's own tests still pass on a correct variant`);
 
     /* A pointless suite must not be enough for a pass. */
     const fake = `fn word_count(text: &str) -> usize { text.split_whitespace().count() }
@@ -383,6 +555,37 @@ mod tests {
       continue;
     }
     console.log(`ok    ${slug}  a suite of empty tests does not pass (${fakeVerdict.kind})`);
+
+    /* Tests that read their own source and fail only when they see the
+       mutation are not testing the count. */
+    const sourceDetector = `fn word_count(text: &str) -> usize { text.split_whitespace().count() }
+fn main() {}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn renamed() -> bool {
+        ::std::fs::read_to_string("/playground/src/main.rs")
+            .unwrap_or_default()
+            .contains(concat!("fn word_count_", "original_"))
+    }
+    #[test] fn a() { assert!(!renamed()); }
+    #[test] fn b() { assert!(!renamed()); }
+    #[test] fn c() { assert!(!renamed()); }
+}`;
+    const detectorSuite = createHiddenSuite(slug, checksFor(slug));
+    const detectorRun = await run(`${sourceDetector}\n${detectorSuite.code}`);
+    const detectorVerdict = await gradeSubmission({
+      code: sourceDetector,
+      suite: detectorSuite,
+      result: detectorRun,
+      ownTests: exercise.ownTests,
+      runTests: (source) => run(source),
+    });
+    if (detectorVerdict.pass) {
+      fail(slug, "tests that only notice the source was renamed pass the lesson");
+      continue;
+    }
+    console.log(`ok    ${slug}  tests that only notice the source was renamed do not pass (${detectorVerdict.kind})`);
   }
 }
 

@@ -206,11 +206,8 @@
       </div>
       <section class="exercise" id="exercise" data-exercise="install-and-first-program" aria-labelledby="exercise-title">
         <h2 class="exercise__title" id="exercise-title"><span class="h2num" aria-hidden="true">08</span><span>Exercise</span></h2>
-        <p class="exercise__prompt">Write <code>fn year_line(year: u32) -&gt; String</code> that returns <code>Learning Rust in 2026</code> when given 2026. Then print <code>Hello from Rust!</code> and the line for 2026. The checker calls your function with years you have not seen.</p>
-        <div class="exercise__panel exercise__panel--brief">
-          <p class="exercise__panel-title">The checker calls these</p>
-          <pre class="exercise__expected exercise__expected--sig">fn year_line(year: u32) -&gt; String</pre>
-        </div>
+        <p class="exercise__prompt">Make the program print <code>Hello from Rust!</code> and then <code>Learning Rust in 2026</code>, one line each. The editor already prints the first line, so add a second that builds the line from two <code>{}</code> slots, like <code>println!("Learning {} in {}", "Rust", 2026);</code>. Do not type the whole line as one string.</p>
+
         <div class="exercise__panel">
           <p class="exercise__panel-title">Expected output</p>
           <pre class="exercise__expected">Hello from Rust!
@@ -223,11 +220,11 @@ Learning Rust in 2026</pre>
             <div class="exercise__panel exercise__tips" role="region" aria-labelledby="tips-install-and-first-program-title">
               <p class="exercise__panel-title" id="tips-install-and-first-program-title">Work through these in order</p>
               <ol class="exercise__tips-list">
-                <li>The two <code>println!</code> lines in <code>main</code> are already correct. The only part you need to change is the body of <code>year_line</code>.</li>
-                <li>A function returns its last expression when there is no semicolon. <code>format!("Learning Rust in {year}")</code> builds the <code>String</code> to return; <code>println!</code> only prints, so it cannot be the return value.</li>
-                <li>Match the expected text exactly: capital <code>L</code>, one space after <code>in</code>, and the year in the <code>{year}</code> slot. Compare your result with the expected output panel line by line.</li>
+                <li><code>println!</code> prints one line and adds the newline itself, so two calls give you two lines.</li>
+                <li>Keep the words in the string and put the changing parts in slots: <code>"Learning {} in {}"</code>, then <code>"Rust"</code> and <code>2026</code> after the comma.</li>
+                <li>Match the expected panel exactly: capital <code>H</code> and <code>L</code>, and one space after <code>in</code>.</li>
               </ol>
-              <p class="exercise__tips-short"><strong>Short version:</strong> Use <code>format!("Learning Rust in {year}")</code> as the last expression, with no semicolon. <code>format!</code> builds a <code>String</code>; <code>println!</code> only prints one.</p>
+              <p class="exercise__tips-short"><strong>Short version:</strong> Use one <code>println!</code> with two <code>{}</code> slots: <code>println!("Learning {} in {}", "Rust", 2026);</code>. The values after the comma fill the slots in order.</p>
             </div>
           </details>
           <details class="exercise__help-item" data-ex-help="solution">
@@ -237,11 +234,7 @@ Learning Rust in 2026</pre>
               <p class="exercise__panel-text">Reading or loading this does not unlock the lesson. The checker still has to run and pass your code, and loading it replaces what is in the editor.</p>
               <pre class="exercise__code"><code class="language-rust">fn main() {
     println!("Hello from Rust!");
-    println!("{}", year_line(2026));
-}
-
-fn year_line(year: u32) -&gt; String {
-    format!("Learning Rust in {year}")
+    println!("Learning {} in {}", "Rust", 2026);
 }</code></pre>
               <div class="exercise__solution-actions">
                 <button class="btn btn--quiet" type="button" data-ex-copy>Copy solution</button>
@@ -258,12 +251,6 @@ fn year_line(year: u32) -&gt; String {
           <label class="sr-only" for="ex-01-install-and-first-program">Your Rust code for this exercise</label>
           <textarea class="bench__input exercise__input" id="ex-01-install-and-first-program" data-ex-source spellcheck="false" autocapitalize="off" autocomplete="off">fn main() {
     println!("Hello from Rust!");
-    println!("{}", year_line(2026));
-}
-
-fn year_line(year: u32) -&gt; String {
-    // Return the line. Do not print it here.
-    String::new()
 }</textarea>
           <div class="bench__actions">
             <button class="btn btn--primary" type="button" data-ex-check><svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Check answer</button>

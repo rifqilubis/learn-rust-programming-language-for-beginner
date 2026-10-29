@@ -6,7 +6,9 @@ import {
   gradeSubmission,
   describeValue,
   looksLikeCompileError,
+  slotMarker,
   stripMarkers,
+  usesFormatSlots,
 } from "./exercises.js";
 
 const PLAYGROUND_URL = "https://play.rust-lang.org/execute";
@@ -430,6 +432,12 @@ function normalise(text) {
  * Both run at the same time. A pass needs both, or just behaviour for the
  * test-writing lesson, where the output is not the point.
  *
+ * Lesson 1 has no behaviour axis. Its output must match, its added line must
+ * use two `{}` slots (checked in the source), and the same normal run must
+ * report that a two-slot call built the second line. The output alone cannot
+ * show how the line was built, and running the check under `cargo test` would
+ * let a `cfg!(test)` or `#[test]` slot call stand in for the real one.
+ *
  * The expected values never go to the Playground, so the reader's program
  * cannot read them. The only way to produce a matching marker line is to
  * compute the answer.
@@ -439,15 +447,29 @@ function normalise(text) {
  * anything, and the exercise is not finished. */
 async function gradeExercise({ code, slug, tests, expected, ownTests }) {
   const checks = checksFor(slug);
-  const suite = createHiddenSuite(slug, checks);
+  const suite = createHiddenSuite(slug, checks, expected);
 
-  if (suite.code === "") {
+  /* A lesson with no function checks is graded on its output plus, for lesson
+     1, a source check for the `{}` slots and a marker from that same normal
+     run proving a two-slot call built the expected second line. That lesson
+     comes before `fn` is taught, so there is no function to call. Every later
+     lesson has function checks and must pass them. */
+  const slotCheck = Boolean(suite.formatCheck);
+  const outputOnly = slotCheck || suite.code === "";
+  if (outputOnly && normalise(expected) === "") {
     return { ok: false, kind: "config", message: "This exercise has no checks configured, so it cannot be graded." };
   }
 
-  const wantsOutput = !tests && normalise(expected) !== "";
-  const behaviourPromise = runCode({ code: `${code}\n${suite.code}`, tests: true });
-  const outputPromise = wantsOutput ? runCode({ code, tests: false }) : Promise.resolve(null);
+  const plainLine = normalise(expected).split("\n")[1] || "";
+  const wantsOutput = outputOnly || (!tests && normalise(expected) !== "");
+  const behaviourPromise = slotCheck || suite.code === ""
+    ? Promise.resolve(null)
+    : runCode({ code: `${code}\n${suite.code}`, tests: true });
+  /* Lesson 1 runs with the println! wrapper so the same run that prints the
+     output also reports whether a two-slot call built the second line. */
+  const outputPromise = wantsOutput
+    ? runCode({ code: slotCheck ? `${suite.preface}${code}` : code, tests: false })
+    : Promise.resolve(null);
 
   const [behaviour, output] = await Promise.all([behaviourPromise, outputPromise]);
 
@@ -461,13 +483,15 @@ async function gradeExercise({ code, slug, tests, expected, ownTests }) {
     }
   }
 
-  const graded = await gradeSubmission({
-    code,
-    suite,
-    result: behaviour,
-    ownTests,
-    runTests: (source) => runCode({ code: source, tests: true }),
-  });
+  const graded = behaviour
+    ? await gradeSubmission({
+        code,
+        suite,
+        result: behaviour,
+        ownTests,
+        runTests: (source) => runCode({ code: source, tests: true }),
+      })
+    : { pass: true, count: 0 };
 
   if (!graded.pass) {
     if (graded.kind === "compile") {
@@ -543,10 +567,30 @@ async function gradeExercise({ code, slug, tests, expected, ownTests }) {
         result: output,
       };
     }
+    /* The source check gives the beginner message. The marker check catches a
+       dead slot call, a split line, and a slot call that only runs under
+       `cargo test`, because it comes from the same normal run as the output. */
+    if (outputOnly && !usesFormatSlots(code, 2, plainLine)) {
+      return {
+        ok: false,
+        kind: "format",
+        message: `The output is right, but build the second line from slots: println!("Learning {} in {}", "Rust", 2026); instead of typing the whole line as text.`,
+        result: output,
+      };
+    }
+    if (slotCheck && !String(output.stderr).includes(slotMarker(suite.nonce))) {
+      return {
+        ok: false,
+        kind: "format",
+        message: `The output is right, but the line that runs has to build it from slots: println!("Learning {} in {}", "Rust", 2026);. A slot call that never runs does not count.`,
+        result: output,
+      };
+    }
   }
 
   return {
     ok: true,
+    outputOnly,
     hiddenCount: suite.count,
     result: {
       ...(output || behaviour),
@@ -707,13 +751,13 @@ function initExercise() {
       }
 
       if (verdictResult.ok) {
-        setState(`${verdictResult.hiddenCount} checks passed`, "ok");
-        say(
-          verdictResult.outputChecked
+        setState(verdictResult.outputOnly ? "output matches" : `${verdictResult.hiddenCount} checks passed`, "ok");
+        const done = verdictResult.outputOnly
+          ? "The output matches the exercise exactly. Lesson unlocked."
+          : verdictResult.outputChecked
             ? "Every hidden check passed and the output matches the exercise exactly. Lesson unlocked."
-            : "Every hidden check passed, including calls with values you had not seen. Lesson unlocked.",
-          "ok",
-        );
+            : "Every hidden check passed, including calls with values you had not seen. Lesson unlocked.";
+        say(done, "ok");
         unlock();
         return;
       }
@@ -723,6 +767,7 @@ function initExercise() {
         compile: "compile error",
         run: "crashed",
         output: "output differs",
+        format: "missing {} slots",
         "own-tests": "tests missing",
         hidden: "hidden checks failed",
         config: "checker error",

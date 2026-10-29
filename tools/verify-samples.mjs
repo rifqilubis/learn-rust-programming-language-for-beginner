@@ -21,9 +21,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expectations } from "../content/partials.mjs";
 import { withNumbers } from "../content/lessons.mjs";
+import { findRustc } from "./rustc-path.mjs";
 
 const localOnly = process.argv.includes("--local");
-const rustc = join(process.env.CARGO_HOME || join(process.env.HOME || "", ".cargo"), "bin", "rustc");
+const rustc = findRustc();
 
 const version = spawnSync(rustc, ["--version"], { encoding: "utf8" });
 if (version.status !== 0) {

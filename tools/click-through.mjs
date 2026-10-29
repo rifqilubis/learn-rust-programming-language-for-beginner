@@ -6,11 +6,11 @@
  *   python3 -m http.server 8123 &
  *   node tools/click-through.mjs http://localhost:8123
  *
- * Requires puppeteer-core and a Chrome binary. It is a development tool, not
- * part of the site.
+ * Requires the `puppeteer` dev dependency. It is a development tool, not part
+ * of the site.
  */
 
-import puppeteer from "/tmp/verify/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js";
+import puppeteer from "puppeteer";
 
 const base = process.argv[2] || "http://localhost:8123";
 const results = [];
@@ -22,8 +22,8 @@ function record(step, detail) {
 }
 
 const browser = await puppeteer.launch({
-  executablePath: "/usr/bin/google-chrome",
-  headless: "new",
+  ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),
+  headless: true,
   args: ["--no-sandbox", "--disable-dev-shm-usage"],
 });
 
@@ -75,6 +75,70 @@ await page.evaluate(() => {
 await new Promise((resolve) => setTimeout(resolve, 300));
 const copyLabel = await page.$eval("[data-copy-text]", (el) => el.textContent.trim());
 record("copy command", `button now reads "${copyLabel}"`);
+
+/* Lesson 1 is output-only, so it has the most obvious cheat: type the answer.
+   The page rejects the plain line, a dead two-slot call, a split line, and a
+   slot call that only runs under `cargo test`. The real formatted line passes
+   and opens the gate. */
+console.log("\n== lesson 01 ==");
+record("GET lesson 01", String(await goto("/lesson-01-install-and-first-program.html")));
+
+const plainOutput = await answer(
+  'fn main() {\n    println!("Hello from Rust!");\n    println!("Learning Rust in 2026");\n}',
+);
+record(
+  "plain output",
+  `state="${plainOutput.state}" passed=${plainOutput.passed} verdict="${plainOutput.verdict}"`,
+);
+
+const deadSlot = await answer(
+  'fn main() {\n    println!("Hello from Rust!");\n    println!("Learning Rust in 2026");\n    if false {\n        println!("Learning {} in {}", "Rust", 2026);\n    }\n}',
+);
+record(
+  "plain output with a dead slot call",
+  `state="${deadSlot.state}" passed=${deadSlot.passed} verdict="${deadSlot.verdict}"`,
+);
+
+const splitOutput = await answer(
+  'fn main() {\n    println!("Hello from Rust!");\n    print!("Learning Rust in ");\n    println!("2026");\n    if false {\n        println!("Learning {} in {}", "Rust", 2026);\n    }\n}',
+);
+record(
+  "split plain output with a dead slot call",
+  `state="${splitOutput.state}" passed=${splitOutput.passed} verdict="${splitOutput.verdict}"`,
+);
+
+/* The slot call only runs under `cargo test`. The old check ran the slot line
+   in the test harness, so this passed; the check now runs a normal program. */
+const cfgTestSlot = await answer(
+  'fn main() {\n    println!("Hello from Rust!");\n    print!("Learning Rust in ");\n    println!("2026");\n    if cfg!(test) {\n        println!("Learning {} in {}", "Rust", 2026);\n    }\n}',
+);
+record(
+  "plain output with a cfg!(test) slot call",
+  `state="${cfgTestSlot.state}" passed=${cfgTestSlot.passed} verdict="${cfgTestSlot.verdict}"`,
+);
+
+const misplacedSlot = await answer(
+  'fn main() {\n    println!("{} {}", "Hello", "from Rust!");\n    print!("Learning Rust in ");\n    println!("2026");\n}',
+);
+record(
+  "two-slot call on the first line",
+  `state="${misplacedSlot.state}" passed=${misplacedSlot.passed} verdict="${misplacedSlot.verdict}"`,
+);
+
+const formatted = await answer(
+  'fn main() {\n    println!("Hello from Rust!");\n    println!("Learning {} in {}", "Rust", 2026);\n}',
+);
+record(
+  "formatted answer",
+  `state="${formatted.state}" passed=${formatted.passed} verdict="${formatted.verdict}"`,
+);
+
+const lessonOneGate = await page.evaluate(() => {
+  const gate = document.querySelector("[data-next-gate]");
+  const next = document.querySelector("[data-next]");
+  return { gateOpen: gate.dataset.open, nextVisible: next.getClientRects().length > 0 };
+});
+record("lesson 01 gate after passing", `data-open=${lessonOneGate.gateOpen} next visible=${lessonOneGate.nextVisible}`);
 
 /* progress after passing the exercise, then completing the lesson */
 console.log("\n== lesson 02 ==");
@@ -257,10 +321,14 @@ const nudged = await page.evaluate(() =>
 record("tips nudged after two failures", String(nudged));
 await page.click('[data-ex-help="tips"] summary');
 await page.waitForFunction(() => document.querySelector('[data-ex-help="tips"]').open);
-const nudgeCleared = await page.evaluate(() =>
-  document.querySelector('[data-ex-help="tips"] summary').hasAttribute("data-nudge"),
-);
-record("opening tips clears the nudge", String(!nudgeCleared));
+const nudgeCleared = await page
+  .waitForFunction(
+    () => !document.querySelector('[data-ex-help="tips"] summary').hasAttribute("data-nudge"),
+    { timeout: 2000 },
+  )
+  .then(() => true)
+  .catch(() => false);
+record("opening tips clears the nudge", String(nudgeCleared));
 await page.click('[data-ex-help="tips"] summary');
 await page.waitForFunction(() => !document.querySelector('[data-ex-help="tips"]').open);
 
@@ -585,6 +653,10 @@ const problems = results.filter(
     (item.step === "loading the solution does not unlock" && /passed=true/.test(item.detail)) ||
     (item.step === "loading the solution does not unlock" && !/editor matches=true/.test(item.detail)) ||
     (item.step === "light theme after reload" && !item.detail.includes("attr=light")) ||
+    (["plain output", "plain output with a dead slot call", "split plain output with a dead slot call", "plain output with a cfg!(test) slot call", "two-slot call on the first line"].includes(item.step) &&
+      (!item.detail.includes('state="missing {} slots"') || item.detail.includes("passed=true"))) ||
+    (item.step === "formatted answer" && (!item.detail.includes("passed=true") || !item.detail.includes('state="output matches"'))) ||
+    (item.step === "lesson 01 gate after passing" && !item.detail.includes("data-open=true")) ||
     ((item.step === "printing the expected output" || item.step === "hard-coded functions") && item.detail.includes("passed=true")),
 );
 console.log(`  ${results.length} checks, ${problems.length} with a problem`);

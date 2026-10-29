@@ -76,33 +76,22 @@ ${sample(`fn main() {
     ]),
     exercise: {
       prompt:
-        "Write <code>fn year_line(year: u32) -&gt; String</code> that returns <code>Learning Rust in 2026</code> when given 2026. Then print <code>Hello from Rust!</code> and the line for 2026. The checker calls your function with years you have not seen.",
+        `Make the program print <code>Hello from Rust!</code> and then <code>Learning Rust in 2026</code>, one line each. The editor already prints the first line, so add a second that builds the line from two <code>{}</code> slots, like <code>println!("Learning {} in {}", "Rust", 2026);</code>. Do not type the whole line as one string.`,
       hint:
-        "Use <code>format!(\"Learning Rust in {year}\")</code> as the last expression, with no semicolon. <code>format!</code> builds a <code>String</code>; <code>println!</code> only prints one.",
+        `Use one <code>println!</code> with two <code>{}</code> slots: <code>println!("Learning {} in {}", "Rust", 2026);</code>. The values after the comma fill the slots in order.`,
       tips: [
-        `The two <code>println!</code> lines in <code>main</code> are already correct. The only part you need to change is the body of <code>year_line</code>.`,
-        `A function returns its last expression when there is no semicolon. <code>format!("Learning Rust in {year}")</code> builds the <code>String</code> to return; <code>println!</code> only prints, so it cannot be the return value.`,
-        `Match the expected text exactly: capital <code>L</code>, one space after <code>in</code>, and the year in the <code>{year}</code> slot. Compare your result with the expected output panel line by line.`,
+        `<code>println!</code> prints one line and adds the newline itself, so two calls give you two lines.`,
+        `Keep the words in the string and put the changing parts in slots: <code>"Learning {} in {}"</code>, then <code>"Rust"</code> and <code>2026</code> after the comma.`,
+        `Match the expected panel exactly: capital <code>H</code> and <code>L</code>, and one space after <code>in</code>.`,
       ],
-      requires: "fn year_line(year: u32) -> String",
       starter: `fn main() {
     println!("Hello from Rust!");
-    println!("{}", year_line(2026));
-}
-
-fn year_line(year: u32) -> String {
-    // Return the line. Do not print it here.
-    String::new()
 }`,
       expected: `Hello from Rust!
 Learning Rust in 2026`,
       solution: `fn main() {
     println!("Hello from Rust!");
-    println!("{}", year_line(2026));
-}
-
-fn year_line(year: u32) -> String {
-    format!("Learning Rust in {year}")
+    println!("Learning {} in {}", "Rust", 2026);
 }`,
     },
   },
